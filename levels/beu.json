@@ -1,0 +1,31 @@
+{
+  "name": "beu",
+  "ballSpeedMult": 1,
+  "nodes": [
+    {
+      "id": 0,
+      "type": "source",
+      "x": 60,
+      "y": 150
+    },
+    {
+      "id": 1,
+      "type": "bulb",
+      "x": 740,
+      "y": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": 0,
+      "from": 0,
+      "to": 1,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    }
+  ],
+  "made_by": "coucou"
+}

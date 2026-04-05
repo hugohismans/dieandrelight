@@ -1,0 +1,292 @@
+{
+  "name": "free",
+  "ballSpeedMult": 1,
+  "nodes": [
+    {
+      "id": 23,
+      "type": "node",
+      "x": -180,
+      "y": 180
+    },
+    {
+      "id": 24,
+      "type": "node",
+      "x": -180,
+      "y": -200
+    },
+    {
+      "id": 25,
+      "type": "node",
+      "x": 100,
+      "y": -200
+    },
+    {
+      "id": 26,
+      "type": "node",
+      "x": 100,
+      "y": -100
+    },
+    {
+      "id": 27,
+      "type": "node",
+      "x": -100,
+      "y": -100
+    },
+    {
+      "id": 28,
+      "type": "node",
+      "x": -100,
+      "y": 0
+    },
+    {
+      "id": 29,
+      "type": "node",
+      "x": 100,
+      "y": 0
+    },
+    {
+      "id": 30,
+      "type": "node",
+      "x": 100,
+      "y": 100
+    },
+    {
+      "id": 31,
+      "type": "node",
+      "x": -100,
+      "y": 100
+    },
+    {
+      "id": 32,
+      "type": "node",
+      "x": 300,
+      "y": 200
+    },
+    {
+      "id": 33,
+      "type": "node",
+      "x": 300,
+      "y": -200
+    },
+    {
+      "id": 34,
+      "type": "node",
+      "x": 600,
+      "y": -200
+    },
+    {
+      "id": 35,
+      "type": "node",
+      "x": 600,
+      "y": -100
+    },
+    {
+      "id": 36,
+      "type": "node",
+      "x": 400,
+      "y": -100
+    },
+    {
+      "id": 37,
+      "type": "node",
+      "x": 400,
+      "y": 0
+    },
+    {
+      "id": 38,
+      "type": "node",
+      "x": 600,
+      "y": 0
+    },
+    {
+      "id": 39,
+      "type": "node",
+      "x": 600,
+      "y": 100
+    },
+    {
+      "id": 40,
+      "type": "node",
+      "x": 400,
+      "y": 100
+    },
+    {
+      "id": 41,
+      "type": "node",
+      "x": 600,
+      "y": 200
+    }
+  ],
+  "edges": [
+    {
+      "id": 21,
+      "from": 23,
+      "to": 24,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 22,
+      "from": 24,
+      "to": 25,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 23,
+      "from": 25,
+      "to": 26,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 24,
+      "from": 26,
+      "to": 27,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 25,
+      "from": 27,
+      "to": 28,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 26,
+      "from": 28,
+      "to": 29,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 27,
+      "from": 29,
+      "to": 30,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 28,
+      "from": 30,
+      "to": 31,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 29,
+      "from": 32,
+      "to": 33,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 30,
+      "from": 33,
+      "to": 34,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 31,
+      "from": 34,
+      "to": 35,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 32,
+      "from": 35,
+      "to": 36,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 33,
+      "from": 36,
+      "to": 37,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 34,
+      "from": 37,
+      "to": 38,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 35,
+      "from": 38,
+      "to": 39,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 36,
+      "from": 39,
+      "to": 40,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 37,
+      "from": 40,
+      "to": 41,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    }
+  ]
+}

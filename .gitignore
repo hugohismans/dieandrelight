@@ -1,0 +1,8 @@
+# Fichiers parasites
+levels/*.mp4
+levels/*.jpg
+levels/*.jpeg
+levels/*.png
+levels/*.exe
+.DS_Store
+Thumbs.db

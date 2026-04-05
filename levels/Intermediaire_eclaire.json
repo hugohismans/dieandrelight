@@ -1,0 +1,329 @@
+{
+  "name": "Intermediaire_eclaire",
+  "ballSpeedMult": 4,
+  "nodes": [
+    {
+      "id": 0,
+      "type": "source",
+      "x": 100,
+      "y": -1600
+    },
+    {
+      "id": 2,
+      "type": "node",
+      "x": 1120,
+      "y": -1600
+    },
+    {
+      "id": 3,
+      "type": "node",
+      "x": 1020,
+      "y": -1120
+    },
+    {
+      "id": 4,
+      "type": "node",
+      "x": 1180,
+      "y": -1100
+    },
+    {
+      "id": 5,
+      "type": "node",
+      "x": 960,
+      "y": -400
+    },
+    {
+      "id": 6,
+      "type": "node",
+      "x": 1140,
+      "y": -400
+    },
+    {
+      "id": 7,
+      "type": "node",
+      "x": 300,
+      "y": 800
+    },
+    {
+      "id": 8,
+      "type": "node",
+      "x": 300,
+      "y": -400
+    },
+    {
+      "id": 9,
+      "type": "node",
+      "x": 400,
+      "y": -1100
+    },
+    {
+      "id": 10,
+      "type": "bulb",
+      "x": -100,
+      "y": -1580
+    },
+    {
+      "id": 11,
+      "type": "node",
+      "x": 1060,
+      "y": -1340
+    },
+    {
+      "id": 12,
+      "type": "node",
+      "x": 1060,
+      "y": -720
+    },
+    {
+      "id": 13,
+      "type": "node",
+      "x": 980,
+      "y": -140
+    },
+    {
+      "id": 14,
+      "type": "node",
+      "x": 600,
+      "y": 400
+    },
+    {
+      "id": 15,
+      "type": "node",
+      "x": 280,
+      "y": 380
+    },
+    {
+      "id": 16,
+      "type": "node",
+      "x": 300,
+      "y": -140
+    },
+    {
+      "id": 17,
+      "type": "node",
+      "x": 320,
+      "y": -620
+    },
+    {
+      "id": 18,
+      "type": "node",
+      "x": 380,
+      "y": -960
+    },
+    {
+      "id": 19,
+      "type": "node",
+      "x": 160,
+      "y": -1320
+    }
+  ],
+  "edges": [
+    {
+      "id": 0,
+      "from": 0,
+      "to": 2,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 2,
+      "from": 3,
+      "to": 4,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 4,
+      "from": 5,
+      "to": 6,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 9,
+      "from": 2,
+      "to": 11,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 10,
+      "from": 11,
+      "to": 3,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 11,
+      "from": 4,
+      "to": 12,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 12,
+      "from": 12,
+      "to": 5,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 13,
+      "from": 6,
+      "to": 13,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 15,
+      "from": 13,
+      "to": 14,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 16,
+      "from": 14,
+      "to": 7,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 17,
+      "from": 7,
+      "to": 15,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 19,
+      "from": 15,
+      "to": 16,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 20,
+      "from": 16,
+      "to": 8,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 21,
+      "from": 8,
+      "to": 17,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 23,
+      "from": 17,
+      "to": 18,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": false
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 24,
+      "from": 18,
+      "to": 9,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 25,
+      "from": 9,
+      "to": 19,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    },
+    {
+      "id": 26,
+      "from": 19,
+      "to": 10,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "micro": false
+    }
+  ]
+}

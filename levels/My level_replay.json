@@ -1,0 +1,1308 @@
+{
+  "levelName": "My level",
+  "levelJSON": {
+    "name": "My level",
+    "ballSpeedMult": 1.25,
+    "nodes": [
+      {
+        "id": 0,
+        "type": "source",
+        "x": 100,
+        "y": 100
+      },
+      {
+        "id": 2,
+        "type": "node",
+        "x": 400,
+        "y": 100
+      },
+      {
+        "id": 3,
+        "type": "node",
+        "x": 100,
+        "y": 200
+      },
+      {
+        "id": 8,
+        "type": "node",
+        "x": 400,
+        "y": 400
+      },
+      {
+        "id": 10,
+        "type": "bulb",
+        "x": 400,
+        "y": 500
+      },
+      {
+        "id": 11,
+        "type": "source",
+        "x": 400,
+        "y": 200
+      },
+      {
+        "id": 13,
+        "type": "node",
+        "x": 100,
+        "y": 300
+      },
+      {
+        "id": 14,
+        "type": "node",
+        "x": 400,
+        "y": 300
+      },
+      {
+        "id": 16,
+        "type": "source",
+        "x": 100,
+        "y": 400
+      },
+      {
+        "id": 17,
+        "type": "node",
+        "x": 100,
+        "y": 500
+      }
+    ],
+    "edges": [
+      {
+        "id": 0,
+        "from": 0,
+        "to": 2,
+        "wayY": null,
+        "switch": {
+          "key": "Q",
+          "initOpen": true
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 1,
+        "from": 2,
+        "to": 3,
+        "wayY": null,
+        "switch": {
+          "key": "P",
+          "initOpen": true
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 9,
+        "from": 3,
+        "to": 11,
+        "wayY": null,
+        "switch": {
+          "key": "Q",
+          "initOpen": true
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 12,
+        "from": 11,
+        "to": 13,
+        "wayY": null,
+        "switch": null,
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 13,
+        "from": 13,
+        "to": 14,
+        "wayY": null,
+        "switch": null,
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 15,
+        "from": 14,
+        "to": 16,
+        "wayY": null,
+        "switch": {
+          "key": "P",
+          "initOpen": true
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 16,
+        "from": 16,
+        "to": 8,
+        "wayY": null,
+        "switch": {
+          "key": "P",
+          "initOpen": false
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 17,
+        "from": 8,
+        "to": 17,
+        "wayY": null,
+        "switch": {
+          "key": "Q",
+          "initOpen": false
+        },
+        "resistance": false,
+        "inductance": false,
+        "micro": false
+      },
+      {
+        "id": 18,
+        "from": 17,
+        "to": 10,
+        "wayY": null,
+        "switch": null,
+        "resistance": true,
+        "resDuration": 2,
+        "inductance": false,
+        "micro": false
+      }
+    ]
+  },
+  "duration": 19452,
+  "inputs": [
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1227
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1731
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1762
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1793
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1838
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1869
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1899
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1931
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1962
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 1994
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2026
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2058
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2105
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2136
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2167
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2198
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2229
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2259
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2290
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2321
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2369
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2399
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2431
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2462
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2493
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2523
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2555
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2586
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2632
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2662
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2693
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2725
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2757
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2789
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2821
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2853
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2884
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2915
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2962
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 2994
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 3024
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 3056
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 3086
+    },
+    {
+      "type": "keyup",
+      "key": "Q",
+      "t": 3115
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3202
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3708
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3739
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3770
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3801
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3848
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3878
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3910
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3941
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 3972
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4003
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4033
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4080
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4111
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4142
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4173
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4205
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4236
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4268
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4299
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4330
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4376
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4407
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4438
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4469
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4500
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4531
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 4561
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 4601
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5101
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5147
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5179
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5210
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5240
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5271
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5303
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5335
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5367
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5412
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5443
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5474
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5505
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5536
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5567
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5598
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5643
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5675
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5706
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5737
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5768
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5798
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5828
+    },
+    {
+      "type": "keydown",
+      "key": "Q",
+      "t": 5875
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 5897
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 5998
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6089
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 6182
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6256
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 6342
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6440
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 6509
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6613
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 6695
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6786
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 6871
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 6971
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7048
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 7148
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7230
+    },
+    {
+      "type": "keyup",
+      "key": "P",
+      "t": 7232
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 7319
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7427
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 7510
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7599
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 7703
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7787
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 7887
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 7992
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 8085
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 8174
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 8295
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 8327
+    },
+    {
+      "type": "keyup",
+      "key": "Q",
+      "t": 9196
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 9473
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 9987
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10017
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10049
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10080
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10112
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10142
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10174
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10205
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10252
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10284
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10314
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10345
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10376
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10407
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10439
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10471
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10502
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10549
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10579
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10610
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10641
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10673
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10704
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10736
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10768
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10798
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10846
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10877
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10908
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10938
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 10968
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11000
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11031
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11062
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11108
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11140
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11170
+    },
+    {
+      "type": "keydown",
+      "key": "P",
+      "t": 11202
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 11221
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 11331
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 11416
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 11490
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 11584
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 11678
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 11769
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 11867
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 11954
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 12054
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 12146
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 12229
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 12341
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 12426
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 12535
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 12642
+    },
+    {
+      "type": "keyup",
+      "key": "P",
+      "t": 12723
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 12726
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 12878
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 12965
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 13117
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 13216
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 13297
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 13392
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 13487
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 13576
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 13689
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 13765
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 13869
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 13961
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 14060
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 14162
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 14273
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 14394
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 14445
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 16849
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 16932
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 17043
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 17119
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 17225
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 17329
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 17417
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 17565
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 17610
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 17737
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 17834
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 17988
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 18009
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 18195
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 18256
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 18410
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 18487
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 18654
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 18725
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 18855
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 18945
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 19070
+    },
+    {
+      "type": "keydown",
+      "key": " ",
+      "t": 19147
+    },
+    {
+      "type": "keyup",
+      "key": " ",
+      "t": 19290
+    }
+  ]
+}

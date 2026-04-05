@@ -1,0 +1,98 @@
+{
+  "name": "Mon niveau",
+  "ballSpeedMult": 1,
+  "nodes": [
+    {
+      "id": 0,
+      "type": "source",
+      "x": 60,
+      "y": 150
+    },
+    {
+      "id": 1,
+      "type": "bulb",
+      "x": 740,
+      "y": 150
+    },
+    {
+      "id": 2,
+      "type": "node",
+      "x": 320,
+      "y": 20
+    },
+    {
+      "id": 3,
+      "type": "node",
+      "x": 200,
+      "y": 220
+    },
+    {
+      "id": 4,
+      "type": "node",
+      "x": 120,
+      "y": 200
+    }
+  ],
+  "edges": [
+    {
+      "id": 0,
+      "from": 0,
+      "to": 2,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": true,
+      "microDuration": 5
+    },
+    {
+      "id": 1,
+      "from": 2,
+      "to": 1,
+      "wayY": null,
+      "switch": {
+        "key": "P",
+        "initOpen": true
+      },
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 3,
+      "from": 3,
+      "to": 1,
+      "wayY": null,
+      "switch": {
+        "key": "P",
+        "initOpen": true
+      },
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 4,
+      "from": 0,
+      "to": 4,
+      "wayY": null,
+      "switch": null,
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    },
+    {
+      "id": 5,
+      "from": 4,
+      "to": 3,
+      "wayY": null,
+      "switch": {
+        "key": "Q",
+        "initOpen": true
+      },
+      "resistance": false,
+      "inductance": false,
+      "micro": false
+    }
+  ]
+}
