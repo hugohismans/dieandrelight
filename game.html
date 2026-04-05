@@ -3450,6 +3450,7 @@ async function hofFetch(version, diff) {
     if (!data) return [];
     const isSurvival = diff === 'survie';
     return Object.values(data)
+      .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time)
       .slice(0, 50);
   } catch { return []; }
