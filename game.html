@@ -3509,7 +3509,7 @@ function hofBuildTabs(activeVersion, activeDiff) {
   });
   // Difficulty row (v0_0_4+)
   const diffRow = document.getElementById('hof-diff-row');
-  if (activeVersion === 'v0_0_5' || activeVersion === 'v0_0_4') {
+  if (activeVersion === 'v0_1_0' || activeVersion === 'v0_0_5' || activeVersion === 'v0_0_4') {
     diffRow.classList.remove('hidden');
     diffRow.innerHTML = '';
     HOF_DIFFS.forEach(d => {
