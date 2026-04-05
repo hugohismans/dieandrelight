@@ -3441,7 +3441,7 @@ const DEVICE_ICON = { pc: '🖥️', mobile: '📱', tablet: '📟' };
 async function hofFetch(version, diff) {
   try {
     // v0_0_4+ uses per-difficulty sub-paths; older versions are flat
-    const path = ((version === 'v0_0_5' || version === 'v0_0_4') && diff)
+    const path = ((version === 'v0_1_0' || version === 'v0_0_5' || version === 'v0_0_4') && diff)
       ? `${FB_URL}/${version}/${diff}.json`
       : `${FB_URL}/${version}.json`;
     const res = await fetch(path);
@@ -3547,7 +3547,7 @@ function hofBuildSpecials() {
 }
 
 async function openHOF(version = HOF_VERSION, diff = null) {
-  if ((version === 'v0_0_5' || version === 'v0_0_4') && !diff) diff = _diffId();
+  if ((version === 'v0_1_0' || version === 'v0_0_5' || version === 'v0_0_4') && !diff) diff = _diffId();
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
   hofBuildSpecials();
