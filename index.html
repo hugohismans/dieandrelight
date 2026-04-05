@@ -1317,13 +1317,16 @@ async function renderHOF() {
   const isSurvival = hofCurrentMode === 'survie';
   try {
     const diff = isSurvival ? 'survie' : HOF_FIXED_DIFF;
-    const path = (hofCurrentVersion === 'v0_0_5' || hofCurrentVersion === 'v0_0_4')
+    const perDiff = hofCurrentVersion === 'v0_1_0' || hofCurrentVersion === 'v0_0_5' || hofCurrentVersion === 'v0_0_4';
+    const path = perDiff
       ? `${FB_URL}/${hofCurrentVersion}/${diff}.json`
-      : (isSurvival ? `${FB_URL}/${hofCurrentVersion}/survie.json` : `${FB_URL}/${hofCurrentVersion}.json`);
+      : `${FB_URL}/${hofCurrentVersion}.json`;
     const res = await fetch(path);
     const data = res.ok ? await res.json() : null;
     const entries = data
       ? Object.values(data)
+          .flatMap(e => e && typeof e === 'object' && !e.pseudo && !e.score ? Object.values(e) : [e])
+          .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
           .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time)
           .slice(0, 20)
       : [];
@@ -1337,7 +1340,7 @@ async function renderHOF() {
       el.innerHTML = entries.map((e, i) =>
         `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
-          <span class="ihof-pseudo" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</span>
+          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
           <span class="ihof-time" style="color:#ff8899">${e.score} niv.</span>
         </div>`
       ).join('');
@@ -1345,7 +1348,7 @@ async function renderHOF() {
       el.innerHTML = entries.map((e, i) =>
         `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
-          <span class="ihof-pseudo" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</span>
+          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
           <span class="ihof-time">${fmtTime(e.time)}</span>
           <span class="ihof-deaths">${e.deaths}💀</span>
         </div>`
@@ -1380,7 +1383,7 @@ async function renderAchRanks() {
         <span class="ach-rank-pos">${medals[i]||(i+1)}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:baseline;gap:6px">
-            <span class="ach-rank-pseudo" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</span>
+            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
             <span class="ach-rank-count">${e.count}/${ACH_TOTAL}</span>
           </div>
           <div style="height:2px;background:#aa44ff22;border-radius:1px;margin-top:3px">
@@ -1427,6 +1430,10 @@ const ACH_NAMES = [
 let _ppUid = null, _ppCache = {};
 
 document.getElementById('pp-close').onclick = () => document.getElementById('pp-overlay').classList.remove('open');
+document.addEventListener('click', e => {
+  const el = e.target.closest('.pp-trigger');
+  if (el) openPlayerProfile(el.dataset.uid, el.dataset.pseudo);
+});
 
 async function openPlayerProfile(uid, pseudo) {
   _ppUid = uid; _ppCache = {};

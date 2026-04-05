@@ -3090,7 +3090,6 @@ async function _submitSurvivalScore(prevKey = null) {
   }
 }
 
-document.getElementById('sg-submit').onclick = _submitSurvivalScore;
 document.getElementById('sg-retry').onclick = () => {
   document.getElementById('survival-gameover').classList.remove('open');
   startSurvival();
@@ -3594,7 +3593,7 @@ function hofRenderBody(entries, isSurvival = false) {
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
-        <td class="hof-pseudo" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</td>
+        <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</td>
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
         <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
@@ -3608,7 +3607,7 @@ function hofRenderBody(entries, isSurvival = false) {
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
-      <td class="hof-pseudo" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</td>
+      <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</td>
       <td class="hof-time">${campFmtTime(e.time)}</td>
       <td class="hof-deaths">${e.deaths}</td>
       <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
@@ -3629,7 +3628,7 @@ function hofBuildTabs(activeVersion, activeDiff) {
     const btn = document.createElement('button');
     btn.className = 'hof-tab' + (v === activeVersion ? ' active' : '');
     btn.textContent = v.replace(/_/g, '.');
-    btn.onclick = () => openHOF(v, v === 'v0_0_5' ? (activeDiff || currentCampaignId) : null);
+    btn.onclick = () => openHOF(v, HOF_PER_DIFF_VERSIONS.has(v) ? (activeDiff || (HOF_DIFFS.includes(currentCampaignId) ? currentCampaignId : 'bebe')) : null);
     tabsEl.appendChild(btn);
   });
   // Difficulty row (v0_0_4+)
@@ -3673,7 +3672,7 @@ function hofBuildSpecials() {
 
 const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
 async function openHOF(version = HOF_VERSION, diff = null) {
-  if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = _diffId();
+  if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = HOF_DIFFS.includes(_diffId()) ? _diffId() : 'bebe';
   if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null; // old flat versions
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
@@ -3687,6 +3686,10 @@ document.getElementById('hof-close').onclick = () =>
   document.getElementById('hof-overlay').classList.remove('open');
 document.getElementById('pp-close').onclick = () =>
   document.getElementById('pp-overlay').classList.remove('open');
+document.getElementById('hof-body').addEventListener('click', e => {
+  const td = e.target.closest('.pp-trigger');
+  if (td) openPlayerProfile(td.dataset.uid, td.dataset.pseudo);
+});
 
 // ── PLAYER PROFILE ─────────────────────────────────────────
 const PP_DIFFS = [
