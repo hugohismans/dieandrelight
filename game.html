@@ -1145,7 +1145,61 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .hof-table tr:nth-child(2) td { color: #aaaaaa; }
   .hof-table tr:nth-child(3) td { color: #cc8844; }
   .hof-rank { color: #224433; font-size: 11px; }
-  .hof-pseudo { color: inherit; font-weight: bold; letter-spacing: 1px; }
+  .hof-pseudo { color: inherit; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .hof-pseudo:hover { color: #00ffcc !important; }
+
+  /* ── PLAYER PROFILE ──────────────────────────────────────── */
+  #pp-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88); z-index: 600;
+    align-items: center; justify-content: center;
+  }
+  #pp-overlay.open { display: flex; }
+  #pp-box {
+    background: #05090a; border: 1px solid #00ffcc44;
+    box-shadow: 0 0 40px #00ffcc22;
+    width: min(520px, 96vw); max-height: 88vh;
+    display: flex; flex-direction: column;
+    font-family: 'Courier New', monospace; overflow: hidden;
+  }
+  #pp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid #1a5a3a; flex-shrink: 0;
+  }
+  #pp-pseudo-title { font-size: 15px; letter-spacing: 3px; color: #00ffcc; margin: 0; }
+  #pp-close {
+    background: none; border: none; color: #446655;
+    font-size: 20px; cursor: pointer; padding: 2px 6px;
+  }
+  #pp-close:hover { color: #00ffcc; }
+  #pp-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+  #pp-hof-section { padding: 14px 18px; border-bottom: 1px solid #1a5a3a; }
+  #pp-ach-section { padding: 14px 18px; }
+  #pp-hof-title, #pp-ach-title {
+    font-size: 10px; letter-spacing: 3px; color: #224433;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  #pp-diff-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .pp-diff-btn {
+    background: none; border: 1px solid #1a5a3a; color: #446655;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.12s;
+  }
+  .pp-diff-btn:hover { border-color: #446655; color: #00ffcc; }
+  .pp-diff-btn.active { border-color: #00ffcc; color: #00ffcc; background: #0d2218; }
+  #pp-hof-content { font-size: 12px; color: #446655; min-height: 28px; }
+  .pp-hof-entry { display: flex; gap: 16px; align-items: baseline; }
+  .pp-hof-rank { color: #ffdd44; font-size: 16px; }
+  .pp-hof-time { color: #00ffcc; font-variant-numeric: tabular-nums; }
+  .pp-hof-deaths { color: #663333; }
+  .pp-hof-none { color: #224433; font-size: 11px; letter-spacing: 1px; }
+  #pp-ach-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pp-ach-item {
+    display: flex; align-items: center; gap: 5px;
+    background: #0a1a14; border: 1px solid #1a5a3a;
+    padding: 4px 8px; font-size: 11px; color: #00cc99; letter-spacing: 1px;
+  }
+  .pp-ach-none { color: #224433; font-size: 11px; letter-spacing: 1px; }
   .hof-time { color: #00ffcc; font-variant-numeric: tabular-nums; }
   .hof-deaths { color: #663333; }
   .hof-loading { color: #224433; font-size: 12px; letter-spacing: 1px; padding: 20px 0; text-align: center; }
@@ -1493,6 +1547,27 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div id="hof-specials">
       <h3>✦ Special Thanks &amp; Content Creators</h3>
       <div id="hof-specials-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Player profile overlay -->
+<div id="pp-overlay">
+  <div id="pp-box">
+    <div id="pp-header">
+      <h2 id="pp-pseudo-title"></h2>
+      <button id="pp-close">✕</button>
+    </div>
+    <div id="pp-body">
+      <div id="pp-hof-section">
+        <div id="pp-hof-title">🏆 Scores HOF</div>
+        <div id="pp-diff-tabs"></div>
+        <div id="pp-hof-content"></div>
+      </div>
+      <div id="pp-ach-section">
+        <div id="pp-ach-title">🏅 Hauts-faits débloqués</div>
+        <div id="pp-ach-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2793,7 +2868,7 @@ function unlockAchievement(id) {
     if (currentPseudo) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now() })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone] })
       }).catch(() => {});
     }
   }).catch(() => {});
@@ -3491,7 +3566,14 @@ async function hofFetch(version, diff) {
     const data = await res.json();
     if (!data) return [];
     const isSurvival = diff === 'survie';
-    return Object.values(data)
+    // Flatten: handle both flat {key: entry} and nested {diff: {key: entry}} structures
+    const raw = Object.values(data);
+    const entries = raw.flatMap(e =>
+      e && typeof e === 'object' && !e.pseudo && !e.score
+        ? Object.values(e)
+        : [e]
+    );
+    return entries
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time)
       .slice(0, 50);
@@ -3512,7 +3594,7 @@ function hofRenderBody(entries, isSurvival = false) {
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
-        <td class="hof-pseudo">${escHtml(e.pseudo)}</td>
+        <td class="hof-pseudo" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</td>
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
         <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
@@ -3526,7 +3608,7 @@ function hofRenderBody(entries, isSurvival = false) {
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
-      <td class="hof-pseudo">${escHtml(e.pseudo)}</td>
+      <td class="hof-pseudo" onclick="openPlayerProfile('${e.uid}','${escHtml(e.pseudo)}')">${escHtml(e.pseudo)}</td>
       <td class="hof-time">${campFmtTime(e.time)}</td>
       <td class="hof-deaths">${e.deaths}</td>
       <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
@@ -3603,6 +3685,100 @@ async function openHOF(version = HOF_VERSION, diff = null) {
 
 document.getElementById('hof-close').onclick = () =>
   document.getElementById('hof-overlay').classList.remove('open');
+document.getElementById('pp-close').onclick = () =>
+  document.getElementById('pp-overlay').classList.remove('open');
+
+// ── PLAYER PROFILE ─────────────────────────────────────────
+const PP_DIFFS = [
+  { id: 'bebe',          label: '🍼 Bébés' },
+  { id: 'piquer',        label: '⚡ Piquer' },
+  { id: 'cauchemar',     label: '💀 Cauchemar' },
+  { id: 'bebe_inv',      label: '🔄 Bébés' },
+  { id: 'piquer_inv',    label: '🔄 Piquer' },
+  { id: 'cauchemar_inv', label: '🔄 Cauchemar' },
+  { id: 'survie',        label: '💀 Survie' },
+];
+let _ppUid = null;
+let _ppHofCache = {};
+
+async function openPlayerProfile(uid, pseudo) {
+  _ppUid = uid;
+  _ppHofCache = {};
+  document.getElementById('pp-pseudo-title').textContent = pseudo;
+  document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
+  document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
+  document.getElementById('pp-overlay').classList.add('open');
+
+  // Build diff tabs
+  const tabsEl = document.getElementById('pp-diff-tabs');
+  tabsEl.innerHTML = '';
+  PP_DIFFS.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'pp-diff-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = d.label;
+    btn.dataset.diff = d.id;
+    btn.onclick = () => {
+      tabsEl.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _ppShowDiff(d.id);
+    };
+    tabsEl.appendChild(btn);
+  });
+
+  // Load first diff + achievements in parallel
+  _ppShowDiff('bebe');
+  _ppLoadAchievements(uid);
+}
+
+async function _ppShowDiff(diff) {
+  const el = document.getElementById('pp-hof-content');
+  el.innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
+  try {
+    if (!_ppHofCache[diff]) {
+      const res = await fetch(`${FB_URL}/${HOF_VERSION}/${diff}.json`);
+      _ppHofCache[diff] = (res.ok ? await res.json() : null) || {};
+    }
+    const data = _ppHofCache[diff];
+    const isSurvival = diff === 'survie';
+    const sorted = Object.values(data)
+      .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
+      .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
+    const rank = sorted.findIndex(e => e.uid === _ppUid);
+    if (rank === -1) {
+      el.innerHTML = '<span class="pp-hof-none">Pas d\'entrée pour ce mode</span>';
+      return;
+    }
+    const e = sorted[rank];
+    const medals = ['🥇', '🥈', '🥉'];
+    el.innerHTML = `<div class="pp-hof-entry">
+      <span class="pp-hof-rank">${medals[rank] || '#' + (rank + 1)}</span>
+      ${isSurvival
+        ? `<span class="pp-hof-time">${e.score} niveau(x)</span>`
+        : `<span class="pp-hof-time">${campFmtTime(e.time)}</span><span class="pp-hof-deaths">${e.deaths} 💀</span>`}
+    </div>`;
+  } catch {
+    el.innerHTML = '<span class="pp-hof-none">Erreur de chargement</span>';
+  }
+}
+
+async function _ppLoadAchievements(uid) {
+  const el = document.getElementById('pp-ach-list');
+  try {
+    const res = await fetch(`${FB_ACH_RANKS}/${uid}.json`);
+    const data = res.ok ? await res.json() : null;
+    const ids = data?.achievements;
+    if (!ids || !ids.length) {
+      el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
+      return;
+    }
+    el.innerHTML = ids.map(id => {
+      const ach = ACHIEVEMENTS.find(a => a.id === id);
+      return ach ? `<div class="pp-ach-item">${ach.emoji} ${ach.name}</div>` : '';
+    }).join('');
+  } catch {
+    el.innerHTML = '<span class="pp-ach-none">Erreur de chargement</span>';
+  }
+}
 document.getElementById('hof-open-btn').onclick = () => {
   closeMenu();
   openHOF(); // consultation libre, pas besoin d'être connecté
@@ -3695,7 +3871,7 @@ async function loadDoneFromFirebase() {
     if (currentPseudo && _achDone.size > 0) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now() })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone] })
       }).catch(() => {});
     }
   } catch(e) {}
