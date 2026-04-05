@@ -2932,15 +2932,50 @@ function _openSurvivalGameOver() {
     return;
   }
 
-  // Connecté
+  // Connecté — vérifier Firebase pour un score existant
   pseudoEl.style.display = '';
-  submitEl.style.display = '';
   if (currentPseudo) pseudoEl.value = currentPseudo;
-  statusEl.textContent = '';
+  statusEl.style.color = '#446655';
+  statusEl.textContent = 'Vérification…';
+  submitEl.style.display = '';
+  submitEl.disabled = true;
   overlay.classList.add('open');
+
+  let _survivalPrevKey = null;
+  let _survivalPrevScore = null;
+  try {
+    const res = await fetch(`${FB_URL}/${HOF_VERSION}/survie.json`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data) {
+        for (const [key, v] of Object.entries(data)) {
+          if (v.uid === currentUser.uid && typeof v.score === 'number') {
+            if (_survivalPrevScore === null || v.score > _survivalPrevScore) {
+              _survivalPrevScore = v.score;
+              _survivalPrevKey = key;
+            }
+          }
+        }
+      }
+    }
+  } catch {}
+
+  if (_survivalPrevScore !== null && survivalScore <= _survivalPrevScore) {
+    statusEl.style.color = '#663333';
+    statusEl.textContent = `Ton record reste ${_survivalPrevScore} niveau(x) — score actuel insuffisant.`;
+    submitEl.style.display = 'none';
+  } else {
+    statusEl.textContent = _survivalPrevScore !== null
+      ? `▲ Nouveau record ! (ancien : ${_survivalPrevScore})`
+      : (currentPseudo ? '👤 ' + currentPseudo : '');
+    statusEl.style.color = _survivalPrevScore !== null ? '#00ffcc' : '#446655';
+    submitEl.disabled = false;
+    submitEl.textContent = _survivalPrevKey ? 'METTRE À JOUR →' : 'ENTRER AU HOF →';
+    submitEl.onclick = () => _submitSurvivalScore(_survivalPrevKey);
+  }
 }
 
-async function _submitSurvivalScore() {
+async function _submitSurvivalScore(prevKey = null) {
   const pseudoEl = document.getElementById('sg-pseudo');
   const statusEl = document.getElementById('sg-status');
   const submitEl = document.getElementById('sg-submit');
@@ -2950,13 +2985,12 @@ async function _submitSurvivalScore() {
   submitEl.disabled = true;
   try {
     const token = await currentUser.getIdToken();
-    const entry = {
-      pseudo, uid: currentUser.uid,
-      score: survivalScore,
-      ts: Date.now(), device: detectDevice()
-    };
-    await fetch(`${FB_URL}/${HOF_VERSION}/survie.json?auth=${token}`, {
-      method: 'POST',
+    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now(), device: detectDevice() };
+    const url = prevKey
+      ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json?auth=${token}`
+      : `${FB_URL}/${HOF_VERSION}/survie.json?auth=${token}`;
+    await fetch(url, {
+      method: prevKey ? 'PUT' : 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(entry)
     });
