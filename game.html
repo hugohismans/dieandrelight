@@ -2891,7 +2891,7 @@ function endSurvival() {
   _openSurvivalGameOver();
 }
 
-function _openSurvivalGameOver() {
+async function _openSurvivalGameOver() {
   const overlay  = document.getElementById('survival-gameover');
   const pseudoEl = document.getElementById('sg-pseudo');
   const submitEl = document.getElementById('sg-submit');
@@ -3580,8 +3580,10 @@ function hofBuildSpecials() {
   ).join('');
 }
 
+const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
 async function openHOF(version = HOF_VERSION, diff = null) {
-  if ((version === 'v0_1_0' || version === 'v0_0_5' || version === 'v0_0_4') && !diff) diff = _diffId();
+  if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = _diffId();
+  if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null; // old flat versions
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
   hofBuildSpecials();
