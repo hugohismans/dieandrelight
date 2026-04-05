@@ -3574,20 +3574,20 @@ async function _getAccountBestScore(diffId) {
     const res  = await fetch(`${FB_URL}/${HOF_VERSION}/${diffId}.json`);
     if (!res.ok) return local;
     const data = await res.json();
-    if (!data) return local;
+    // Firebase is reachable — it's the source of truth
+    const clearLocal = () => { const s = loadSave(); delete s['hof_score_' + diffId]; localStorage.setItem(SAVE_KEY, JSON.stringify(s)); };
+    if (!data) { clearLocal(); return null; }
     for (const [key, v] of Object.entries(data)) {
       if (v.uid !== currentUser.uid) continue;
-      // Found user's Firebase entry — keep whichever is better
-      if (!local || v.time < local.time) {
-        setCampScore(diffId, v.time, v.deaths, key); // sync Firebase → local
-        return { time: v.time, deaths: v.deaths, key, version: HOF_VERSION, levelCount: CAMPAIGNS[diffId]?.levels.length ?? 0 };
-      }
-      // Local is better, but attach Firebase key for future PUT
-      if (!local.key) setCampScore(diffId, local.time, local.deaths, key);
-      return { ...local, key };
+      // Found user's Firebase entry — sync to local and return it
+      setCampScore(diffId, v.time, v.deaths, key);
+      return { time: v.time, deaths: v.deaths, key, version: HOF_VERSION, levelCount: CAMPAIGNS[diffId]?.levels.length ?? 0 };
     }
+    // Firebase reachable but no entry for this user — clear stale local cache
+    clearLocal();
+    return null;
   } catch(e) {}
-  return local;
+  return local; // Firebase unreachable — fall back to local
 }
 
 // ── LEVEL COMPLETION STARS ─────────────────────────────────
