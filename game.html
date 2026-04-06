@@ -2182,6 +2182,7 @@ function _addCampBtn(lv, lvIdx) {
   btn.textContent = lv.name;
   btn.dataset.lv = lvIdx;
   btn.onclick = () => {
+    _previewHide();
     if (lv._json === null) {
       _fetchLevel(lv, () => { if (lv.name) btn.textContent = lv.name; selectLevel(lvIdx); });
     } else {
