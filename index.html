@@ -184,7 +184,34 @@ body {
 .ach-rank-row.ar-3rd .ach-rank-pseudo { color: #ee9944; }
 .ach-rank-row.ar-3rd .ach-rank-count  { color: #ee9944; }
 
-@media (max-width: 820px) { .side-panel { display: none; } }
+@media (max-width: 820px) {
+  body {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  #center {
+    min-height: 100svh;
+    flex-shrink: 0;
+  }
+  .side-panel {
+    width: 100%;
+    flex-shrink: 0;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: 1px solid #1a4535 !important;
+    background: #03120e !important;
+    padding: 16px 16px 12px;
+  }
+  #panel-left  { order: 3; }
+  #center      { order: 1; }
+  #panel-right { order: 2; }
+  .panel-half { max-height: 260px; min-height: unset; }
+  .panel-half:first-child { padding-top: 16px; }
+  #auth-block { max-width: 90vw; }
+}
 
 /* ── POWER-ON FLASH ──────────────────────────────────────── */
 #power-on {
