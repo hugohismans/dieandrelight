@@ -1653,6 +1653,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <div id="pp-overlay">
   <div id="pp-box">
     <div id="pp-header">
+      <span id="pp-emote" style="font-size:28px;line-height:1">🐥</span>
       <h2 id="pp-pseudo-title"></h2>
       <button id="pp-close">✕</button>
     </div>
@@ -3050,7 +3051,7 @@ function unlockAchievement(id) {
     if (currentPseudo) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone] })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote })
       }).catch(() => {});
     }
   }).catch(() => {});
@@ -3979,6 +3980,11 @@ async function _ppLoadAchievements(uid) {
   try {
     const res = await fetch(`${FB_ACH_RANKS}/${uid}.json`);
     const data = res.ok ? await res.json() : null;
+    // Afficher l'emote
+    const emoteId = data?.emote || 'none';
+    const emoteObj = EMOTES.find(e => e.id === emoteId) || EMOTES[0];
+    const emoteEl = document.getElementById('pp-emote');
+    if (emoteEl) emoteEl.textContent = emoteObj.emoji;
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
     if (!ids || !ids.length) {
@@ -4073,12 +4079,13 @@ async function loadDoneFromFirebase() {
   if (!currentUser) return;
   try {
     const token = await currentUser.getIdToken();
-    const [resN, resI, resA, resD, resVB] = await Promise.all([
+    const [resN, resI, resA, resD, resVB, resInv] = await Promise.all([
       fetch(`${FB_USERS}/${currentUser.uid}/done.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/done_inv.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/achievements.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/deaths.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`),
+      fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`),
     ]);
     if (resN.ok) { const d = await resN.json(); if (d) Object.keys(d).forEach(k => _doneLevels.add(_d64(k))); }
     if (resI.ok) { const d = await resI.json(); if (d) Object.keys(d).forEach(k => _doneInvLevels.add(_d64(k))); }
@@ -4090,6 +4097,16 @@ async function loadDoneFromFirebase() {
     if (resVB.ok) { const d = await resVB.json(); if (typeof d === 'number' && d > voltbucks) {
       voltbucks = d; writeSave({ voltbucks }); _updateVBDisplay();
     }}
+    if (resInv.ok) {
+      const inv = await resInv.json();
+      if (inv && Array.isArray(inv.owned)) {
+        inv.owned.forEach(id => _ownedItems.add(id));
+        localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+      }
+      if (inv?.skin) { _equippedSkin = inv.skin; localStorage.setItem(_EQUIPPED_LS, _equippedSkin); }
+      if (inv?.emote) { _equippedEmote = inv.emote; localStorage.setItem(_EMOTE_LS, _equippedEmote); }
+      if (inv?.bg) { _equippedBg = inv.bg; localStorage.setItem(_BG_LS, _equippedBg); _applyBackground(); }
+    }
     localStorage.setItem(_DONE_LS,     JSON.stringify([..._doneLevels]));
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
     localStorage.setItem(_ACH_LS,      JSON.stringify([..._achDone]));
@@ -4105,7 +4122,7 @@ async function loadDoneFromFirebase() {
     if (currentPseudo && _achDone.size > 0) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone] })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote })
       }).catch(() => {});
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
@@ -4151,6 +4168,14 @@ let _equippedBg    = localStorage.getItem(_BG_LS)    || 'default';
 function _saveCosmetics() {
   localStorage.setItem(_EMOTE_LS, _equippedEmote);
   localStorage.setItem(_BG_LS,    _equippedBg);
+  // Sync emote publiquement dans achievement_ranks
+  if (!currentUser || !currentPseudo) return;
+  currentUser.getIdToken().then(token => {
+    fetch(`${FB_ACH_RANKS}/${currentUser.uid}/emote.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(_equippedEmote)
+    }).catch(() => {});
+  }).catch(() => {});
 }
 
 const BALL_SKINS = [
@@ -4211,8 +4236,15 @@ let _ownedItems   = new Set(JSON.parse(localStorage.getItem(_OWNED_LS) || '["def
 let _equippedSkin = localStorage.getItem(_EQUIPPED_LS) || 'default';
 
 function _saveInventory() {
-  localStorage.setItem(_OWNED_LS,   JSON.stringify([..._ownedItems]));
+  localStorage.setItem(_OWNED_LS,    JSON.stringify([..._ownedItems]));
   localStorage.setItem(_EQUIPPED_LS, _equippedSkin);
+  if (!currentUser) return;
+  currentUser.getIdToken().then(token => {
+    fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ owned: [..._ownedItems], skin: _equippedSkin, emote: _equippedEmote, bg: _equippedBg })
+    }).catch(() => {});
+  }).catch(() => {});
 }
 
 let _shopTab = 'skins';
