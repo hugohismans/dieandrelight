@@ -2115,6 +2115,7 @@ let invertControls = false;
 function _ikey(k) { return invertControls ? (k === 'Q' ? 'P' : k === 'P' ? 'Q' : k) : k; }
 
 function selectLevel(idx) {
+  resumeAudio();
   replayMode = false;
   particles = []; shakeTimer = 0; bulbFlash = 0;
   for (const k in keys) keys[k] = false;
@@ -4232,6 +4233,11 @@ function resumeAudio() {
     masterGain = AC.createGain();
     masterGain.gain.value = allMuted ? 0 : 1;
     masterGain.connect(AC.destination);
+    // Pré-génère le buffer de bruit pour éviter le délai au premier son
+    const buf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    noiseBuffer = buf;
   }
   if (AC.state === 'suspended') AC.resume();
 }
