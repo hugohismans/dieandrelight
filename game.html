@@ -1147,6 +1147,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .hof-rank { color: #224433; font-size: 11px; }
   .hof-pseudo { color: inherit; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .hof-pseudo:hover { color: #00ffcc !important; }
+  .hof-del-btn { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.4; padding: 0 2px; }
+  .hof-del-btn:hover { opacity: 1; }
 
   /* ── PLAYER PROFILE ──────────────────────────────────────── */
   #pp-overlay {
@@ -3467,6 +3469,8 @@ document.getElementById('auth-sidebar-btn').onclick = () => {
 
 // ── HALL OF FAME ───────────────────────────────────────────
 const HOF_VERSION  = 'v0_1_0';
+const ADMIN_UID    = 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2';
+let _hofVersion = HOF_VERSION, _hofDiff = null;
 const HOF_VERSIONS = ['v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1']; // add new versions here
 const HOF_DIFFS    = ['bebe', 'piquer', 'cauchemar', 'bebe_inv', 'piquer_inv', 'cauchemar_inv', 'survie'];
 const HOF_DIFF_META = {
@@ -3568,11 +3572,12 @@ async function hofFetch(version, diff) {
     if (!data) return [];
     const isSurvival = diff === 'survie';
     // Flatten: handle both flat {key: entry} and nested {diff: {key: entry}} structures
-    const raw = Object.values(data);
-    const entries = raw.flatMap(e =>
+    // Preserve Firebase keys for admin deletion
+    const raw = Object.entries(data);
+    const entries = raw.flatMap(([k, e]) =>
       e && typeof e === 'object' && !e.pseudo && !e.score
-        ? Object.values(e)
-        : [e]
+        ? Object.entries(e).map(([k2, e2]) => ({ ...e2, _fbKey: k2 }))
+        : [{ ...e, _fbKey: k }]
     );
     return entries
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
@@ -3588,10 +3593,14 @@ function hofRenderBody(entries, isSurvival = false) {
     return;
   }
   const medals = ['🥇','🥈','🥉'];
+  const isAdmin = currentUser?.uid === ADMIN_UID;
+  const delBtn = (e) => isAdmin
+    ? `<td><button class="hof-del-btn" data-key="${e._fbKey || ''}" title="Supprimer">🗑️</button></td>`
+    : '<td></td>';
   if (isSurvival) {
     body.innerHTML = `<table class="hof-table">
       <thead><tr>
-        <th>#</th><th>Pseudo</th><th>⚡ Niveaux</th><th>Date</th><th></th>
+        <th>#</th><th>Pseudo</th><th>⚡ Niveaux</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
@@ -3599,13 +3608,14 @@ function hofRenderBody(entries, isSurvival = false) {
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
         <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
+        ${delBtn(e)}
       </tr>`).join('')}</tbody>
     </table>`;
     return;
   }
   body.innerHTML = `<table class="hof-table">
     <thead><tr>
-      <th>#</th><th>Pseudo</th><th>Temps</th><th>💀 Morts</th><th>Date</th><th></th>
+      <th>#</th><th>Pseudo</th><th>Temps</th><th>💀 Morts</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
@@ -3614,6 +3624,7 @@ function hofRenderBody(entries, isSurvival = false) {
       <td class="hof-deaths">${e.deaths}</td>
       <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
       <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
+      ${delBtn(e)}
     </tr>`).join('')}</tbody>
   </table>`;
 }
@@ -3676,6 +3687,7 @@ const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
 async function openHOF(version = HOF_VERSION, diff = null) {
   if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = HOF_DIFFS.includes(_diffId()) ? _diffId() : 'bebe';
   if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null; // old flat versions
+  _hofVersion = version; _hofDiff = diff;
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
   hofBuildSpecials();
@@ -3688,9 +3700,23 @@ document.getElementById('hof-close').onclick = () =>
   document.getElementById('hof-overlay').classList.remove('open');
 document.getElementById('pp-close').onclick = () =>
   document.getElementById('pp-overlay').classList.remove('open');
-document.getElementById('hof-body').addEventListener('click', e => {
+document.getElementById('hof-body').addEventListener('click', async e => {
   const td = e.target.closest('.pp-trigger');
-  if (td) openPlayerProfile(td.dataset.uid, td.dataset.pseudo);
+  if (td) { openPlayerProfile(td.dataset.uid, td.dataset.pseudo); return; }
+  const btn = e.target.closest('.hof-del-btn');
+  if (btn && currentUser?.uid === ADMIN_UID) {
+    const key = btn.dataset.key;
+    if (!key || !confirm(`Supprimer cette entrée HOF ?`)) return;
+    try {
+      const token = await currentUser.getIdToken();
+      const path = _hofDiff
+        ? `${FB_URL}/${_hofVersion}/${_hofDiff}/${key}.json?auth=${token}`
+        : `${FB_URL}/${_hofVersion}/${key}.json?auth=${token}`;
+      const res = await fetch(path, { method: 'DELETE' });
+      if (res.ok) { btn.closest('tr').remove(); }
+      else alert('Erreur suppression : ' + res.status);
+    } catch(err) { alert('Erreur : ' + err.message); }
+  }
 });
 
 // ── PLAYER PROFILE ─────────────────────────────────────────
