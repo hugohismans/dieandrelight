@@ -1192,8 +1192,11 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     display: none; position: fixed; inset: 0; z-index: 300;
     align-items: center; justify-content: center;
     background: rgba(0,0,0,0.85);
+    transition: background 0.4s;
   }
   #shop-overlay.open { display: flex; }
+  #shop-overlay.preview-mode { background: transparent; pointer-events: none; }
+  #shop-overlay.preview-mode #shop-box { pointer-events: auto; opacity: 0.15; }
   #shop-box {
     background: #030d07; border: 1px solid #1a5a3a;
     width: min(500px, 95vw); max-height: 85vh;
@@ -4416,9 +4419,12 @@ function _renderShopBgs() {
       clearTimeout(_bgPreviewTimeout);
       const prev = _equippedBg;
       _equippedBg = bgId; _applyBackground();
+      document.getElementById('shop-overlay').classList.add('preview-mode');
       btn.textContent = '⏱ 5s…';
       _bgPreviewTimeout = setTimeout(() => {
-        _equippedBg = prev; _applyBackground(); _renderShopBgs();
+        _equippedBg = prev; _applyBackground();
+        document.getElementById('shop-overlay').classList.remove('preview-mode');
+        _renderShopBgs();
       }, 5000);
     });
   });
