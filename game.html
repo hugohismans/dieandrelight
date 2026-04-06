@@ -1679,7 +1679,9 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <button id="shop-close">✕</button>
     </div>
     <div id="shop-tabs">
-      <button class="shop-tab active" data-tab="skins">🔵 Skins de boule</button>
+      <button class="shop-tab active" data-tab="skins">🔵 Boule</button>
+      <button class="shop-tab" data-tab="emotes">😀 Emote</button>
+      <button class="shop-tab" data-tab="backgrounds">🌌 Fond</button>
     </div>
     <div id="shop-body"></div>
   </div>
@@ -3327,9 +3329,12 @@ function openProfile() {
   });
   const achCount = _achDone.size;
   const achTotal = ACHIEVEMENTS.length;
+  const emote = EMOTES.find(e => e.id === _equippedEmote) || EMOTES[0];
   document.getElementById('profile-content').innerHTML = `
     <div style="text-align:center;padding:10px 0 4px">
+      <div style="font-size:48px;line-height:1.1;margin-bottom:4px">${emote.emoji}</div>
       <div class="prof-pseudo">${escHtml(pseudo)}</div>
+      <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:#aa7700;margin-top:4px">⚡ ${voltbucks} VB</div>
     </div>
     <div>
       <div class="prof-section-title">Stats</div>
@@ -4114,6 +4119,40 @@ _applyDoneUI();
 _updateVBDisplay();
 
 // ── SHOP & SKINS ────────────────────────────────────────────
+// ── EMOTES & BACKGROUNDS ───────────────────────────────────
+const EMOTES = [
+  { id: 'none',    emoji: '🐥', name: 'Poussin',         price: 0 },
+  { id: 'bolt',    emoji: '⚡', name: 'Électrique',      price: 150 },
+  { id: 'skull',   emoji: '💀', name: 'Mortel',          price: 200 },
+  { id: 'crown',   emoji: '👑', name: 'Royauté',         price: 500 },
+  { id: 'ghost',   emoji: '👻', name: 'Fantôme',         price: 300 },
+  { id: 'fire',    emoji: '🔥', name: 'En feu',          price: 300 },
+  { id: 'robot',   emoji: '🤖', name: 'Robot',           price: 400 },
+  { id: 'alien',   emoji: '👾', name: 'Alien',           price: 400 },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',         price: 600 },
+  { id: 'devil',   emoji: '😈', name: 'Diable',          price: 600 },
+  { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800 },
+  { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500 },
+];
+
+const BACKGROUNDS = [
+  { id: 'default',  name: 'Électrons',        price: 0 },
+  { id: 'stars',    name: 'Étoiles filantes', price: 400 },
+  { id: 'matrix',   name: 'Pluie de code',    price: 500 },
+  { id: 'aurora',   name: 'Aurore boréale',   price: 600 },
+  { id: 'void',     name: 'Vide cosmique',    price: 300 },
+];
+
+const _EMOTE_LS  = 'elecgame_emote';
+const _BG_LS     = 'elecgame_bg';
+let _equippedEmote = localStorage.getItem(_EMOTE_LS) || 'none';
+let _equippedBg    = localStorage.getItem(_BG_LS)    || 'default';
+
+function _saveCosmetics() {
+  localStorage.setItem(_EMOTE_LS, _equippedEmote);
+  localStorage.setItem(_BG_LS,    _equippedBg);
+}
+
 const BALL_SKINS = [
   {
     id: 'default', name: 'Électron', price: 0,
@@ -4176,9 +4215,17 @@ function _saveInventory() {
   localStorage.setItem(_EQUIPPED_LS, _equippedSkin);
 }
 
+let _shopTab = 'skins';
+
 function openShop() {
   document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
-  _renderShopSkins();
+  document.querySelectorAll('.shop-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === _shopTab);
+    b.onclick = () => { _shopTab = b.dataset.tab; openShop(); };
+  });
+  if (_shopTab === 'skins')       _renderShopSkins();
+  else if (_shopTab === 'emotes') _renderShopEmotes();
+  else if (_shopTab === 'backgrounds') _renderShopBgs();
   document.getElementById('shop-overlay').classList.add('open');
 }
 
@@ -4270,8 +4317,206 @@ function _shopItemClick(skinId) {
   document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
 }
 
+function _renderShopEmotes() {
+  const body = document.getElementById('shop-body');
+  body.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+  body.innerHTML = EMOTES.map(e => {
+    const owned    = _ownedItems.has('emote_' + e.id) || e.price === 0;
+    const equipped = _equippedEmote === e.id;
+    const canAfford = voltbucks >= e.price;
+    const cls = 'shop-item' + (equipped ? ' equipped' : owned ? ' owned' : canAfford ? '' : ' broke');
+    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
+    const price = e.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + e.price + ' VB';
+    return `<div class="${cls}" data-emote="${e.id}">
+      ${badge}
+      <div style="font-size:32px;line-height:1.2;padding:4px 0">${e.emoji}</div>
+      <div class="shop-item-name">${e.name}</div>
+      <div class="shop-item-price">${price}</div>
+    </div>`;
+  }).join('');
+  body.querySelectorAll('[data-emote]').forEach(el => {
+    el.addEventListener('click', () => {
+      const emote = EMOTES.find(e => e.id === el.dataset.emote);
+      if (!emote) return;
+      const key = 'emote_' + emote.id;
+      if (_ownedItems.has(key) || emote.price === 0) {
+        _equippedEmote = emote.id; _saveCosmetics(); _renderShopEmotes();
+        document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+        return;
+      }
+      if (voltbucks < emote.price) return;
+      if (!confirm(`Acheter "${emote.name}" pour ⚡${emote.price} VB ?`)) return;
+      voltbucks -= emote.price; _ownedItems.add(key); _equippedEmote = emote.id;
+      _saveInventory(); _saveCosmetics(); _syncVB(); _renderShopEmotes();
+      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+    });
+  });
+}
+
+let _bgPreviewTimeout = null;
+
+function _renderShopBgs() {
+  const body = document.getElementById('shop-body');
+  body.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
+  body.innerHTML = BACKGROUNDS.map(bg => {
+    const owned    = _ownedItems.has('bg_' + bg.id) || bg.price === 0;
+    const equipped = _equippedBg === bg.id;
+    const canAfford = voltbucks >= bg.price;
+    const cls = 'shop-item' + (equipped ? ' equipped' : owned ? ' owned' : canAfford ? '' : ' broke');
+    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
+    const price = bg.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + bg.price + ' VB';
+    const preview = _bgPreviewStyle(bg.id);
+    const previewBtn = !equipped ? `<button class="shop-bg-preview" data-bg-preview="${bg.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid #1a4535;color:#336655;cursor:pointer;padding:2px 6px;margin-top:2px">Aperçu</button>` : '';
+    return `<div class="${cls}" data-bg="${bg.id}">
+      ${badge}
+      <div style="width:80px;height:50px;border:1px solid #1a4535;border-radius:2px;overflow:hidden;${preview}"></div>
+      <div class="shop-item-name">${bg.name}</div>
+      <div class="shop-item-price">${price}</div>
+      ${previewBtn}
+    </div>`;
+  }).join('');
+
+  // Boutons aperçu
+  body.querySelectorAll('[data-bg-preview]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const bgId = btn.dataset.bgPreview;
+      clearTimeout(_bgPreviewTimeout);
+      const prev = _equippedBg;
+      _equippedBg = bgId; _applyBackground();
+      btn.textContent = '⏱ 5s…';
+      _bgPreviewTimeout = setTimeout(() => {
+        _equippedBg = prev; _applyBackground(); _renderShopBgs();
+      }, 5000);
+    });
+  });
+
+  body.querySelectorAll('[data-bg]').forEach(el => {
+    el.addEventListener('click', () => {
+      const bg = BACKGROUNDS.find(b => b.id === el.dataset.bg);
+      if (!bg) return;
+      const key = 'bg_' + bg.id;
+      clearTimeout(_bgPreviewTimeout);
+      if (_ownedItems.has(key) || bg.price === 0) {
+        _equippedBg = bg.id; _saveCosmetics(); _applyBackground(); _renderShopBgs();
+        document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+        return;
+      }
+      if (voltbucks < bg.price) return;
+      if (!confirm(`Acheter "${bg.name}" pour ⚡${bg.price} VB ?`)) return;
+      voltbucks -= bg.price; _ownedItems.add(key); _equippedBg = bg.id;
+      _saveInventory(); _saveCosmetics(); _syncVB(); _applyBackground(); _renderShopBgs();
+      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+    });
+  });
+}
+
+function _bgPreviewStyle(id) {
+  const styles = {
+    default: 'background:linear-gradient(135deg,#03120e,#071a10);',
+    stars:   'background:linear-gradient(135deg,#000008,#080020);',
+    matrix:  'background:linear-gradient(135deg,#000a00,#001500);',
+    aurora:  'background:linear-gradient(135deg,#050015,#001a15);',
+    void:    'background:#000000;',
+  };
+  return styles[id] || '';
+}
+
 document.getElementById('shop-close').onclick  = () => document.getElementById('shop-overlay').classList.remove('open');
 document.getElementById('shop-open-btn').onclick = () => { closeMenu(); openShop(); };
+
+// ── BACKGROUND ENGINE ───────────────────────────────────────
+let _bgAnimId = null;
+let _bgParticles = [];
+
+function _applyBackground() {
+  const cvs = document.getElementById('bg-electrons');
+  if (_bgAnimId) { cancelAnimationFrame(_bgAnimId); _bgAnimId = null; }
+  _bgParticles = [];
+  const c = cvs.getContext('2d');
+  const W = () => cvs.width, H = () => cvs.height;
+
+  if (_equippedBg === 'default') { _startDefaultBg(); return; }
+
+  if (_equippedBg === 'void') {
+    c.clearRect(0, 0, cvs.width, cvs.height);
+    return; // fond noir fixe
+  }
+
+  if (_equippedBg === 'stars') {
+    for (let i = 0; i < 25; i++) _bgParticles.push({
+      x: Math.random() * cvs.width, y: Math.random() * cvs.height,
+      vx: -(1.5 + Math.random() * 3), vy: 0.2 + Math.random() * 0.5,
+      len: 40 + Math.random() * 80, alpha: 0.3 + Math.random() * 0.5,
+      color: ['#ffffff','#aaddff','#ffeeaa'][Math.floor(Math.random()*3)],
+    });
+    function frameSt() {
+      c.clearRect(0, 0, cvs.width, cvs.height);
+      for (const s of _bgParticles) {
+        s.x += s.vx; s.y += s.vy;
+        if (s.x < -s.len) { s.x = cvs.width + 10; s.y = Math.random() * cvs.height; }
+        if (s.y > cvs.height + 10) { s.y = -10; s.x = Math.random() * cvs.width; }
+        c.save();
+        const g = c.createLinearGradient(s.x, s.y, s.x + s.len, s.y - s.len * 0.15);
+        g.addColorStop(0, 'transparent');
+        g.addColorStop(1, s.color);
+        c.globalAlpha = s.alpha;
+        c.strokeStyle = g; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + s.len, s.y - s.len * 0.15); c.stroke();
+        c.restore();
+      }
+      _bgAnimId = requestAnimationFrame(frameSt);
+    }
+    _bgAnimId = requestAnimationFrame(frameSt);
+    return;
+  }
+
+  if (_equippedBg === 'matrix') {
+    const cols = Math.floor(cvs.width / 16);
+    const drops = Array.from({length: cols}, () => Math.random() * cvs.height / 16);
+    function frameMx() {
+      c.fillStyle = 'rgba(0,0,0,0.06)'; c.fillRect(0, 0, cvs.width, cvs.height);
+      c.fillStyle = '#00ff41'; c.font = '12px Courier New';
+      for (let i = 0; i < drops.length; i++) {
+        const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+        c.globalAlpha = 0.15 + Math.random() * 0.1;
+        c.fillText(char, i * 16, drops[i] * 16);
+        if (drops[i] * 16 > cvs.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i] += 0.4;
+      }
+      c.globalAlpha = 1;
+      _bgAnimId = requestAnimationFrame(frameMx);
+    }
+    _bgAnimId = requestAnimationFrame(frameMx);
+    return;
+  }
+
+  if (_equippedBg === 'aurora') {
+    let t = 0;
+    function frameAu() {
+      t += 0.004;
+      c.clearRect(0, 0, cvs.width, cvs.height);
+      for (let i = 0; i < 4; i++) {
+        const y = cvs.height * (0.2 + i * 0.15 + Math.sin(t + i) * 0.08);
+        const g = c.createLinearGradient(0, y - 60, 0, y + 60);
+        const hue = (180 + i * 40 + t * 20) % 360;
+        g.addColorStop(0, 'transparent');
+        g.addColorStop(0.5, `hsla(${hue},80%,50%,0.07)`);
+        g.addColorStop(1, 'transparent');
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(0, y);
+        for (let x = 0; x <= cvs.width; x += 20) {
+          c.lineTo(x, y + Math.sin(x / 100 + t + i) * 30);
+        }
+        c.lineTo(cvs.width, y + 60); c.lineTo(0, y + 60); c.closePath(); c.fill();
+      }
+      _bgAnimId = requestAnimationFrame(frameAu);
+    }
+    _bgAnimId = requestAnimationFrame(frameAu);
+    return;
+  }
+}
 
 // Bouton admin +1000 VB (visible uniquement pour Lesups)
 function _renderAdminVBBtn() {
@@ -6546,90 +6791,55 @@ loop();
    Discrets : faible opacité, vitesse basse, trail court.
 ──────────────────────────────────────────────────────────────── */
 (function() {
-  const cvs = document.getElementById('bg-electrons');
-  const ctx = cvs.getContext('2d');
-
-  const N = 10; // nombre d'électrons
-  let W, H;
-  const electrons = [];
-
-  function resize() {
-    W = cvs.width  = window.innerWidth;
-    H = cvs.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  function rand(min, max) { return min + Math.random() * (max - min); }
-
-  // Couleurs possibles : vert-cyan (thème jeu) + quelques teintes légèrement différentes
-  const COLORS = ['#00ffcc', '#00ddaa', '#00ffaa', '#44ffcc', '#00ccff'];
-
-  for (let i = 0; i < N; i++) {
-    electrons.push({
-      x: rand(0, W),
-      y: rand(0, H),
-      vx: rand(-0.25, 0.25),
-      vy: rand(-0.25, 0.25),
-      r: rand(1.2, 2.2),
-      alpha: rand(0.08, 0.20),
+  function _startDefaultBg() {
+    const cvs = document.getElementById('bg-electrons');
+    const ctx = cvs.getContext('2d');
+    const N = 10;
+    let W = cvs.width, H = cvs.height;
+    const electrons = [];
+    function rand(min, max) { return min + Math.random() * (max - min); }
+    const COLORS = ['#00ffcc', '#00ddaa', '#00ffaa', '#44ffcc', '#00ccff'];
+    for (let i = 0; i < N; i++) electrons.push({
+      x: rand(0, W), y: rand(0, H),
+      vx: rand(-0.25, 0.25), vy: rand(-0.25, 0.25),
+      r: rand(1.2, 2.2), alpha: rand(0.08, 0.20),
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      trail: [],
-      trailMax: Math.floor(rand(8, 18))
+      trail: [], trailMax: Math.floor(rand(8, 18))
     });
-  }
-
-  function frame() {
-    ctx.clearRect(0, 0, W, H);
-
-    for (const e of electrons) {
-      // Dérive douce
-      e.x += e.vx;
-      e.y += e.vy;
-
-      // Rebond doux sur les bords (wrap avec marge)
-      if (e.x < -20)  e.x = W + 20;
-      if (e.x > W+20) e.x = -20;
-      if (e.y < -20)  e.y = H + 20;
-      if (e.y > H+20) e.y = -20;
-
-      // Trail
-      e.trail.push({ x: e.x, y: e.y });
-      if (e.trail.length > e.trailMax) e.trail.shift();
-
-      // Dessine le trail en fondu
-      for (let t = 0; t < e.trail.length; t++) {
-        const progress = t / e.trail.length;
-        const a = e.alpha * progress * 0.5;
-        ctx.beginPath();
-        ctx.arc(e.trail[t].x, e.trail[t].y, e.r * progress, 0, Math.PI * 2);
-        ctx.fillStyle = e.color;
-        ctx.globalAlpha = a;
-        ctx.fill();
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      for (const e of electrons) {
+        e.x += e.vx; e.y += e.vy;
+        if (e.x < -20)  e.x = W + 20;
+        if (e.x > W+20) e.x = -20;
+        if (e.y < -20)  e.y = H + 20;
+        if (e.y > H+20) e.y = -20;
+        e.trail.push({ x: e.x, y: e.y });
+        if (e.trail.length > e.trailMax) e.trail.shift();
+        for (let t = 0; t < e.trail.length; t++) {
+          const progress = t / e.trail.length;
+          ctx.beginPath();
+          ctx.arc(e.trail[t].x, e.trail[t].y, e.r * progress, 0, Math.PI * 2);
+          ctx.fillStyle = e.color;
+          ctx.globalAlpha = e.alpha * progress * 0.5;
+          ctx.fill();
+        }
+        ctx.globalAlpha = e.alpha;
+        const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 3);
+        g.addColorStop(0, e.color); g.addColorStop(1, 'transparent');
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.r * 3, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.fill();
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+        ctx.fillStyle = e.color; ctx.fill();
       }
-
-      // Point principal avec glow léger
-      ctx.globalAlpha = e.alpha;
-      const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 3);
-      g.addColorStop(0, e.color);
-      g.addColorStop(1, 'transparent');
-      ctx.beginPath();
-      ctx.arc(e.x, e.y, e.r * 3, 0, Math.PI * 2);
-      ctx.fillStyle = g;
-      ctx.fill();
-
-      // Noyau solide
-      ctx.beginPath();
-      ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-      ctx.fillStyle = e.color;
-      ctx.fill();
+      ctx.globalAlpha = 1;
+      _bgAnimId = requestAnimationFrame(frame);
     }
-
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(frame);
+    _bgAnimId = requestAnimationFrame(frame);
+    window.addEventListener('resize', () => { W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; });
   }
 
-  requestAnimationFrame(frame);
+  _applyBackground();
 })();
 </script>
 </body>
