@@ -169,6 +169,33 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #skip-btn:hover, #prev-btn:hover { border-color: #ffcc44; color: #ffcc44; box-shadow: 0 0 12px #ffaa0055; }
 
   /* ── DEATH COUNTER ──────────────────────────────────────── */
+  #vb-counter {
+    position: fixed;
+    top: 10px;
+    right: 14px;
+    z-index: 150;
+    color: #aa7700;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    pointer-events: none;
+  }
+  #vb-toast {
+    position: fixed;
+    top: 30px;
+    right: 14px;
+    z-index: 200;
+    color: #ffcc00;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #ffaa0099;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(0px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #vb-toast.show { opacity: 1; transform: translateY(-8px); }
   #death-counter {
     position: fixed;
     top: 38px;
@@ -1416,6 +1443,11 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <!-- Campaign deaths -->
 <div id="camp-death-counter">💀 camp: 0</div>
 
+<!-- VoltBucks counter -->
+<div id="vb-counter">⚡ 0 VB</div>
+<!-- VoltBucks earn toast -->
+<div id="vb-toast"></div>
+
 <!-- Admin mode -->
 <div id="admin-badge">🔑 admin</div>
 <div id="admin-nav">
@@ -1618,6 +1650,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <button class="replay-btn" id="profile-open-btn" style="border-color:#00ddaa;color:#00ddaa">👤 Profil</button>
       <button class="replay-btn" id="ach-open-btn" style="border-color:#aa66ff;color:#aa66ff">🏅 Hauts-Faits</button>
       <button class="replay-btn" id="auth-sidebar-btn" style="border-color:#4488ff;color:#4488ff">👤 Connexion</button>
+      <button class="replay-btn" id="shop-open-btn" style="border-color:#ffaa00;color:#ffaa00">⚡ Boutique VoltBucks</button>
       <button class="replay-btn" id="hof-open-btn" style="border-color:#ffdd44;color:#ffdd44">🏆 Hall of Fame</button>
       <a href="index.html" style="display:block;text-align:center;font-family:'Courier New',monospace;font-size:12px;letter-spacing:2px;color:#224433;text-decoration:none;padding:8px 14px;border:1px solid #1a4535;transition:color 0.15s,border-color 0.15s" onmouseover="this.style.color='#00ffcc';this.style.borderColor='#336655'" onmouseout="this.style.color='#224433';this.style.borderColor='#1a4535'">⌂ Accueil</a>
     </div>
@@ -2832,6 +2865,69 @@ const ACHIEVEMENTS = [
 const _ACH_LS = 'elecgame_achievements';
 let _achDone  = new Set(JSON.parse(localStorage.getItem(_ACH_LS) || '[]'));
 
+// ── VOLTBUCKS ───────────────────────────────────────────────
+const FB_VB_RANKS = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
+let voltbucks = loadSave().voltbucks || 0;
+
+// Gain par haut-fait (plus c'est dur, plus ça rapporte)
+const ACH_VB = {
+  first_death:               50,
+  centurion:                100,
+  bebe_won:                 100,
+  piquer_won:               300,
+  cauchemar_won:            600,
+  bebe_deathless:           200,
+  piquer_deathless:         500,
+  cauchemar_deathless:     1500,
+  bebe_speed:               200,
+  cauchemar_speed:          500,
+  mirror_won:               300,
+  cauchemar_mirror:         800,
+  cauchemar_mirror_deathless: 2000,
+  survie_5:                 150,
+  survie_10:                300,
+  survie_20:                600,
+  survie_50:               1500,
+  survie_deathless:         400,
+  survie_comeback:          200,
+};
+
+function _syncVB() {
+  writeSave({ voltbucks });
+  _updateVBDisplay();
+  if (!currentUser || !currentPseudo) return;
+  currentUser.getIdToken().then(token => {
+    fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(voltbucks)
+    }).catch(() => {});
+    fetch(`${FB_VB_RANKS}/${currentUser.uid}.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pseudo: currentPseudo, vb: voltbucks, ts: Date.now() })
+    }).catch(() => {});
+  }).catch(() => {});
+}
+
+function earnVoltbucks(amount, reason) {
+  if (!amount || amount <= 0) return;
+  voltbucks += amount;
+  _syncVB();
+  // Toast VoltBucks
+  const el = document.getElementById('vb-toast');
+  if (el) {
+    el.textContent = '+' + amount + ' ⚡VB';
+    el.classList.remove('show');
+    void el.offsetWidth; // reflow pour relancer l'animation
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+}
+
+function _updateVBDisplay() {
+  const el = document.getElementById('vb-counter');
+  if (el) el.textContent = '⚡ ' + voltbucks + ' VB';
+}
+
 // Résultat de la dernière campagne terminée (set dans openFinish)
 let _lastCamp = null; // { campId, deaths, time, inv }
 
@@ -2863,6 +2959,7 @@ function unlockAchievement(id) {
   localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
   const ach = ACHIEVEMENTS.find(a => a.id === id);
   if (ach) _showToast(ach);
+  if (ACH_VB[id]) earnVoltbucks(ACH_VB[id], 'achievement');
   if (currentUser) currentUser.getIdToken().then(token => {
     // Sauvegarde l'achievement individuel
     fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
@@ -3891,11 +3988,12 @@ async function loadDoneFromFirebase() {
   if (!currentUser) return;
   try {
     const token = await currentUser.getIdToken();
-    const [resN, resI, resA, resD] = await Promise.all([
+    const [resN, resI, resA, resD, resVB] = await Promise.all([
       fetch(`${FB_USERS}/${currentUser.uid}/done.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/done_inv.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/achievements.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/deaths.json?auth=${token}`),
+      fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`),
     ]);
     if (resN.ok) { const d = await resN.json(); if (d) Object.keys(d).forEach(k => _doneLevels.add(_d64(k))); }
     if (resI.ok) { const d = await resI.json(); if (d) Object.keys(d).forEach(k => _doneInvLevels.add(_d64(k))); }
@@ -3903,6 +4001,9 @@ async function loadDoneFromFirebase() {
     if (resA.ok) { const d = await resA.json(); if (d) Object.keys(d).forEach(k => { fbAchKeys.add(k); _achDone.add(_d64(k)); }); }
     if (resD.ok) { const d = await resD.json(); if (typeof d === 'number' && d > deathCount) {
       deathCount = d; writeSave({ deaths: deathCount }); updateDeathDisplay();
+    }}
+    if (resVB.ok) { const d = await resVB.json(); if (typeof d === 'number' && d > voltbucks) {
+      voltbucks = d; writeSave({ voltbucks }); _updateVBDisplay();
     }}
     localStorage.setItem(_DONE_LS,     JSON.stringify([..._doneLevels]));
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
@@ -3929,6 +4030,9 @@ async function loadDoneFromFirebase() {
 
 // Apply localStorage stars immediately at startup
 _applyDoneUI();
+_updateVBDisplay();
+
+document.getElementById('shop-open-btn').onclick = () => { closeMenu(); /* Phase 2 */ alert('Boutique — bientôt disponible !'); };
 
 // ── Finish overlay (campaign complete) ─────────────────────
 async function openFinish(timeMs, deaths) {
@@ -3944,6 +4048,9 @@ async function openFinish(timeMs, deaths) {
   // Enregistre le résultat pour checkAchievements
   _lastCamp = { campId: _baseCampId(diffId), deaths, time: timeMs, inv: invertControls };
   checkAchievements('camp');
+  // Gain VoltBucks pour complétion de campagne
+  const _vbCamp = { bebe: 1, piquer: 10, cauchemar: 50 };
+  if (!adminMode) earnVoltbucks(_vbCamp[_baseCampId(diffId)] || 0, 'campaign');
 
   // Reset overlay state
   pseudoIn.style.display = 'none';
