@@ -6866,7 +6866,7 @@ loop();
    Discrets : faible opacité, vitesse basse, trail court.
 ──────────────────────────────────────────────────────────────── */
 (function() {
-  function _startDefaultBg() {
+  window._startDefaultBg = function _startDefaultBg() {
     const cvs = document.getElementById('bg-electrons');
     cvs.width = cvs.offsetWidth || window.innerWidth;
     cvs.height = cvs.offsetHeight || window.innerHeight;
