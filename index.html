@@ -184,6 +184,34 @@ body {
 .ach-rank-row.ar-3rd .ach-rank-pseudo { color: #ee9944; }
 .ach-rank-row.ar-3rd .ach-rank-count  { color: #ee9944; }
 
+#scroll-hint {
+  display: none;
+}
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%       { transform: translateY(6px); opacity: 1; }
+}
+@media (max-width: 820px) {
+  #scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00cc99;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  #scroll-hint.hidden { opacity: 0; }
+  #scroll-arrow { animation: bounce-arrow 1.4s ease-in-out infinite; font-size: 14px; }
+}
 @media (max-width: 820px) {
   body {
     flex-direction: column;
@@ -735,6 +763,11 @@ canvas#bg {
     <button id="play-btn" onclick="startGame()">▶ &nbsp;Jouer</button>
 
     <a id="editor-link" href="editor.html">éditeur de niveaux →</a>
+  </div>
+
+  <div id="scroll-hint">
+    <span>🏆 HOF &amp; Special Thanks</span>
+    <div id="scroll-arrow">▼</div>
   </div>
 </div>
 
@@ -1428,6 +1461,12 @@ renderSpecials();
 buildHofTabs();
 renderHOF();
 renderAchRanks();
+
+// Masque l'indicateur de scroll dès que l'utilisateur scrolle (mobile uniquement)
+window.addEventListener('scroll', () => {
+  const hint = document.getElementById('scroll-hint');
+  if (hint) hint.classList.add('hidden');
+}, { once: true, passive: true });
 
 // ── PLAYER PROFILE ─────────────────────────────────────────
 const FB_URL_INDEX    = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/hof';
