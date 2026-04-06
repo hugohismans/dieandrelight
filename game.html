@@ -79,6 +79,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #bg-electrons {
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 2;
     pointer-events: none;
   }
@@ -1657,7 +1659,9 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   <div id="pp-box">
     <div id="pp-header">
       <span id="pp-emote" style="font-size:28px;line-height:1">🐥</span>
+      <canvas id="pp-ball" width="28" height="28" style="border-radius:50%;flex-shrink:0"></canvas>
       <h2 id="pp-pseudo-title"></h2>
+      <span id="pp-bg-badge" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #1a4535;border-radius:2px;color:#336655;margin-left:4px;flex-shrink:0"></span>
       <button id="pp-close">✕</button>
     </div>
     <div id="pp-body">
@@ -3054,7 +3058,7 @@ function unlockAchievement(id) {
     if (currentPseudo) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
       }).catch(() => {});
     }
   }).catch(() => {});
@@ -3918,11 +3922,35 @@ const PP_DIFFS = [
 let _ppUid = null;
 let _ppHofCache = {};
 
+function _ppDrawBallPreview(canvas, skinId) {
+  if (!canvas) return;
+  const skin = BALL_SKINS.find(s => s.id === skinId) || BALL_SKINS[0];
+  const ctx = canvas.getContext('2d');
+  const r = 14, cx = 14, cy = 14;
+  ctx.clearRect(0, 0, 28, 28);
+  if (skin.special === 'rainbow') {
+    const hue = (Date.now() / 30) % 360;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    const g = ctx.createRadialGradient(cx - 4, cy - 4, 0.5, cx, cy, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.4, `hsl(${hue},100%,65%)`);
+    g.addColorStop(1, `hsl(${(hue + 120) % 360},100%,35%)`);
+    ctx.fillStyle = g; ctx.fill();
+  } else if (skin.inner) {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    const g = ctx.createRadialGradient(cx - 4, cy - 4, 0.5, cx, cy, r);
+    skin.inner.forEach(([c, s]) => g.addColorStop(s, c));
+    ctx.fillStyle = g; ctx.fill();
+  }
+}
+
 async function openPlayerProfile(uid, pseudo) {
   _ppUid = uid;
   _ppHofCache = {};
   document.getElementById('pp-pseudo-title').textContent = pseudo;
   document.getElementById('pp-emote').textContent = '🐥';
+  document.getElementById('pp-bg-badge').textContent = '';
+  _ppDrawBallPreview(document.getElementById('pp-ball'), 'default');
   document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
   document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
   document.getElementById('pp-overlay').classList.add('open');
@@ -3984,11 +4012,17 @@ async function _ppLoadAchievements(uid) {
   try {
     const res = await fetch(`${FB_ACH_RANKS}/${uid}.json`);
     const data = res.ok ? await res.json() : null;
-    // Afficher l'emote
+    // Cosmetics
     const emoteId = data?.emote || 'none';
     const emoteObj = EMOTES.find(e => e.id === emoteId) || EMOTES[0];
     const emoteEl = document.getElementById('pp-emote');
     if (emoteEl) emoteEl.textContent = emoteObj.emoji;
+    const skinId = data?.skin || 'default';
+    _ppDrawBallPreview(document.getElementById('pp-ball'), skinId);
+    const bgId = data?.bg || 'default';
+    const bgLabels = { default:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
+    const bgEl = document.getElementById('pp-bg-badge');
+    if (bgEl) bgEl.textContent = bgLabels[bgId] || '';
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
     if (!ids || !ids.length) {
@@ -4126,7 +4160,7 @@ async function loadDoneFromFirebase() {
     if (currentPseudo && _achDone.size > 0) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
       }).catch(() => {});
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
@@ -4175,9 +4209,9 @@ function _saveCosmetics() {
   // Sync emote publiquement dans achievement_ranks
   if (!currentUser || !currentPseudo) return;
   currentUser.getIdToken().then(token => {
-    fetch(`${FB_ACH_RANKS}/${currentUser.uid}/emote.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(_equippedEmote)
+    fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
+      method: 'PATCH', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
     }).catch(() => {});
   }).catch(() => {});
 }
@@ -4472,6 +4506,8 @@ function _applyBackground() {
   const cvs = document.getElementById('bg-electrons');
   if (_bgAnimId) { cancelAnimationFrame(_bgAnimId); _bgAnimId = null; }
   _bgParticles = [];
+  cvs.width = cvs.offsetWidth || window.innerWidth;
+  cvs.height = cvs.offsetHeight || window.innerHeight;
   const c = cvs.getContext('2d');
   const W = () => cvs.width, H = () => cvs.height;
 
@@ -6832,6 +6868,8 @@ loop();
 (function() {
   function _startDefaultBg() {
     const cvs = document.getElementById('bg-electrons');
+    cvs.width = cvs.offsetWidth || window.innerWidth;
+    cvs.height = cvs.offsetHeight || window.innerHeight;
     const ctx = cvs.getContext('2d');
     const N = 10;
     let W = cvs.width, H = cvs.height;

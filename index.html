@@ -812,7 +812,10 @@ canvas#bg {
 <div id="pp-overlay">
   <div id="pp-box">
     <div id="pp-header">
+      <span id="pp-emote" style="font-size:28px;line-height:1">🐥</span>
+      <canvas id="pp-ball" width="28" height="28" style="border-radius:50%;flex-shrink:0"></canvas>
       <h2 id="pp-pseudo-title"></h2>
+      <span id="pp-bg-badge" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #1a4535;border-radius:2px;color:#336655;margin-left:4px;flex-shrink:0"></span>
       <button id="pp-close">✕</button>
     </div>
     <div id="pp-body">
@@ -1504,6 +1507,9 @@ document.addEventListener('click', e => {
 async function openPlayerProfile(uid, pseudo) {
   _ppUid = uid; _ppCache = {};
   document.getElementById('pp-pseudo-title').textContent = pseudo;
+  document.getElementById('pp-emote').textContent = '🐥';
+  document.getElementById('pp-bg-badge').textContent = '';
+  _ppDrawBall(document.getElementById('pp-ball'), 'default');
   document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
   document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
   document.getElementById('pp-overlay').classList.add('open');
@@ -1551,11 +1557,56 @@ async function _ppShowDiff(diff) {
 
 function _d64(s) { const p=(4-s.length%4)%4; return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(s.length+p,'=')))); }
 
+const _PP_EMOTES = { none:'🐥', bolt:'⚡', skull:'💀', crown:'👑', ghost:'👻', fire:'🔥', robot:'🤖', alien:'👾', diamond:'💎', devil:'😈', comet:'☄️', godmode:'✨' };
+const _PP_SKIN_COLORS = {
+  default: ['#88ccff','#0055ff'], plasma: ['#ff88ff','#aa00ff'],
+  soleil:  ['#ffdd44','#ff6600'], venin:  ['#88ff88','#006600'],
+  braise:  ['#ff8844','#cc0000'], spectre:['#aaaaee','#222244'],
+  neant:   ['#996699','#000000'], arc:    null,
+};
+const _PP_BG_LABELS = { default:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
+
+function _ppDrawBall(canvas, skinId) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const r = 14, cx = 14, cy = 14;
+  ctx.clearRect(0, 0, 28, 28);
+  const colors = _PP_SKIN_COLORS[skinId] || _PP_SKIN_COLORS.default;
+  if (!colors) {
+    // rainbow
+    let t = Date.now() / 1000;
+    const hue = (t * 60) % 360;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.05, cx, cy, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.4, `hsl(${hue},100%,60%)`);
+    g.addColorStop(1, `hsl(${(hue+120)%360},100%,30%)`);
+    ctx.fillStyle = g; ctx.fill();
+    return;
+  }
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.05, cx, cy, r);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.5, colors[0]);
+  g.addColorStop(1, colors[1]);
+  ctx.fillStyle = g; ctx.fill();
+}
+
 async function _ppLoadAch(uid) {
   const el = document.getElementById('pp-ach-list');
   try {
     const res = await fetch(`${FB_ACH_URL}/${uid}.json`);
     const data = res.ok ? await res.json() : null;
+    // Cosmetics
+    const emoteId = data?.emote || 'none';
+    const skinId  = data?.skin  || 'default';
+    const bgId    = data?.bg    || 'default';
+    const emoteEl = document.getElementById('pp-emote');
+    if (emoteEl) emoteEl.textContent = _PP_EMOTES[emoteId] || '🐥';
+    _ppDrawBall(document.getElementById('pp-ball'), skinId);
+    const bgEl = document.getElementById('pp-bg-badge');
+    if (bgEl) bgEl.textContent = _PP_BG_LABELS[bgId] || '';
+    // Achievements
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
     if (!ids || !ids.length) {
