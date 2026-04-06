@@ -916,8 +916,15 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .ach-name {
     font-family: 'Courier New', monospace; font-size: 11px;
     letter-spacing: 1px; color: #446655;
+    display: flex; align-items: center; gap: 6px;
   }
   .ach-item.unlocked .ach-name { color: #00ddaa; }
+  .ach-vb {
+    font-size: 9px; letter-spacing: 1px; color: #664400;
+    background: #1a0e00; border: 1px solid #3a2200;
+    padding: 1px 5px; border-radius: 2px; white-space: nowrap;
+  }
+  .ach-vb.earned { color: #ffaa00; border-color: #aa6600; background: #1a0e0088; }
   .ach-desc {
     font-family: 'Courier New', monospace; font-size: 9px;
     letter-spacing: 1px; color: #1a4535; line-height: 1.5;
@@ -3211,10 +3218,11 @@ function openAchievements() {
   const list = document.getElementById('ach-list');
   list.innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = _achDone.has(a.id);
+    const vb = ACH_VB[a.id] || 0;
     return `<div class="ach-item${unlocked ? ' unlocked' : ''}">
       <div class="ach-emoji">${a.emoji}</div>
       <div class="ach-info">
-        <div class="ach-name">${a.name}</div>
+        <div class="ach-name">${a.name}${vb ? `<span class="ach-vb${unlocked ? ' earned' : ''}">⚡${vb} VB</span>` : ''}</div>
         <div class="ach-desc">${unlocked ? a.desc : '???'}</div>
       </div>
     </div>`;
