@@ -3895,6 +3895,8 @@ async function loadDoneFromFirebase() {
         body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone] })
       }).catch(() => {});
     }
+    // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
+    HOF_DIFFS.filter(d => d !== 'survie').forEach(diff => _getAccountBestScore(diff).catch(() => {}));
   } catch(e) {}
 }
 
