@@ -1196,7 +1196,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   }
   #shop-overlay.open { display: flex; }
   #shop-overlay.preview-mode { background: transparent; pointer-events: none; }
-  #shop-overlay.preview-mode #shop-box { pointer-events: auto; opacity: 0.15; }
+  #shop-overlay.preview-mode #shop-box { pointer-events: none; opacity: 0.15; cursor: wait; }
   #shop-box {
     background: #030d07; border: 1px solid #1a5a3a;
     width: min(500px, 95vw); max-height: 85vh;
@@ -3922,6 +3922,7 @@ async function openPlayerProfile(uid, pseudo) {
   _ppUid = uid;
   _ppHofCache = {};
   document.getElementById('pp-pseudo-title').textContent = pseudo;
+  document.getElementById('pp-emote').textContent = '🐥';
   document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
   document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
   document.getElementById('pp-overlay').classList.add('open');
