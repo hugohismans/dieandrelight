@@ -3769,7 +3769,15 @@ async function _ppLoadAchievements(uid) {
   try {
     const res = await fetch(`${FB_ACH_RANKS}/${uid}.json`);
     const data = res.ok ? await res.json() : null;
-    const ids = data?.achievements;
+    let ids = data?.achievements;
+    // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
+    if (!ids || !ids.length) {
+      const res2 = await fetch(`${FB_USERS}/${uid}/achievements.json`);
+      if (res2.ok) {
+        const raw = await res2.json();
+        if (raw && typeof raw === 'object') ids = Object.keys(raw).map(k => _d64(k));
+      }
+    }
     if (!ids || !ids.length) {
       el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
       return;
@@ -3777,7 +3785,8 @@ async function _ppLoadAchievements(uid) {
     el.innerHTML = ids.map(id => {
       const ach = ACHIEVEMENTS.find(a => a.id === id);
       return ach ? `<div class="pp-ach-item">${ach.emoji} ${ach.name}</div>` : '';
-    }).join('');
+    }).filter(Boolean).join('');
+    if (!el.innerHTML) el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
   } catch {
     el.innerHTML = '<span class="pp-ach-none">Erreur de chargement</span>';
   }

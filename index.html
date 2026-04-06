@@ -1483,14 +1483,25 @@ async function _ppShowDiff(diff) {
   } catch { el.innerHTML = '<span class="pp-hof-none">Erreur</span>'; }
 }
 
+function _d64(s) { const p=(4-s.length%4)%4; return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(s.length+p,'=')))); }
+
 async function _ppLoadAch(uid) {
   const el = document.getElementById('pp-ach-list');
   try {
     const res = await fetch(`${FB_ACH_URL}/${uid}.json`);
     const data = res.ok ? await res.json() : null;
-    const ids = data?.achievements;
+    let ids = data?.achievements;
+    // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
+    if (!ids || !ids.length) {
+      const res2 = await fetch(`${FB_USERS_URL}/${uid}/achievements.json`);
+      if (res2.ok) {
+        const raw = await res2.json();
+        if (raw && typeof raw === 'object') ids = Object.keys(raw).map(k => _d64(k));
+      }
+    }
     if (!ids || !ids.length) { el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>'; return; }
-    el.innerHTML = ids.map(id => { const a = ACH_NAMES.find(x => x.id === id); return a ? `<div class="pp-ach-item">${a.emoji} ${a.name}</div>` : ''; }).join('');
+    el.innerHTML = ids.map(id => { const a = ACH_NAMES.find(x => x.id === id); return a ? `<div class="pp-ach-item">${a.emoji} ${a.name}</div>` : ''; }).filter(Boolean).join('');
+    if (!el.innerHTML) el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
   } catch { el.innerHTML = '<span class="pp-ach-none">Erreur</span>'; }
 }
 </script>
