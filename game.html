@@ -171,19 +171,24 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   /* ── DEATH COUNTER ──────────────────────────────────────── */
   #vb-counter {
     position: fixed;
-    top: 10px;
-    right: 14px;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 150;
     color: #aa7700;
     font-family: 'Courier New', monospace;
     font-size: 12px;
     letter-spacing: 2px;
     pointer-events: none;
+    background: #0a1a1488;
+    padding: 2px 10px;
+    border: 1px solid #443300;
   }
   #vb-toast {
     position: fixed;
-    top: 30px;
-    right: 14px;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0px);
     z-index: 200;
     color: #ffcc00;
     font-family: 'Courier New', monospace;
@@ -192,10 +197,9 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     text-shadow: 0 0 10px #ffaa0099;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(0px);
     transition: opacity 0.3s, transform 0.3s;
   }
-  #vb-toast.show { opacity: 1; transform: translateY(-8px); }
+  #vb-toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
   #death-counter {
     position: fixed;
     top: 38px;
