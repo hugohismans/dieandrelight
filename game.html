@@ -1187,6 +1187,60 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .hof-del-btn { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.4; padding: 0 2px; }
   .hof-del-btn:hover { opacity: 1; }
 
+  /* ── SHOP ────────────────────────────────────────────────── */
+  #shop-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.85);
+  }
+  #shop-overlay.open { display: flex; }
+  #shop-box {
+    background: #030d07; border: 1px solid #1a5a3a;
+    width: min(500px, 95vw); max-height: 85vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 0 40px #00ffcc11;
+  }
+  #shop-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid #1a5a3a; flex-shrink: 0; gap: 10px;
+  }
+  #shop-title { font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 3px; color: #ffaa00; }
+  #shop-balance { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 2px; color: #ffcc00; margin-left: auto; }
+  #shop-close { background: none; border: none; color: #446655; font-size: 20px; cursor: pointer; padding: 2px 6px; }
+  #shop-close:hover { color: #00ffcc; }
+  #shop-tabs { display: flex; gap: 0; border-bottom: 1px solid #1a5a3a; flex-shrink: 0; }
+  .shop-tab {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px;
+    color: #446655; cursor: pointer; padding: 8px 16px; transition: all 0.15s;
+  }
+  .shop-tab.active { color: #ffaa00; border-bottom-color: #ffaa00; }
+  .shop-tab:hover:not(.active) { color: #669977; }
+  #shop-body { overflow-y: auto; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  #shop-body::-webkit-scrollbar { width: 3px; }
+  #shop-body::-webkit-scrollbar-thumb { background: #1a5a3a; }
+  .shop-item {
+    border: 1px solid #1a4535; background: #060e0a;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; padding: 12px 8px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .shop-item:hover { border-color: #2a6650; background: #0a1a12; }
+  .shop-item.owned { border-color: #1a5a3a; }
+  .shop-item.equipped { border-color: #ffaa00; background: #1a0e0044; }
+  .shop-item-preview { width: 60px; height: 60px; }
+  .shop-item-name { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 1px; color: #446655; text-align: center; }
+  .shop-item.owned .shop-item-name, .shop-item.equipped .shop-item-name { color: #00ddaa; }
+  .shop-item-price { font-family: 'Courier New', monospace; font-size: 10px; color: #aa7700; }
+  .shop-item.owned .shop-item-price { color: #1a5a3a; }
+  .shop-item.equipped .shop-item-price { color: #ffaa00; }
+  .shop-item-badge {
+    position: absolute; top: 4px; right: 4px;
+    font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 1px;
+    padding: 1px 4px; border-radius: 2px;
+  }
+  .shop-item.equipped .shop-item-badge { background: #ffaa0033; color: #ffaa00; border: 1px solid #ffaa0066; }
+  .shop-item.owned:not(.equipped) .shop-item-badge { background: #1a5a3a33; color: #00cc99; border: 1px solid #1a5a3a; }
+
   /* ── PLAYER PROFILE ──────────────────────────────────────── */
   #pp-overlay {
     display: none; position: fixed; inset: 0;
@@ -1613,6 +1667,21 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
         <div id="pp-ach-list"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Shop overlay -->
+<div id="shop-overlay">
+  <div id="shop-box">
+    <div id="shop-header">
+      <div id="shop-title">⚡ BOUTIQUE VOLTBUCKS</div>
+      <div id="shop-balance"></div>
+      <button id="shop-close">✕</button>
+    </div>
+    <div id="shop-tabs">
+      <button class="shop-tab active" data-tab="skins">🔵 Skins de boule</button>
+    </div>
+    <div id="shop-body"></div>
   </div>
 </div>
 
@@ -4036,6 +4105,7 @@ async function loadDoneFromFirebase() {
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
     HOF_DIFFS.filter(d => d !== 'survie').forEach(diff => _getAccountBestScore(diff).catch(() => {}));
+    _renderAdminVBBtn();
   } catch(e) {}
 }
 
@@ -4043,7 +4113,178 @@ async function loadDoneFromFirebase() {
 _applyDoneUI();
 _updateVBDisplay();
 
-document.getElementById('shop-open-btn').onclick = () => { closeMenu(); /* Phase 2 */ alert('Boutique — bientôt disponible !'); };
+// ── SHOP & SKINS ────────────────────────────────────────────
+const BALL_SKINS = [
+  {
+    id: 'default', name: 'Électron', price: 0,
+    glow: '#88ddff', shadow: '#88ddff',
+    outer: [['rgba(80,180,255,0.6)', 0], ['rgba(0,80,255,0)', 1]],
+    inner: [['#ffffff', 0], ['#88ccff', 0.5], ['#0055ff', 1]],
+  },
+  {
+    id: 'plasma', name: 'Plasma', price: 300,
+    glow: '#ff44ff', shadow: '#ff00ff',
+    outer: [['rgba(255,80,255,0.6)', 0], ['rgba(180,0,255,0)', 1]],
+    inner: [['#ffffff', 0], ['#ff88ff', 0.5], ['#aa00ff', 1]],
+  },
+  {
+    id: 'soleil', name: 'Soleil', price: 300,
+    glow: '#ffcc00', shadow: '#ff8800',
+    outer: [['rgba(255,200,0,0.6)', 0], ['rgba(255,100,0,0)', 1]],
+    inner: [['#ffffff', 0], ['#ffdd44', 0.5], ['#ff6600', 1]],
+  },
+  {
+    id: 'venin', name: 'Venin', price: 400,
+    glow: '#44ff44', shadow: '#00ff44',
+    outer: [['rgba(0,255,80,0.6)', 0], ['rgba(0,180,0,0)', 1]],
+    inner: [['#ffffff', 0], ['#88ff88', 0.5], ['#006600', 1]],
+  },
+  {
+    id: 'braise', name: 'Braise', price: 400,
+    glow: '#ff6600', shadow: '#ff2200',
+    outer: [['rgba(255,100,0,0.65)', 0], ['rgba(200,0,0,0)', 1]],
+    inner: [['#ffffff', 0], ['#ff8844', 0.5], ['#cc0000', 1]],
+  },
+  {
+    id: 'spectre', name: 'Spectre', price: 600,
+    glow: '#aaaaff', shadow: '#6666ff',
+    outer: [['rgba(180,180,255,0.4)', 0], ['rgba(80,80,255,0)', 1]],
+    inner: [['#eeeeee', 0], ['#aaaaee', 0.4], ['#222244', 0.85], ['rgba(0,0,0,0)', 1]],
+  },
+  {
+    id: 'neant', name: 'Néant', price: 800,
+    glow: '#220022', shadow: '#440044',
+    outer: [['rgba(80,0,80,0.5)', 0], ['rgba(0,0,0,0)', 1]],
+    inner: [['#996699', 0], ['#330033', 0.5], ['#000000', 1]],
+  },
+  {
+    id: 'arc', name: 'Arc-en-ciel', price: 1200,
+    glow: '#ff88ff', shadow: '#ff88ff',
+    outer: null, // dessin spécial
+    inner: null,
+    special: 'rainbow',
+  },
+];
+
+const _OWNED_LS   = 'elecgame_owned';
+const _EQUIPPED_LS = 'elecgame_skin';
+let _ownedItems   = new Set(JSON.parse(localStorage.getItem(_OWNED_LS) || '["default"]'));
+let _equippedSkin = localStorage.getItem(_EQUIPPED_LS) || 'default';
+
+function _saveInventory() {
+  localStorage.setItem(_OWNED_LS,   JSON.stringify([..._ownedItems]));
+  localStorage.setItem(_EQUIPPED_LS, _equippedSkin);
+}
+
+function openShop() {
+  document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+  _renderShopSkins();
+  document.getElementById('shop-overlay').classList.add('open');
+}
+
+function _renderShopSkins() {
+  const body = document.getElementById('shop-body');
+  body.innerHTML = BALL_SKINS.map(s => {
+    const owned    = _ownedItems.has(s.id);
+    const equipped = _equippedSkin === s.id;
+    const canAfford = voltbucks >= s.price;
+    const cls = equipped ? 'shop-item equipped' : owned ? 'shop-item owned' : 'shop-item' + (canAfford ? '' : ' broke');
+    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
+    const price = s.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + s.price + ' VB';
+    return `<div class="${cls}" data-skin="${s.id}" title="${s.name}">
+      ${badge}
+      <canvas class="shop-item-preview" width="60" height="60" data-skin-preview="${s.id}"></canvas>
+      <div class="shop-item-name">${s.name}</div>
+      <div class="shop-item-price">${price}</div>
+    </div>`;
+  }).join('');
+
+  // Dessine les previews
+  body.querySelectorAll('[data-skin-preview]').forEach(cvs => {
+    const skin = BALL_SKINS.find(s => s.id === cvs.dataset.skinPreview);
+    if (!skin) return;
+    _drawSkinPreview(cvs, skin);
+  });
+
+  // Clics
+  body.querySelectorAll('.shop-item').forEach(el => {
+    el.addEventListener('click', () => _shopItemClick(el.dataset.skin));
+  });
+}
+
+function _drawSkinPreview(cvs, skin) {
+  const c = cvs.getContext('2d');
+  const x = 30, y = 30, r = 12;
+  c.clearRect(0, 0, 60, 60);
+  if (skin.special === 'rainbow') {
+    const t = (Date.now() / 800) % 1;
+    const outer = c.createRadialGradient(x, y, 0, x, y, 26);
+    const hue = Math.round(t * 360);
+    outer.addColorStop(0, `hsla(${hue},100%,70%,0.6)`);
+    outer.addColorStop(1, `hsla(${(hue+60)%360},100%,50%,0)`);
+    c.beginPath(); c.arc(x, y, 26, 0, Math.PI * 2);
+    c.fillStyle = outer; c.fill();
+    c.save(); c.shadowBlur = 14; c.shadowColor = `hsl(${hue},100%,60%)`;
+    const inner = c.createRadialGradient(x-2, y-2, 1, x, y, r);
+    inner.addColorStop(0, '#ffffff');
+    inner.addColorStop(0.5, `hsl(${(hue+120)%360},100%,70%)`);
+    inner.addColorStop(1, `hsl(${(hue+240)%360},100%,40%)`);
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
+    c.fillStyle = inner; c.fill(); c.restore();
+    return;
+  }
+  // Halo
+  if (skin.outer) {
+    const outer = c.createRadialGradient(x, y, 0, x, y, 26);
+    skin.outer.forEach(([col, stop]) => outer.addColorStop(stop, col));
+    c.beginPath(); c.arc(x, y, 26, 0, Math.PI * 2);
+    c.fillStyle = outer; c.fill();
+  }
+  // Core
+  c.save(); c.shadowBlur = 14; c.shadowColor = skin.shadow;
+  const inner = c.createRadialGradient(x-2, y-2, 1, x, y, r);
+  skin.inner.forEach(([col, stop]) => inner.addColorStop(stop, col));
+  c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
+  c.fillStyle = inner; c.fill(); c.restore();
+}
+
+function _shopItemClick(skinId) {
+  const skin = BALL_SKINS.find(s => s.id === skinId);
+  if (!skin) return;
+  if (_ownedItems.has(skinId)) {
+    // Équiper
+    _equippedSkin = skinId;
+    _saveInventory();
+    _renderShopSkins();
+    document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+    return;
+  }
+  if (voltbucks < skin.price) { return; }
+  if (!confirm(`Acheter "${skin.name}" pour ⚡${skin.price} VB ?`)) return;
+  voltbucks -= skin.price;
+  _ownedItems.add(skinId);
+  _equippedSkin = skinId;
+  _saveInventory();
+  _syncVB();
+  _renderShopSkins();
+  document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+}
+
+document.getElementById('shop-close').onclick  = () => document.getElementById('shop-overlay').classList.remove('open');
+document.getElementById('shop-open-btn').onclick = () => { closeMenu(); openShop(); };
+
+// Bouton admin +1000 VB (visible uniquement pour Lesups)
+function _renderAdminVBBtn() {
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+  const existing = document.getElementById('admin-vb-btn');
+  if (existing) return;
+  const btn = document.createElement('button');
+  btn.id = 'admin-vb-btn';
+  btn.textContent = '+1000 VB (admin)';
+  btn.style.cssText = 'position:fixed;bottom:60px;right:14px;z-index:300;font-family:Courier New,monospace;font-size:10px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:4px 10px;cursor:pointer';
+  btn.onclick = () => { earnVoltbucks(1000, 'admin'); };
+  document.body.appendChild(btn);
+}
 
 // ── Finish overlay (campaign complete) ─────────────────────
 async function openFinish(timeMs, deaths) {
@@ -4694,18 +4935,33 @@ function drawSwitch(sw) {
 }
 
 function drawBall(x, y) {
-  const grd = ctx.createRadialGradient(x, y, 0, x, y, 26);
-  grd.addColorStop(0, 'rgba(80,180,255,0.6)');
-  grd.addColorStop(1, 'rgba(0,80,255,0)');
-  ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI * 2);
-  ctx.fillStyle = grd; ctx.fill();
-
+  const skin = BALL_SKINS.find(s => s.id === _equippedSkin) || BALL_SKINS[0];
+  if (skin.special === 'rainbow') {
+    const hue = Math.round(((Date.now() / 800) % 1) * 360);
+    const outer = ctx.createRadialGradient(x, y, 0, x, y, 26);
+    outer.addColorStop(0, `hsla(${hue},100%,70%,0.6)`);
+    outer.addColorStop(1, `hsla(${(hue+60)%360},100%,50%,0)`);
+    ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI * 2);
+    ctx.fillStyle = outer; ctx.fill();
+    ctx.save(); ctx.shadowBlur = 18; ctx.shadowColor = `hsl(${hue},100%,60%)`;
+    const core = ctx.createRadialGradient(x - 3, y - 3, 1, x, y, BALL_R);
+    core.addColorStop(0, '#ffffff');
+    core.addColorStop(0.5, `hsl(${(hue+120)%360},100%,70%)`);
+    core.addColorStop(1, `hsl(${(hue+240)%360},100%,40%)`);
+    ctx.beginPath(); ctx.arc(x, y, BALL_R, 0, Math.PI * 2);
+    ctx.fillStyle = core; ctx.fill(); ctx.restore();
+    return;
+  }
+  if (skin.outer) {
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, 26);
+    skin.outer.forEach(([col, stop]) => grd.addColorStop(stop, col));
+    ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.fill();
+  }
   ctx.save();
-  ctx.shadowBlur = 18; ctx.shadowColor = '#88ddff';
+  ctx.shadowBlur = 18; ctx.shadowColor = skin.shadow;
   const core = ctx.createRadialGradient(x - 3, y - 3, 1, x, y, BALL_R);
-  core.addColorStop(0, '#ffffff');
-  core.addColorStop(0.5, '#88ccff');
-  core.addColorStop(1, '#0055ff');
+  skin.inner.forEach(([col, stop]) => core.addColorStop(stop, col));
   ctx.beginPath(); ctx.arc(x, y, BALL_R, 0, Math.PI * 2);
   ctx.fillStyle = core; ctx.fill();
   ctx.restore();
