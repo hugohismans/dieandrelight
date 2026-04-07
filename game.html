@@ -3842,7 +3842,20 @@ function registerDeath() {
     survivalStreak = 0;
     survivalLives--;
     updateSurvivalHUD();
-    if (survivalLives <= 0) setTimeout(() => { if (survivalRunning) endSurvival(); }, 900);
+    if (survivalLives <= 0) {
+      // Cœur en inventaire → l'utiliser automatiquement
+      if (_consumables.heart) {
+        _consumables.heart = false; _saveConsumables();
+        survivalLives = 1;
+        updateSurvivalHUD();
+        _runUsedConsumables.add('heart');
+        _updateConsumHUD();
+        const el = document.getElementById('vb-toast');
+        if (el) { el.textContent = t('consum.heart.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+      } else {
+        setTimeout(() => { if (survivalRunning) endSurvival(); }, 900);
+      }
+    }
   }
   if (!adminMode) checkAchievements('death');
   updateDeathDisplay();
