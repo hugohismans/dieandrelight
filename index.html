@@ -90,7 +90,7 @@ body {
   z-index: 1;
   overflow: hidden;
 }
-#panel-left  { border-right: 1px solid #1a4535; background: linear-gradient(90deg, transparent, #03120e); }
+#panel-left  { border-right: 1px solid #1a4535; background: linear-gradient(90deg, transparent, #03120e); padding: 0; gap: 0; }
 #panel-right {
   border-left: 1px solid #1a4535;
   background: linear-gradient(270deg, transparent, #03120e);
@@ -704,12 +704,21 @@ canvas#bg {
 <div id="scanlines"></div>
 <div id="vignette"></div>
 
-<!-- Left: Special Thanks -->
+<!-- Left: Special Thanks + VoltBucks HOF -->
 <div class="side-panel" id="panel-left">
-  <div class="panel-header">
-    <div class="panel-title">✦ Special Thanks</div>
+  <div class="panel-half">
+    <div class="panel-header">
+      <div class="panel-title">✦ Special Thanks</div>
+    </div>
+    <div class="panel-body" id="sp-list"></div>
   </div>
-  <div class="panel-body" id="sp-list"></div>
+  <div class="panel-sep"></div>
+  <div class="panel-half">
+    <div class="panel-header">
+      <div class="panel-title">⚡ VoltBucks</div>
+    </div>
+    <div class="panel-body" id="vb-rank-list"></div>
+  </div>
 </div>
 
 <!-- Auth block — fixed top center -->
@@ -1465,10 +1474,38 @@ async function renderAchRanks() {
   }
 }
 
+async function renderVBRanks() {
+  const el = document.getElementById('vb-rank-list');
+  el.innerHTML = '<div class="panel-empty">Chargement…</div>';
+  try {
+    const res = await fetch(`${FB_VB_RANKS_URL}.json`);
+    const data = res.ok ? await res.json() : null;
+    if (!data) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    const entries = Object.entries(data)
+      .map(([uid, e]) => ({ ...e, uid }))
+      .filter(e => e.pseudo && typeof e.vb === 'number' && e.vb > 0)
+      .sort((a, b) => b.vb - a.vb || a.ts - b.ts)
+      .slice(0, 15);
+    if (!entries.length) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    const medals = ['🥇','🥈','🥉'];
+    const cls    = ['ihof-1st','ihof-2nd','ihof-3rd'];
+    el.innerHTML = entries.map((e, i) =>
+      `<div class="ihof-row ${cls[i]||''}">
+        <span class="ihof-rank">${medals[i]||(i+1)}</span>
+        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
+        <span class="ihof-time" style="color:#ffe066">⚡${e.vb} VB</span>
+      </div>`
+    ).join('');
+  } catch {
+    el.innerHTML = '<div class="panel-empty">Erreur de chargement.</div>';
+  }
+}
+
 renderSpecials();
 buildHofTabs();
 renderHOF();
 renderAchRanks();
+renderVBRanks();
 
 // Masque l'indicateur de scroll dès que l'utilisateur scrolle (mobile uniquement)
 window.addEventListener('scroll', () => {
