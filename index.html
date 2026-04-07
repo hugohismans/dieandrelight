@@ -2095,41 +2095,39 @@ document.getElementById('idx-ach-modal-close').onclick = () => _closeModal('idx-
 
 async function _idxRenderAchModal() {
   const body = document.getElementById('idx-ach-modal-body');
+  if (!_idxUser) {
+    body.innerHTML = `<div style="color:#224433;text-align:center;padding:30px;font-size:11px;letter-spacing:1px">${currentLang === 'fr' ? 'Connecte-toi pour voir tes hauts-faits.' : 'Sign in to see your achievements.'}</div>`;
+    return;
+  }
   body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.loading')}</div>`;
   try {
-    const res = await fetch(`${FB_ACH_RANKS}.json`);
+    const res = await fetch(`${FB_ACH_URL}/${_idxUser.uid}.json`);
     const data = res.ok ? await res.json() : null;
-    if (!data) { body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.no_data')}</div>`; return; }
-    const entries = Object.entries(data)
-      .map(([uid, e]) => ({...e, uid}))
-      .filter(e => e.pseudo && e.count > 0)
-      .sort((a, b) => b.count - a.count || a.ts - b.ts)
-      .slice(0, 30);
-    const medals = ['🥇','🥈','🥉'];
-    const ACH_TOTAL_COUNT = 19;
+    let ids = data?.achievements;
+    if (!ids || !ids.length) {
+      const res2 = await fetch(`${FB_USERS_URL}/${_idxUser.uid}/achievements.json`);
+      if (res2.ok) {
+        const raw = await res2.json();
+        if (raw && typeof raw === 'object') ids = Object.keys(raw).map(k => _d64(k));
+      }
+    }
+    const ACH_TOTAL = 19;
+    const unlocked = (ids || []).map(id => ACH_NAMES.find(x => x.id === id)).filter(Boolean);
+    const locked = ACH_NAMES.filter(a => !(ids || []).includes(a.id));
     body.innerHTML = `
-      <div style="font-size:10px;color:#446655;letter-spacing:1px;margin-bottom:12px">Classement des joueurs par hauts-faits débloqués / Ranking by unlocked achievements</div>
-      <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace">
-        <thead><tr style="color:#446655;border-bottom:1px solid #aa44ff33">
-          <th style="padding:4px 8px;text-align:left">#</th>
-          <th style="padding:4px 8px;text-align:left">Pseudo</th>
-          <th style="padding:4px 8px;text-align:right">Hauts-faits</th>
-        </tr></thead>
-        <tbody>${entries.map((e, i) => {
-          const pct = Math.round((e.count / ACH_TOTAL_COUNT) * 100);
-          return `<tr style="border-bottom:1px solid #aa44ff11">
-            <td style="padding:5px 8px;color:#aa44ff">${medals[i]||(i+1)}</td>
-            <td style="padding:5px 8px">
-              ${e.emote && _PP_EMOTES[e.emote] ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote]}</span>` : ''}
-              <span class="pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">${escHtml(e.pseudo)}</span>
-            </td>
-            <td style="padding:5px 8px;text-align:right">
-              <span style="color:#aa44ff">${e.count}/${ACH_TOTAL_COUNT}</span>
-              <span style="color:#446655;font-size:10px;margin-left:6px">${pct}%</span>
-            </td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>`;
+      <div style="font-size:10px;color:#446655;letter-spacing:1px;margin-bottom:14px">
+        <span style="color:#aa44ff">${unlocked.length}</span>/${ACH_TOTAL} ${currentLang === 'fr' ? 'débloqué(s)' : 'unlocked'}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${unlocked.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#0a1a14;border:1px solid #1a5a3a;font-size:11px;letter-spacing:1px">
+          <span style="font-size:16px">${a.emoji}</span>
+          <span style="color:#00cc99">${t_idx('ach.' + a.id)}</span>
+        </div>`).join('')}
+        ${locked.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#050e09;border:1px solid #0d2a1a;font-size:11px;letter-spacing:1px;opacity:0.4">
+          <span style="font-size:16px">🔒</span>
+          <span style="color:#224433">???</span>
+        </div>`).join('')}
+      </div>`;
   } catch { body.innerHTML = `<div style="color:#ff4444;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_error')}</div>`; }
 }
 
