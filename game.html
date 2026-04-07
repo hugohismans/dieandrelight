@@ -217,6 +217,10 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     flex-direction: column;
     gap: 8px;
   }
+  @media (hover: none) and (pointer: coarse) {
+    #consumable-hud { bottom: 110px; }
+  }
+  body.touch-device #consumable-hud { bottom: 110px; }
   .consum-btn {
     width: 44px; height: 44px;
     background: rgba(0,0,0,0.75);
@@ -4379,6 +4383,7 @@ function _updateConsumHUD() {
 
 function _useHeart() {
   if (!_consumables.heart || !survivalRunning) return;
+  if (!confirm('❤️ Utiliser le Cœur pour gagner +1 vie ?')) return;
   _consumables.heart = false; _saveConsumables();
   survivalLives = Math.min(survivalLives + 1, 6);
   updateSurvivalHUD();
@@ -4390,6 +4395,7 @@ function _useHeart() {
 
 function _useFuse() {
   if (!_consumables.fuse || survivalRunning) return;
+  if (!confirm('🔌 Utiliser le Fusible ? Clique ensuite sur un switch pour le verrouiller fermé.')) return;
   _fuseMode = true;
   _updateConsumHUD();
   const el = document.getElementById('fuse-hint');
@@ -4411,6 +4417,7 @@ function _applyFuseToSwitch(eid, swRef) {
 
 function _useAttenuator() {
   if (!_consumables.attenuator || _attenuatorActive || survivalRunning) return;
+  if (!confirm('🐢 Utiliser l\'Atténuateur ? La vitesse passe à 75% pour tout le niveau.')) return;
   _consumables.attenuator = false; _saveConsumables();
   _attenuatorActive = true;
   _runUsedConsumables.add('attenuator');
