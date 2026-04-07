@@ -1400,14 +1400,18 @@ async function renderHOF() {
     }
     const medals = ['🥇','🥈','🥉'];
     const cls    = ['ihof-1st','ihof-2nd','ihof-3rd'];
+    const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
     if (isSurvival) {
-      el.innerHTML = entries.map((e, i) =>
-        `<div class="ihof-row ${cls[i]||''}">
+      el.innerHTML = entries.map((e, i) => {
+        const bonuses = Array.isArray(e.bonuses) && e.bonuses.length
+          ? `<span title="Bonus utilisés" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmoji[b]||'').join('')}</span>`
+          : '';
+        return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
           <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
-          <span class="ihof-time" style="color:#ff8899">${e.score} niv.</span>
-        </div>`
-      ).join('');
+          <span class="ihof-time" style="color:#ff8899">${e.score} niv.${bonuses}</span>
+        </div>`;
+      }).join('');
     } else {
       el.innerHTML = entries.map((e, i) =>
         `<div class="ihof-row ${cls[i]||''}">

@@ -4118,10 +4118,14 @@ async function _ppShowDiff(diff) {
     }
     const e = sorted[rank];
     const medals = ['🥇', '🥈', '🥉'];
+    const _bonusEmojiPP = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
+    const bonusBadge = isSurvival && Array.isArray(e.bonuses) && e.bonuses.length
+      ? `<span title="Bonus utilisés" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmojiPP[b]||'').join('')}</span>`
+      : '';
     el.innerHTML = `<div class="pp-hof-entry">
       <span class="pp-hof-rank">${medals[rank] || '#' + (rank + 1)}</span>
       ${isSurvival
-        ? `<span class="pp-hof-time">${e.score} niveau(x)</span>`
+        ? `<span class="pp-hof-time">${e.score} niveau(x)${bonusBadge}</span>`
         : `<span class="pp-hof-time">${campFmtTime(e.time)}</span><span class="pp-hof-deaths">${e.deaths} 💀</span>`}
     </div>`;
   } catch {
