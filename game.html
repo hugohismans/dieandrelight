@@ -3064,6 +3064,19 @@ function unlockAchievement(id) {
   if (ach) _showToast(ach);
   if (ACH_VB[id]) earnVoltbucks(ACH_VB[id], 'achievement');
   if (currentUser) currentUser.getIdToken().then(token => {
+    // Marquer comme payé en VB pour éviter le double paiement rétroactif
+    if (ACH_VB[id]) {
+      fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`)
+        .then(r => r.json()).then(arr => {
+          const paid = Array.isArray(arr) ? arr : [];
+          if (!paid.includes(id)) {
+            paid.push(id);
+            fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`, {
+              method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(paid)
+            }).catch(() => {});
+          }
+        }).catch(() => {});
+    }
     // Sauvegarde l'achievement individuel
     fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
       method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
@@ -4136,13 +4149,14 @@ async function loadDoneFromFirebase() {
   if (!currentUser) return;
   try {
     const token = await currentUser.getIdToken();
-    const [resN, resI, resA, resD, resVB, resInv] = await Promise.all([
+    const [resN, resI, resA, resD, resVB, resInv, resPaid] = await Promise.all([
       fetch(`${FB_USERS}/${currentUser.uid}/done.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/done_inv.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/achievements.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/deaths.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`),
+      fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`),
     ]);
     if (resN.ok) { const d = await resN.json(); if (d) Object.keys(d).forEach(k => _doneLevels.add(_d64(k))); }
     if (resI.ok) { const d = await resI.json(); if (d) Object.keys(d).forEach(k => _doneInvLevels.add(_d64(k))); }
@@ -4168,6 +4182,26 @@ async function loadDoneFromFirebase() {
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
     localStorage.setItem(_ACH_LS,      JSON.stringify([..._achDone]));
     _applyDoneUI();
+    // Paiement rétroactif VB pour hauts-faits déjà débloqués
+    const paidSet = new Set(resPaid.ok ? (await resPaid.json() || []) : []);
+    const unpaidAch = [..._achDone].filter(id => ACH_VB[id] && !paidSet.has(id));
+    if (unpaidAch.length > 0) {
+      const retro = unpaidAch.reduce((s, id) => s + ACH_VB[id], 0);
+      voltbucks += retro;
+      writeSave({ voltbucks });
+      _updateVBDisplay();
+      const newPaid = [...paidSet, ...unpaidAch];
+      fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(newPaid)
+      }).catch(() => {});
+      fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(voltbucks)
+      }).catch(() => {});
+      setTimeout(() => {
+        const el = document.getElementById('vb-toast');
+        if (el) { el.textContent = `🎁 +${retro} VB récupérés`; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 3000); }
+      }, 1500);
+    }
     // Push vers Firebase les hauts-faits locaux absents de Firebase
     const missing = [..._achDone].filter(id => !fbAchKeys.has(_b64(id)));
     missing.forEach(id => {
