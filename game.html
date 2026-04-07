@@ -2319,15 +2319,31 @@ function selectLevel(idx) {
   replayMode = false;
   particles = []; shakeTimer = 0; bulbFlash = 0;
   for (const k in keys) keys[k] = false;
-  // Reset consumable per-level state (fusible et atténuateur ne persistent pas d'un niveau à l'autre)
-  _lockedSwitchEid = null; _lockedSwitchRef = null;
-  _attenuatorActive = false; _fuseMode = false;
+  _fuseMode = false;
   document.getElementById('fuse-hint').style.display = 'none';
-  _updateConsumHUD();
+  const _prevLevelIdx = currentLevel;
   stopHum(true);
   const prevLevel_ = currentLevel;
   currentLevel = idx;
   try { state = LEVELS[idx].make(); } catch(e) { return; } // not loaded yet
+
+  // Fusible : persiste si on rejoue le même niveau, reset si on change de niveau
+  if (idx !== _prevLevelIdx) {
+    _lockedSwitchEid = null; _lockedSwitchRef = null; _lockedSwitchKey = null;
+    _attenuatorActive = false;
+  } else {
+    // Même niveau redémarré : réappliquer le fusible sur les nouveaux objets switch
+    if (_lockedSwitchEid && state.switchMap) {
+      const sw = state.switchMap.get(_lockedSwitchEid);
+      if (sw) { sw.open = false; _lockedSwitchRef = sw; }
+      else { _lockedSwitchEid = null; }
+    } else if (_lockedSwitchKey && state.switches) {
+      _lockedSwitchRef = state.switches.find(sw => _ikey(sw.key) === _lockedSwitchKey) || null;
+      if (_lockedSwitchRef) _lockedSwitchRef.open = false;
+      else { _lockedSwitchKey = null; }
+    }
+  }
+  _updateConsumHUD();
 
   // GG level : déclenche la célébration par-dessus le niveau qui tourne
   if (LEVELS[idx]?.isGG && campRunning) {
@@ -4359,6 +4375,7 @@ let _runUsedConsumables = new Set();
 let _fuseMode = false;
 let _lockedSwitchEid = null;   // edge id for custom levels
 let _lockedSwitchRef = null;   // sw object ref for classic levels
+let _lockedSwitchKey = null;   // key (Q/P) pour retrouver le switch classic après restart
 let _attenuatorActive = false;
 
 function _saveConsumables() {
@@ -4406,6 +4423,7 @@ function _applyFuseToSwitch(eid, swRef) {
   _fuseMode = false;
   _lockedSwitchEid = eid;
   _lockedSwitchRef = swRef;
+  _lockedSwitchKey = swRef ? _ikey(swRef.key) : null;
   if (swRef) swRef.open = false;
   _consumables.fuse = false; _saveConsumables();
   _runUsedConsumables.add('fuse');
