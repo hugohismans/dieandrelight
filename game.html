@@ -2934,6 +2934,26 @@ async function _apAdminToken() {
   return await currentUser.getIdToken(true);
 }
 
+// Cherche un UID par pseudo — d'abord dans pseudos/, puis dans le HOF en fallback
+async function _apFindUidByPseudo(pseudo, token) {
+  const r1 = await fetch(`${_FB_BASE}/pseudos/${encodeURIComponent(pseudo)}.json?auth=${token}`);
+  const uid1 = await r1.json();
+  if (uid1 && typeof uid1 === 'string') return uid1;
+  // Fallback : scanner les diffs HOF
+  const diffs = ['cauchemar','piquer','bebe','cauchemar_inv','piquer_inv','bebe_inv','survie'];
+  for (const diff of diffs) {
+    try {
+      const r2 = await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${diff}.json?auth=${token}`);
+      const data = await r2.json();
+      if (!data) continue;
+      for (const entry of Object.values(data)) {
+        if (entry.pseudo && entry.pseudo.toLowerCase() === pseudo && entry.uid) return entry.uid;
+      }
+    } catch {}
+  }
+  return null;
+}
+
 document.getElementById('ap-vb-search').onclick = async () => {
   const pseudo = document.getElementById('ap-vb-pseudo').value.trim().toLowerCase();
   const st = document.getElementById('ap-vb-status');
@@ -2942,19 +2962,17 @@ document.getElementById('ap-vb-search').onclick = async () => {
   st.style.color = '#886622'; st.textContent = 'Recherche…'; res.style.display = 'none';
   try {
     const token = await _apAdminToken();
-    // Lookup UID via pseudos/
-    const r1 = await fetch(`${_FB_BASE}/pseudos/${encodeURIComponent(pseudo)}.json?auth=${token}`);
-    const uid = await r1.json();
-    if (!uid || typeof uid !== 'string') { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+    const uid = await _apFindUidByPseudo(pseudo, token);
+    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable dans pseudos/ ni dans le HOF.'; return; }
     // Fetch VB
     const r2 = await fetch(`${_FB_BASE}/users/${uid}/voltbucks.json?auth=${token}`);
     const vb  = await r2.json();
     document.getElementById('ap-vb-uid').textContent     = uid;
     document.getElementById('ap-vb-current').textContent = '⚡ ' + (typeof vb === 'number' ? vb : '?') + ' VB';
-    document.getElementById('ap-vb-uid').dataset.uid = uid;
+    document.getElementById('ap-vb-uid').dataset.uid    = uid;
     document.getElementById('ap-vb-uid').dataset.pseudo = pseudo;
-    document.getElementById('ap-vb-uid').dataset.vb = typeof vb === 'number' ? vb : 0;
-    res.style.display = ''; st.textContent = '';
+    document.getElementById('ap-vb-uid').dataset.vb     = typeof vb === 'number' ? vb : 0;
+    res.style.display = ''; st.style.color = '#886622'; st.textContent = '';
   } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
 };
 
@@ -3159,9 +3177,8 @@ document.getElementById('ap-uid-lookup-btn').onclick = async () => {
   st.style.color = '#886622'; st.textContent = 'Recherche…';
   try {
     const token = await _apAdminToken();
-    const r = await fetch(`${_FB_BASE}/pseudos/${encodeURIComponent(pseudo)}.json?auth=${token}`);
-    const uid = await r.json();
-    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+    const uid = await _apFindUidByPseudo(pseudo, token);
+    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable dans pseudos/ ni dans le HOF.'; return; }
     st.style.color = '#ffcc44'; st.textContent = `UID : ${uid}`;
   } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
 };
