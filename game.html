@@ -5228,7 +5228,10 @@ async function openHOF(version = HOF_VERSION, diff = null) {
   ]);
   _hofEmoteMap = {};
   if (achData) Object.entries(achData).forEach(([uid, a]) => {
-    if (a?.emote) { const eo = EMOTES.find(e => e.id === a.emote); if (eo) _hofEmoteMap[uid] = eo.emoji; }
+    if (a?.emote && a.emote !== 'none') {
+      const eo = EMOTES.find(e => e.id === a.emote);
+      _hofEmoteMap[uid] = eo ? eo.emoji : a.emote;
+    }
   });
   hofRenderBody(entries, diff === 'survie');
 }

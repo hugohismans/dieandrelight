@@ -1649,7 +1649,7 @@ async function renderHOF() {
     // Map uid → emote
     const emoteMap = {};
     if (achData) Object.entries(achData).forEach(([uid, a]) => {
-      if (a?.emote) { const em = _PP_EMOTES[a.emote]; if (em) emoteMap[uid] = em; }
+      if (a?.emote && a.emote !== 'none') emoteMap[uid] = _PP_EMOTES[a.emote] || a.emote;
     });
     const entries = data
       ? Object.values(data)
@@ -1719,7 +1719,7 @@ async function renderAchRanks() {
         <span class="ach-rank-pos">${medals[i]||(i+1)}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:baseline;gap:6px">
-            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && _PP_EMOTES[e.emote] ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote]}</span>` : ''}${escHtml(e.pseudo)}</span>
+            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && e.emote !== 'none' ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote] || e.emote}</span>` : ''}${escHtml(e.pseudo)}</span>
             <span class="ach-rank-count">${e.count}/${ACH_TOTAL}</span>
           </div>
           <div style="height:2px;background:#aa44ff22;border-radius:1px;margin-top:3px">
@@ -1751,7 +1751,7 @@ async function renderVBRanks() {
     el.innerHTML = entries.map((e, i) =>
       `<div class="ihof-row ${cls[i]||''}">
         <span class="ihof-rank">${medals[i]||(i+1)}</span>
-        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && _PP_EMOTES[e.emote] ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote]}</span>` : ''}${escHtml(e.pseudo)}</span>
+        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && e.emote !== 'none' ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote] || e.emote}</span>` : ''}${escHtml(e.pseudo)}</span>
         <span class="ihof-time" style="color:#ffe066">⚡${e.vb} VB</span>
       </div>`
     ).join('');
@@ -2045,7 +2045,7 @@ async function _idxRenderHofModal() {
     const achData = resAch.ok ? await resAch.json() : null;
     const emoteMap = {};
     if (achData) Object.entries(achData).forEach(([uid, a]) => {
-      if (a?.emote) { const em = _PP_EMOTES[a.emote]; if (em) emoteMap[uid] = em; }
+      if (a?.emote && a.emote !== 'none') emoteMap[uid] = _PP_EMOTES[a.emote] || a.emote;
     });
     const entries = data
       ? Object.values(data)
