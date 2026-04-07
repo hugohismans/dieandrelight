@@ -3072,7 +3072,7 @@ function unlockAchievement(id) {
     if (currentPseudo) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
       }).catch(() => {});
     }
   }).catch(() => {});
@@ -4039,7 +4039,9 @@ async function _ppLoadAchievements(uid) {
     const bgEl = document.getElementById('pp-bg-badge');
     if (bgEl) { const t = bgLabels[bgId] || ''; bgEl.textContent = t; bgEl.style.display = t ? '' : 'none'; }
     const vbEl = document.getElementById('pp-vb');
-    if (vbEl) { const t = typeof data?.vb === 'number' ? '⚡ ' + data.vb + ' VB' : ''; vbEl.textContent = t; vbEl.style.display = t ? '' : 'none'; }
+    let vbVal = typeof data?.vb === 'number' ? data.vb : null;
+    if (vbVal === null) { try { const r = await fetch(`${FB_VB_RANKS}/${uid}.json`); if (r.ok) { const d = await r.json(); if (typeof d?.vb === 'number') vbVal = d.vb; } } catch {} }
+    if (vbEl) { const t = vbVal !== null ? '⚡ ' + vbVal + ' VB' : ''; vbEl.textContent = t; vbEl.style.display = t ? '' : 'none'; }
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
     if (!ids || !ids.length) {
@@ -4177,7 +4179,7 @@ async function loadDoneFromFirebase() {
     if (currentPseudo && _achDone.size > 0) {
       fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
         method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
+        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
       }).catch(() => {});
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)

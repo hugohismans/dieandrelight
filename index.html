@@ -1475,6 +1475,7 @@ window.addEventListener('scroll', () => {
 // ── PLAYER PROFILE ─────────────────────────────────────────
 const FB_URL_INDEX    = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/hof';
 const FB_ACH_URL      = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/achievement_ranks';
+const FB_VB_RANKS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
 const HOF_VER         = 'v0_1_0';
 const PP_DIFFS = [
   { id: 'bebe',          label: '🍼 Bébés' },
@@ -1609,7 +1610,9 @@ async function _ppLoadAch(uid) {
     const bgEl = document.getElementById('pp-bg-badge');
     if (bgEl) { const t = _PP_BG_LABELS[bgId] || ''; bgEl.textContent = t; bgEl.style.display = t ? '' : 'none'; }
     const vbEl = document.getElementById('pp-vb');
-    if (vbEl) { const t = typeof data?.vb === 'number' ? '⚡ ' + data.vb + ' VB' : ''; vbEl.textContent = t; vbEl.style.display = t ? '' : 'none'; }
+    let vbVal = typeof data?.vb === 'number' ? data.vb : null;
+    if (vbVal === null) { try { const r = await fetch(`${FB_VB_RANKS_URL}/${uid}.json`); if (r.ok) { const d = await r.json(); if (typeof d?.vb === 'number') vbVal = d.vb; } } catch {} }
+    if (vbEl) { const t = vbVal !== null ? '⚡ ' + vbVal + ' VB' : ''; vbEl.textContent = t; vbEl.style.display = t ? '' : 'none'; }
     // Achievements
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
