@@ -206,6 +206,30 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     opacity: 0;
     transition: opacity 0.3s, transform 0.3s;
   }
+
+  /* ── CONSUMABLE HUD ──────────────────────────────────────── */
+  #consumable-hud {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .consum-btn {
+    width: 44px; height: 44px;
+    background: rgba(0,0,0,0.75);
+    border: 1px solid #336644;
+    border-radius: 6px;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .consum-btn:hover { border-color: #00ffcc; box-shadow: 0 0 12px #00ffcc44; }
   #vb-toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
   #death-counter {
     position: fixed;
@@ -1695,6 +1719,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <button class="shop-tab active" data-tab="skins">🔵 Boule</button>
       <button class="shop-tab" data-tab="emotes">😀 Emote</button>
       <button class="shop-tab" data-tab="backgrounds">🌌 Fond</button>
+      <button class="shop-tab" data-tab="bonus">⚗️ Bonus</button>
     </div>
     <div id="shop-body"></div>
   </div>
@@ -1783,6 +1808,14 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <input type="file" id="ext-level-input" accept=".json" style="display:none">
 <input type="file" id="replay-input" accept=".json" style="display:none">
 
+<!-- Consumable HUD buttons -->
+<div id="consumable-hud">
+  <button id="hud-heart"  class="consum-btn" title="Cœur — +1 vie" style="display:none"      onclick="_useHeart()">❤️</button>
+  <button id="hud-fuse"   class="consum-btn" title="Fusible — verrouille un switch" style="display:none" onclick="_useFuse()">🔌</button>
+  <button id="hud-attn"   class="consum-btn" title="Atténuateur — vitesse 75%" style="display:none"  onclick="_useAttenuator()">🐢</button>
+</div>
+<div id="fuse-hint" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:#ffaa00;background:rgba(0,0,0,0.8);border:1px solid #aa6600;padding:4px 12px;border-radius:2px;pointer-events:none">🔌 CLIQUE SUR UN SWITCH POUR LE VERROUILLER</div>
+
 <!-- Main game area -->
 <div id="game-area">
   <canvas id="c" width="800" height="300" tabindex="0"></canvas>
@@ -1811,6 +1844,40 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 let W = canvas.width, H = canvas.height;
+
+// Fuse mode — click to select a switch
+canvas.addEventListener('click', e => {
+  if (!_fuseMode || !state) return;
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / rect.width;
+  const sy = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * sx;
+  const cy = (e.clientY - rect.top) * sy;
+
+  if (state.type === 'custom') {
+    // Convert to world coords
+    const wx = (cx - camTX) / camScale;
+    const wy = (cy - camTY) / camScale;
+    const { graph, switchMap } = state;
+    for (const [eid, sw] of switchMap) {
+      const edge = graph.edges.find(ed => ed.id === eid);
+      if (!edge) continue;
+      const sp = posOnEdge(0.5, edge, graph.nodes);
+      if (Math.abs(wx - sp.x) < 28 && Math.abs(wy - sp.y) < 28) {
+        _applyFuseToSwitch(eid, sw);
+        return;
+      }
+    }
+  } else if (state.switches) {
+    for (const sw of state.switches) {
+      const swY = sw.trackY !== undefined ? sw.trackY : WIRE_Y;
+      if (Math.abs(cx - sw.x) < 28 && Math.abs(cy - swY) < 28) {
+        _applyFuseToSwitch(null, sw);
+        return;
+      }
+    }
+  }
+});
 
 function setCanvasSize(w, h) {
   W = w; H = h;
@@ -2248,6 +2315,11 @@ function selectLevel(idx) {
   replayMode = false;
   particles = []; shakeTimer = 0; bulbFlash = 0;
   for (const k in keys) keys[k] = false;
+  // Reset consumable per-level state (fusible et atténuateur ne persistent pas d'un niveau à l'autre)
+  _lockedSwitchEid = null; _lockedSwitchRef = null;
+  _attenuatorActive = false; _fuseMode = false;
+  document.getElementById('fuse-hint').style.display = 'none';
+  _updateConsumHUD();
   stopHum(true);
   const prevLevel_ = currentLevel;
   currentLevel = idx;
@@ -3165,6 +3237,7 @@ function goSurvivalLevel(entry) {
 function startSurvival() {
   if (campRunning) campStop();
   survivalRunning  = true;
+  _runUsedConsumables = new Set();
   survivalLives    = 3;
   survivalScore    = 0;
   survivalDeaths   = 0;
@@ -3286,7 +3359,7 @@ async function _submitSurvivalScore(prevKey = null) {
   submitEl.disabled = true;
   try {
     const token = await currentUser.getIdToken();
-    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now(), device: detectDevice() };
+    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now(), device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
     const url = prevKey
       ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json?auth=${token}`
       : `${FB_URL}/${HOF_VERSION}/survie.json?auth=${token}`;
@@ -3749,6 +3822,7 @@ function campStart_() {
   campStart    = Date.now();
   campDeaths   = 0;
   campRunning  = true;
+  _runUsedConsumables = new Set();
   campPaused   = 0;
   adminSkipped = false;
   campTimerEl.classList.add('active');
@@ -4149,7 +4223,7 @@ async function loadDoneFromFirebase() {
   if (!currentUser) return;
   try {
     const token = await currentUser.getIdToken();
-    const [resN, resI, resA, resD, resVB, resInv, resPaid] = await Promise.all([
+    const [resN, resI, resA, resD, resVB, resInv, resPaid, resConsum] = await Promise.all([
       fetch(`${FB_USERS}/${currentUser.uid}/done.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/done_inv.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/achievements.json?auth=${token}`),
@@ -4157,6 +4231,7 @@ async function loadDoneFromFirebase() {
       fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`),
+      fetch(`${FB_USERS}/${currentUser.uid}/consumables.json?auth=${token}`),
     ]);
     if (resN.ok) { const d = await resN.json(); if (d) Object.keys(d).forEach(k => _doneLevels.add(_d64(k))); }
     if (resI.ok) { const d = await resI.json(); if (d) Object.keys(d).forEach(k => _doneInvLevels.add(_d64(k))); }
@@ -4177,6 +4252,14 @@ async function loadDoneFromFirebase() {
       if (inv?.skin) { _equippedSkin = inv.skin; localStorage.setItem(_EQUIPPED_LS, _equippedSkin); }
       if (inv?.emote) { _equippedEmote = inv.emote; localStorage.setItem(_EMOTE_LS, _equippedEmote); }
       if (inv?.bg) { _equippedBg = inv.bg; localStorage.setItem(_BG_LS, _equippedBg); _applyBackground(); }
+    }
+    if (resConsum.ok) {
+      const cs = await resConsum.json();
+      if (cs && typeof cs === 'object') {
+        _consumables = { ..._consumables, ...cs };
+        localStorage.setItem(_CONSUM_LS, JSON.stringify(_consumables));
+        _updateConsumHUD();
+      }
     }
     localStorage.setItem(_DONE_LS,     JSON.stringify([..._doneLevels]));
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
@@ -4256,6 +4339,85 @@ const _EMOTE_LS  = 'elecgame_emote';
 const _BG_LS     = 'elecgame_bg';
 let _equippedEmote = localStorage.getItem(_EMOTE_LS) || 'none';
 let _equippedBg    = localStorage.getItem(_BG_LS)    || 'default';
+
+// ── CONSUMABLES ─────────────────────────────────────────────
+const CONSUMABLES = [
+  { id: 'heart',      emoji: '❤️', name: 'Cœur',        price: 500,  desc: '+1 vie en mode survie' },
+  { id: 'fuse',       emoji: '🔌', name: 'Fusible',      price: 800,  desc: 'Verrouille un switch pour le niveau' },
+  { id: 'attenuator', emoji: '🐢', name: 'Atténuateur',  price: 600,  desc: 'Vitesse à 75% pour tout le niveau' },
+];
+const _CONSUM_LS = 'elecgame_consumables';
+let _consumables = JSON.parse(localStorage.getItem(_CONSUM_LS) || '{}');
+// { heart: true/false, fuse: true/false, attenuator: true/false }
+
+// Per-run state
+let _runUsedConsumables = new Set();
+let _fuseMode = false;
+let _lockedSwitchEid = null;   // edge id for custom levels
+let _lockedSwitchRef = null;   // sw object ref for classic levels
+let _attenuatorActive = false;
+
+function _saveConsumables() {
+  localStorage.setItem(_CONSUM_LS, JSON.stringify(_consumables));
+  if (!currentUser) return;
+  currentUser.getIdToken().then(token => {
+    fetch(`${FB_USERS}/${currentUser.uid}/consumables.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(_consumables)
+    }).catch(() => {});
+  }).catch(() => {});
+}
+
+function _updateConsumHUD() {
+  const heartBtn = document.getElementById('hud-heart');
+  const fuseBtn  = document.getElementById('hud-fuse');
+  const attnBtn  = document.getElementById('hud-attn');
+  if (heartBtn) heartBtn.style.display = _consumables.heart && survivalRunning ? '' : 'none';
+  if (fuseBtn)  fuseBtn.style.display  = _consumables.fuse && !survivalRunning && !_fuseMode ? '' : 'none';
+  if (attnBtn)  attnBtn.style.display  = _consumables.attenuator && !_attenuatorActive && (campRunning || !survivalRunning) ? '' : 'none';
+}
+
+function _useHeart() {
+  if (!_consumables.heart || !survivalRunning) return;
+  _consumables.heart = false; _saveConsumables();
+  survivalLives = Math.min(survivalLives + 1, 6);
+  updateSurvivalHUD();
+  _runUsedConsumables.add('heart');
+  _updateConsumHUD();
+  const el = document.getElementById('vb-toast');
+  if (el) { el.textContent = '❤️ +1 vie !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+}
+
+function _useFuse() {
+  if (!_consumables.fuse || survivalRunning) return;
+  _fuseMode = true;
+  _updateConsumHUD();
+  const el = document.getElementById('fuse-hint');
+  if (el) el.style.display = '';
+}
+
+function _applyFuseToSwitch(eid, swRef) {
+  _fuseMode = false;
+  _lockedSwitchEid = eid;
+  _lockedSwitchRef = swRef;
+  if (swRef) swRef.open = false;
+  _consumables.fuse = false; _saveConsumables();
+  _runUsedConsumables.add('fuse');
+  _updateConsumHUD();
+  document.getElementById('fuse-hint').style.display = 'none';
+  const el = document.getElementById('vb-toast');
+  if (el) { el.textContent = '🔌 Switch verrouillé !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+}
+
+function _useAttenuator() {
+  if (!_consumables.attenuator || _attenuatorActive || survivalRunning) return;
+  _consumables.attenuator = false; _saveConsumables();
+  _attenuatorActive = true;
+  _runUsedConsumables.add('attenuator');
+  _updateConsumHUD();
+  const el = document.getElementById('vb-toast');
+  if (el) { el.textContent = '🐢 Vitesse -25% !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+}
 
 function _saveCosmetics() {
   localStorage.setItem(_EMOTE_LS, _equippedEmote);
@@ -4350,6 +4512,7 @@ function openShop() {
   if (_shopTab === 'skins')       _renderShopSkins();
   else if (_shopTab === 'emotes') _renderShopEmotes();
   else if (_shopTab === 'backgrounds') _renderShopBgs();
+  else if (_shopTab === 'bonus') _renderShopBonus();
   document.getElementById('shop-overlay').classList.add('open');
 }
 
@@ -4673,6 +4836,41 @@ function _applyBackground() {
     _bgAnimId = requestAnimationFrame(frameAu);
     return;
   }
+}
+
+function _renderShopBonus() {
+  const body = document.getElementById('shop-body');
+  body.innerHTML = CONSUMABLES.map(c => {
+    const owned = !!_consumables[c.id];
+    const canAfford = voltbucks >= c.price;
+    const cls = owned ? 'shop-bg-item owned' : 'shop-bg-item' + (canAfford ? '' : ' broke');
+    const badge = owned ? '<span class="shop-item-badge">EN STOCK</span>' : '';
+    const btnLabel = owned ? '✓ En stock' : canAfford ? `⚡${c.price} VB` : `⚡${c.price} VB`;
+    const btnDisabled = owned || (!canAfford && !owned) ? '' : '';
+    const btnStyle = owned ? 'opacity:0.5;cursor:default' : canAfford ? '' : 'opacity:0.4;cursor:default';
+    return `<div class="${cls}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;min-width:120px">
+      ${badge}
+      <div style="font-size:36px">${c.emoji}</div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;color:#00ffcc">${c.name}</div>
+      <div style="font-family:'Courier New',monospace;font-size:9px;color:#336655;text-align:center;letter-spacing:1px">${c.desc}</div>
+      <button class="shop-consum-buy" data-consum="${c.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid ${owned?'#1a5a3a':canAfford?'#336644':'#2a2a2a'};color:${owned?'#336655':canAfford?'#00ffcc':'#333'};padding:3px 10px;cursor:${owned||!canAfford?'default':'pointer'};${btnStyle}">${btnLabel}</button>
+    </div>`;
+  }).join('');
+
+  body.querySelectorAll('.shop-consum-buy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.consum;
+      const item = CONSUMABLES.find(c => c.id === id);
+      if (!item || _consumables[id]) return;
+      if (voltbucks < item.price) return;
+      if (!confirm(`Acheter "${item.name}" pour ⚡${item.price} VB ?`)) return;
+      voltbucks -= item.price;
+      _consumables[id] = true;
+      _saveConsumables(); _syncVB(); _renderShopBonus();
+      _updateConsumHUD();
+      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+    });
+  });
 }
 
 // Bouton admin +1000 VB (visible uniquement pour Lesups)
@@ -5214,6 +5412,7 @@ function update(dt) {
 
   // Switch state + sound on change
   for (const sw of state.switches) {
+    if (sw === _lockedSwitchRef) { sw.open = false; continue; }
     const wasOpen = sw.open;
     sw.open = sw.initOpen !== !!keys[_ikey(sw.key)];
     if (sw.open !== wasOpen) {
@@ -5222,7 +5421,7 @@ function update(dt) {
     }
   }
 
-  const move = BALL_SPEED * dt;
+  const move = BALL_SPEED * (_attenuatorActive ? 0.75 : 1.0) * dt;
 
   if (state.type === 'single') {
     state.ball += move;
@@ -5334,6 +5533,14 @@ function drawSwitch(sw) {
   ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
   ctx.fillText('[' + _ikey(sw.key) + ']', x, labelY);
   ctx.restore();
+  // Cadenas si switch verrouillé par fusible
+  if (sw === _lockedSwitchRef) {
+    ctx.save();
+    ctx.font = '14px serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffaa00';
+    ctx.shadowBlur = 8; ctx.shadowColor = '#ff8800';
+    ctx.fillText('🔒', x, isTop ? y - 56 : y + 58);
+    ctx.restore();
+  }
 }
 
 function drawBall(x, y) {
@@ -5812,12 +6019,13 @@ function updateCustom(dt) {
   const st = state;
   if (st.won || st.dead) return;
   const { graph, switchMap, resistanceSet, resistanceDrain, microSet, microDurationMap, inductanceSet, inductanceDurationMap, teleporterPairMap, balls, edgesLit } = st;
-  const levelSpeed = BALL_SPEED * (st.ballSpeedMult ?? 1.0);
+  const levelSpeed = BALL_SPEED * (st.ballSpeedMult ?? 1.0) * (_attenuatorActive ? 0.75 : 1.0);
 
   const { nodes, edges } = graph;
 
   // Update switch states
   for (const [eid, sw] of switchMap) {
+    if (eid === _lockedSwitchEid) { sw.open = false; continue; }
     const wasOpen = sw.open;
     sw.open = sw.initOpen !== !!keys[_ikey(sw.key)];
     if (sw.open !== wasOpen) {
@@ -6558,6 +6766,12 @@ function drawCustom() {
       ctx.fillStyle = c.main;
       ctx.shadowBlur = sw.open ? 0 : 6; ctx.shadowColor = c.glow;
       ctx.fillText('[' + _ikey(sw.key) + ']', 0, 44);
+      // Cadenas si verrouillé par fusible
+      if (edge.id === _lockedSwitchEid) {
+        ctx.font = '16px serif'; ctx.fillStyle = '#ffaa00';
+        ctx.shadowBlur = 8; ctx.shadowColor = '#ff8800';
+        ctx.fillText('🔒', 0, 62);
+      }
       ctx.restore();
 
       ctx.restore(); // undo translate+rotate
