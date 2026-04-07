@@ -1907,6 +1907,8 @@ function applyIdxLang() {
   if (ppAchTitle) ppAchTitle.textContent = t_idx('idx.pp_ach_title');
   // Auth UI (pseudo display label)
   if (typeof updateIdxAuthUI === 'function') updateIdxAuthUI();
+  // Special thanks (labels bilingues)
+  renderSpecials();
 }
 
 document.getElementById('lang-toggle').addEventListener('click', () => {
