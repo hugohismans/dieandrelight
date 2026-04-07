@@ -637,6 +637,24 @@ canvas#bg {
 .audio-btn:hover { border-color: #00ffcc; color: #00ffcc; }
 .audio-btn.muted { border-color: #442222; color: #663333; }
 
+/* ── LANG TOGGLE ─────────────────────────────────────────── */
+#lang-toggle {
+  position: fixed;
+  bottom: 12px;
+  left: 14px;
+  z-index: 150;
+  background: #0a1a14;
+  border: 1px solid #00cc99;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 5px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  box-shadow: 0 0 8px #00ffcc22;
+}
+#lang-toggle:hover { border-color: #00ffcc; box-shadow: 0 0 14px #00ffcc44; }
+
 /* ── VERSION BADGE ───────────────────────────────────────── */
 #version-badge {
   position: fixed;
@@ -755,17 +773,17 @@ canvas#bg {
     <div id="keys">
       <div class="key-item">
         <div class="key-box q" id="key-q">Q</div>
-        <div class="key-desc">Interrupteur gauche</div>
+        <div class="key-desc" id="key-desc-q">Interrupteur gauche</div>
       </div>
       <div class="key-sep">+</div>
       <div class="key-item">
         <div class="key-box p" id="key-p">P</div>
-        <div class="key-desc">Interrupteur droit</div>
+        <div class="key-desc" id="key-desc-p">Interrupteur droit</div>
       </div>
       <div class="key-sep">+</div>
       <div class="key-item">
         <div class="key-box space" id="key-space">ESPACE</div>
-        <div class="key-desc">Passer les résistances</div>
+        <div class="key-desc" id="key-desc-space">Passer les résistances</div>
       </div>
     </div>
 
@@ -775,7 +793,7 @@ canvas#bg {
   </div>
 
   <div id="scroll-hint">
-    <span>🏆 HOF &amp; Special Thanks</span>
+    <span id="scroll-hint-text">🏆 HOF &amp; Special Thanks</span>
     <div id="scroll-arrow">▼</div>
   </div>
 </div>
@@ -802,12 +820,15 @@ canvas#bg {
   <!-- Moitié basse : classement hauts-faits -->
   <div class="panel-half">
     <div class="panel-header">
-      <div class="panel-title">🏅 Hauts-faits</div>
+      <div class="panel-title" id="ach-panel-title">🏅 Hauts-faits</div>
     </div>
     <div class="panel-body" id="ach-rank-list"></div>
   </div>
 
 </div>
+
+<!-- Language toggle -->
+<button id="lang-toggle">EN</button>
 
 <!-- Audio controls -->
 <div id="audio-controls">
@@ -845,6 +866,120 @@ canvas#bg {
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script>
+// ── TRANSLATIONS (index) ───────────────────────────────────
+const TRANSLATIONS_IDX = {
+  fr: {
+    'idx.warning': '⚠ Sans connexion, le Hall of Fame n\'est pas accessible.<br><strong>Ton score sera perdu.</strong>',
+    'idx.google_signin': 'Se connecter avec Google',
+    'idx.edit_pseudo': '✎ Modifier le pseudo',
+    'idx.pseudo_placeholder': 'Nouveau pseudo…',
+    'idx.logout': 'Se déconnecter',
+    'idx.subtitle': 'un jeu de circuit électrique',
+    'idx.key_left': 'Interrupteur gauche',
+    'idx.key_right': 'Interrupteur droit',
+    'idx.key_space_desc': 'Passer les résistances',
+    'idx.key_space_label': 'ESPACE',
+    'idx.play': 'Jouer',
+    'idx.editor': 'éditeur de niveaux →',
+    'idx.scroll_hint': '🏆 HOF & Special Thanks',
+    'idx.ach_panel': '🏅 Hauts-faits',
+    'idx.hof_camp_btn': 'Campagne',
+    'idx.hof_surv_btn': 'Survie',
+    'idx.hof_mode_camp': '💀 Cauchemar',
+    'idx.hof_mode_surv': '💀 Survie',
+    'idx.audio_all': 'Couper tout le son',
+    'idx.audio_hum': 'Couper le bruit électrique',
+    'idx.loading': 'Chargement…',
+    'idx.hof_empty': 'Pas encore d\'entrée —<br>sois le premier !',
+    'idx.hof_error': 'Erreur de chargement',
+    'idx.no_data': 'Pas encore de données.',
+    'idx.ach_none': 'Aucun haut-fait débloqué',
+    'idx.hof_no_entry': 'Pas d\'entrée pour ce mode',
+    'idx.pp_hof_title': '🏆 Scores HOF',
+    'idx.pp_ach_title': '🏅 Hauts-faits débloqués',
+    'idx.pp_loading': 'Chargement…',
+    'idx.pp_error': 'Erreur',
+    'idx.levels_short': 'niv.',
+    'idx.no_pseudo': 'Pas encore de pseudo',
+    'idx.pseudo_min': '⚠ Minimum 2 caractères',
+    'idx.pseudo_saving': 'Enregistrement…',
+    'idx.pseudo_saved': '✓ Pseudo enregistré !',
+    'idx.pseudo_error': '✗ Erreur : ',
+    'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
+    'pp.diff.bebe_inv': '🔄 Bébés', 'pp.diff.piquer_inv': '🔄 Piquer', 'pp.diff.cauchemar_inv': '🔄 Cauchemar',
+    'pp.diff.survie': '💀 Survie',
+    'bg.default': '▦ Grille', 'bg.electrons': '⚡ Électrons', 'bg.stars': '✦ Étoiles',
+    'bg.matrix': '⌨ Code', 'bg.aurora': '〜 Aurore', 'bg.void': '○ Vide',
+    'ach.first_death': 'Premier choc', 'ach.centurion': 'Paratonnerre',
+    'ach.bebe_won': 'Apprenti électricien', 'ach.piquer_won': 'Résistance vaincue',
+    'ach.cauchemar_won': 'Survivant', 'ach.bebe_deathless': 'Biberon propre',
+    'ach.piquer_deathless': 'Intouchable', 'ach.cauchemar_deathless': 'Dieu du circuit',
+    'ach.bebe_speed': 'Court-circuit', 'ach.cauchemar_speed': 'Vitesse de la lumière',
+    'ach.mirror_won': "Monde à l'envers", 'ach.cauchemar_mirror': 'Dimension inversée',
+    'ach.cauchemar_mirror_deathless': 'Au-delà du réel', 'ach.survie_5': 'Survivant',
+    'ach.survie_10': 'Résistant', 'ach.survie_20': 'Indestructible',
+    'ach.survie_50': 'Légende vivante', 'ach.survie_deathless': 'Médecin urgentiste',
+    'ach.survie_comeback': 'Dernier souffle',
+  },
+  en: {
+    'idx.warning': '⚠ Without signing in, the Hall of Fame is not accessible.<br><strong>Your score will be lost.</strong>',
+    'idx.google_signin': 'Sign in with Google',
+    'idx.edit_pseudo': '✎ Edit username',
+    'idx.pseudo_placeholder': 'New username…',
+    'idx.logout': 'Sign out',
+    'idx.subtitle': 'an electric circuit game',
+    'idx.key_left': 'Left switch',
+    'idx.key_right': 'Right switch',
+    'idx.key_space_desc': 'Skip resistors',
+    'idx.key_space_label': 'SPACE',
+    'idx.play': 'Play',
+    'idx.editor': 'level editor →',
+    'idx.scroll_hint': '🏆 HOF & Special Thanks',
+    'idx.ach_panel': '🏅 Achievements',
+    'idx.hof_camp_btn': 'Campaign',
+    'idx.hof_surv_btn': 'Survival',
+    'idx.hof_mode_camp': '💀 Nightmare',
+    'idx.hof_mode_surv': '💀 Survival',
+    'idx.audio_all': 'Mute all sound',
+    'idx.audio_hum': 'Mute electrical noise',
+    'idx.loading': 'Loading…',
+    'idx.hof_empty': 'No entry yet —<br>be the first!',
+    'idx.hof_error': 'Loading error',
+    'idx.no_data': 'No data yet.',
+    'idx.ach_none': 'No achievements unlocked',
+    'idx.hof_no_entry': 'No entry for this mode',
+    'idx.pp_hof_title': '🏆 HOF Scores',
+    'idx.pp_ach_title': '🏅 Unlocked achievements',
+    'idx.pp_loading': 'Loading…',
+    'idx.pp_error': 'Error',
+    'idx.levels_short': 'lvl.',
+    'idx.no_pseudo': 'No username yet',
+    'idx.pseudo_min': '⚠ At least 2 characters',
+    'idx.pseudo_saving': 'Saving…',
+    'idx.pseudo_saved': '✓ Username saved!',
+    'idx.pseudo_error': '✗ Error: ',
+    'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
+    'pp.diff.bebe_inv': '🔄 Babies', 'pp.diff.piquer_inv': '🔄 Getting Tricky', 'pp.diff.cauchemar_inv': '🔄 Nightmare',
+    'pp.diff.survie': '💀 Survival',
+    'bg.default': '▦ Grid', 'bg.electrons': '⚡ Electrons', 'bg.stars': '✦ Stars',
+    'bg.matrix': '⌨ Code', 'bg.aurora': '〜 Aurora', 'bg.void': '○ Void',
+    'ach.first_death': 'First Shock', 'ach.centurion': 'Lightning Rod',
+    'ach.bebe_won': 'Apprentice Electrician', 'ach.piquer_won': 'Resistance Overcome',
+    'ach.cauchemar_won': 'Survivor', 'ach.bebe_deathless': 'Clean Bottle',
+    'ach.piquer_deathless': 'Untouchable', 'ach.cauchemar_deathless': 'Circuit God',
+    'ach.bebe_speed': 'Short Circuit', 'ach.cauchemar_speed': 'Speed of Light',
+    'ach.mirror_won': 'Upside Down', 'ach.cauchemar_mirror': 'Inverted Dimension',
+    'ach.cauchemar_mirror_deathless': 'Beyond Reality', 'ach.survie_5': 'Survivor',
+    'ach.survie_10': 'Resilient', 'ach.survie_20': 'Indestructible',
+    'ach.survie_50': 'Living Legend', 'ach.survie_deathless': 'Emergency Doctor',
+    'ach.survie_comeback': 'Last Breath',
+  }
+};
+let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
+function t_idx(key) {
+  return (TRANSLATIONS_IDX[currentLang] || TRANSLATIONS_IDX.fr)[key] || TRANSLATIONS_IDX.fr[key] || key;
+}
+
 const _fbApp = firebase.initializeApp({
   apiKey: "AIzaSyANpHcNJeMKN46TZmPUE4Omvw0GNSMD8uI",
   authDomain: "dieandretry-af391.firebaseapp.com",
@@ -884,7 +1019,7 @@ function updateIdxAuthUI() {
     warning.style.display   = 'none';
     googleBtn.style.display = 'none';
     loggedIn.style.display  = 'flex';
-    pseudoEl.textContent    = _idxPseudo ? ('👤 ' + _idxPseudo) : '👤 Pas encore de pseudo';
+    pseudoEl.textContent    = _idxPseudo ? ('👤 ' + _idxPseudo) : ('👤 ' + t_idx('idx.no_pseudo'));
     pseudoIn.value          = '';
     document.getElementById('pseudo-edit-row').style.display = 'none';
     statusEl.textContent    = '';
@@ -906,8 +1041,8 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
   const val = document.getElementById('idx-pseudo-input').value.trim();
   const statusEl = document.getElementById('idx-pseudo-status');
   const pseudoEl = document.getElementById('auth-pseudo-display');
-  if (val.length < 2) { statusEl.style.color = '#ff4444'; statusEl.textContent = '⚠ Minimum 2 caractères'; return; }
-  statusEl.style.color = '#446655'; statusEl.textContent = 'Enregistrement…';
+  if (val.length < 2) { statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_min'); return; }
+  statusEl.style.color = '#446655'; statusEl.textContent = t_idx('idx.pseudo_saving');
   try {
     const token = await _idxUser.getIdToken();
     const res = await fetch(`${FB_USERS_URL}/${_idxUser.uid}.json?auth=${token}`, {
@@ -919,9 +1054,9 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
     pseudoEl.textContent = '👤 ' + val;
     document.getElementById('pseudo-edit-row').style.display = 'none';
     document.getElementById('idx-pseudo-input').value = '';
-    statusEl.style.color = '#00ffcc'; statusEl.textContent = '✓ Pseudo enregistré !';
+    statusEl.style.color = '#00ffcc'; statusEl.textContent = t_idx('idx.pseudo_saved');
     setTimeout(() => { statusEl.textContent = ''; }, 2500);
-  } catch(e) { statusEl.style.color = '#ff4444'; statusEl.textContent = '✗ Erreur : ' + e.message; }
+  } catch(e) { statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_error') + e.message; }
 };
 
 document.getElementById('idx-google-btn').onclick = async () => {
@@ -1343,7 +1478,7 @@ function switchHofMode(mode) {
   document.getElementById('hof-mode-camp').classList.toggle('active', mode === 'camp');
   document.getElementById('hof-mode-surv').classList.toggle('active', mode === 'survie');
   document.getElementById('hof-mode-label').textContent =
-    mode === 'survie' ? '💀 Survie' : '💀 Cauchemar';
+    mode === 'survie' ? t_idx('idx.hof_mode_surv') : t_idx('idx.hof_mode_camp');
   buildHofTabs();
   renderHOF();
 }
@@ -1386,7 +1521,7 @@ function switchHofVersion(v) {
 
 async function renderHOF() {
   const el = document.getElementById('ihof-list');
-  el.innerHTML = '<div class="panel-empty">Chargement…</div>';
+  el.innerHTML = `<div class="panel-empty">${t_idx('idx.loading')}</div>`;
   const isSurvival = hofCurrentMode === 'survie';
   try {
     const diff = isSurvival ? 'survie' : HOF_FIXED_DIFF;
@@ -1404,7 +1539,7 @@ async function renderHOF() {
           .slice(0, 20)
       : [];
     if (!entries.length) {
-      el.innerHTML = '<div class="panel-empty">Pas encore d\'entrée —<br>sois le premier !</div>';
+      el.innerHTML = `<div class="panel-empty">${t_idx('idx.hof_empty')}</div>`;
       return;
     }
     const medals = ['🥇','🥈','🥉'];
@@ -1413,12 +1548,12 @@ async function renderHOF() {
     if (isSurvival) {
       el.innerHTML = entries.map((e, i) => {
         const bonuses = Array.isArray(e.bonuses) && e.bonuses.length
-          ? `<span title="Bonus utilisés" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmoji[b]||'').join('')}</span>`
+          ? `<span title="${currentLang === 'en' ? 'Bonuses used' : 'Bonus utilisés'}" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmoji[b]||'').join('')}</span>`
           : '';
         return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
           <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
-          <span class="ihof-time" style="color:#ff8899">${e.score} niv.${bonuses}</span>
+          <span class="ihof-time" style="color:#ff8899">${e.score} ${t_idx('idx.levels_short')}${bonuses}</span>
         </div>`;
       }).join('');
     } else {
@@ -1432,7 +1567,7 @@ async function renderHOF() {
       ).join('');
     }
   } catch {
-    el.innerHTML = '<div class="panel-empty">Erreur de chargement</div>';
+    el.innerHTML = `<div class="panel-empty">${t_idx('idx.hof_error')}</div>`;
   }
 }
 
@@ -1441,17 +1576,17 @@ const ACH_TOTAL = 19; // nb total de hauts-faits dans le jeu
 
 async function renderAchRanks() {
   const el = document.getElementById('ach-rank-list');
-  el.innerHTML = '<div class="panel-empty">Chargement…</div>';
+  el.innerHTML = `<div class="panel-empty">${t_idx('idx.loading')}</div>`;
   try {
     const res = await fetch(`${FB_ACH_RANKS}.json`);
     const data = res.ok ? await res.json() : null;
-    if (!data) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    if (!data) { el.innerHTML = `<div class="panel-empty">${t_idx('idx.no_data')}</div>`; return; }
     const entries = Object.entries(data)
       .map(([uid, e]) => ({ ...e, uid }))
       .filter(e => e.pseudo && e.count > 0)
       .sort((a, b) => b.count - a.count || a.ts - b.ts)
       .slice(0, 15);
-    if (!entries.length) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    if (!entries.length) { el.innerHTML = `<div class="panel-empty">${t_idx('idx.no_data')}</div>`; return; }
     const medals = ['🥇','🥈','🥉'];
     const cls    = ['ar-1st','ar-2nd','ar-3rd'];
     el.innerHTML = entries.map((e, i) => {
@@ -1470,23 +1605,23 @@ async function renderAchRanks() {
       </div>`;
     }).join('');
   } catch {
-    el.innerHTML = '<div class="panel-empty">Erreur de chargement.</div>';
+    el.innerHTML = `<div class="panel-empty">${t_idx('idx.hof_error')}</div>`;
   }
 }
 
 async function renderVBRanks() {
   const el = document.getElementById('vb-rank-list');
-  el.innerHTML = '<div class="panel-empty">Chargement…</div>';
+  el.innerHTML = `<div class="panel-empty">${t_idx('idx.loading')}</div>`;
   try {
     const res = await fetch(`${FB_ACH_RANKS}.json`);
     const data = res.ok ? await res.json() : null;
-    if (!data) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    if (!data) { el.innerHTML = `<div class="panel-empty">${t_idx('idx.no_data')}</div>`; return; }
     const entries = Object.entries(data)
       .map(([uid, e]) => ({ ...e, uid }))
       .filter(e => e.pseudo && typeof e.vb === 'number' && e.vb > 0)
       .sort((a, b) => b.vb - a.vb || a.ts - b.ts)
       .slice(0, 15);
-    if (!entries.length) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
+    if (!entries.length) { el.innerHTML = `<div class="panel-empty">${t_idx('idx.no_data')}</div>`; return; }
     const medals = ['🥇','🥈','🥉'];
     const cls    = ['ihof-1st','ihof-2nd','ihof-3rd'];
     el.innerHTML = entries.map((e, i) =>
@@ -1497,9 +1632,78 @@ async function renderVBRanks() {
       </div>`
     ).join('');
   } catch {
-    el.innerHTML = '<div class="panel-empty">Erreur de chargement.</div>';
+    el.innerHTML = `<div class="panel-empty">${t_idx('idx.hof_error')}</div>`;
   }
 }
+
+// ── LANG APPLY ─────────────────────────────────────────────
+function applyIdxLang() {
+  document.documentElement.lang = currentLang;
+  const langBtn = document.getElementById('lang-toggle');
+  if (langBtn) langBtn.innerHTML =
+    `<span style="color:${currentLang==='fr'?'#00ffcc':'#2a5a40'}">FR</span><span style="color:#1a4535;margin:0 4px">·</span><span style="color:${currentLang==='en'?'#00ffcc':'#2a5a40'}">EN</span>`;
+  // Auth warning
+  const warnEl = document.getElementById('auth-warning');
+  if (warnEl) warnEl.innerHTML = t_idx('idx.warning');
+  // Google sign in button
+  const gBtn = document.getElementById('idx-google-btn');
+  if (gBtn) { const svg = gBtn.querySelector('svg'); gBtn.innerHTML = ''; if (svg) gBtn.appendChild(svg); gBtn.append(' ' + t_idx('idx.google_signin')); }
+  // Edit pseudo / logout buttons
+  const epBtn = document.getElementById('idx-pseudo-edit-btn');
+  if (epBtn) epBtn.textContent = t_idx('idx.edit_pseudo');
+  const pIn = document.getElementById('idx-pseudo-input');
+  if (pIn) pIn.placeholder = t_idx('idx.pseudo_placeholder');
+  const lgBtn = document.getElementById('auth-logout-btn');
+  if (lgBtn) lgBtn.textContent = t_idx('idx.logout');
+  // Subtitle
+  const subEl = document.getElementById('subtitle');
+  if (subEl) subEl.textContent = t_idx('idx.subtitle');
+  // Key descriptions
+  const kq = document.getElementById('key-desc-q');  if (kq) kq.textContent = t_idx('idx.key_left');
+  const kp = document.getElementById('key-desc-p');  if (kp) kp.textContent = t_idx('idx.key_right');
+  const ks = document.getElementById('key-desc-space'); if (ks) ks.textContent = t_idx('idx.key_space_desc');
+  const ksl = document.getElementById('key-space');  if (ksl) ksl.textContent = t_idx('idx.key_space_label');
+  // Play button & editor link
+  const pbEl = document.getElementById('play-btn');
+  if (pbEl) pbEl.innerHTML = '▶ &nbsp;' + t_idx('idx.play');
+  const edEl = document.getElementById('editor-link');
+  if (edEl) edEl.textContent = t_idx('idx.editor');
+  // Scroll hint
+  const shEl = document.getElementById('scroll-hint-text');
+  if (shEl) shEl.textContent = t_idx('idx.scroll_hint');
+  // Panel titles
+  const achTitle = document.getElementById('ach-panel-title');
+  if (achTitle) achTitle.textContent = t_idx('idx.ach_panel');
+  // HOF mode buttons
+  const hofCamp = document.getElementById('hof-mode-camp');
+  if (hofCamp) hofCamp.textContent = t_idx('idx.hof_camp_btn');
+  const hofSurv = document.getElementById('hof-mode-surv');
+  if (hofSurv) hofSurv.textContent = t_idx('idx.hof_surv_btn');
+  // HOF mode label
+  const hofLabel = document.getElementById('hof-mode-label');
+  if (hofLabel) hofLabel.textContent = hofCurrentMode === 'survie' ? t_idx('idx.hof_mode_surv') : t_idx('idx.hof_mode_camp');
+  // Audio titles
+  const btnAll = document.getElementById('btn-mute-all');
+  if (btnAll) btnAll.title = t_idx('idx.audio_all');
+  const btnHum = document.getElementById('btn-mute-hum');
+  if (btnHum) btnHum.title = t_idx('idx.audio_hum');
+  // PP overlay titles
+  const ppHofTitle = document.getElementById('pp-hof-title');
+  if (ppHofTitle) ppHofTitle.textContent = t_idx('idx.pp_hof_title');
+  const ppAchTitle = document.getElementById('pp-ach-title');
+  if (ppAchTitle) ppAchTitle.textContent = t_idx('idx.pp_ach_title');
+  // Auth UI (pseudo display label)
+  if (typeof updateIdxAuthUI === 'function') updateIdxAuthUI();
+}
+
+document.getElementById('lang-toggle').addEventListener('click', () => {
+  currentLang = currentLang === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('elecgame_lang', currentLang);
+  applyIdxLang();
+  renderHOF(); renderAchRanks(); renderVBRanks();
+});
+
+applyIdxLang();
 
 renderSpecials();
 buildHofTabs();
@@ -1519,25 +1723,21 @@ const FB_ACH_URL      = 'https://dieandretry-af391-default-rtdb.europe-west1.fir
 const FB_VB_RANKS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
 const HOF_VER         = 'v0_1_0';
 const PP_DIFFS = [
-  { id: 'bebe',          label: '🍼 Bébés' },
-  { id: 'piquer',        label: '⚡ Piquer' },
-  { id: 'cauchemar',     label: '💀 Cauchemar' },
-  { id: 'bebe_inv',      label: '🔄 Bébés' },
-  { id: 'piquer_inv',    label: '🔄 Piquer' },
-  { id: 'cauchemar_inv', label: '🔄 Cauchemar' },
-  { id: 'survie',        label: '💀 Survie' },
+  { id: 'bebe' }, { id: 'piquer' }, { id: 'cauchemar' },
+  { id: 'bebe_inv' }, { id: 'piquer_inv' }, { id: 'cauchemar_inv' },
+  { id: 'survie' },
 ];
 const ACH_NAMES = [
-  {id:'first_death',emoji:'💀',name:'Premier choc'},{id:'centurion',emoji:'⚡',name:'Paratonnerre'},
-  {id:'bebe_won',emoji:'🍼',name:'Apprenti électricien'},{id:'piquer_won',emoji:'⚡',name:'Résistance vaincue'},
-  {id:'cauchemar_won',emoji:'💀',name:'Survivant'},{id:'bebe_deathless',emoji:'🕊️',name:'Biberon propre'},
-  {id:'piquer_deathless',emoji:'🛡️',name:'Intouchable'},{id:'cauchemar_deathless',emoji:'👑',name:'Dieu du circuit'},
-  {id:'bebe_speed',emoji:'⏱️',name:'Court-circuit'},{id:'cauchemar_speed',emoji:'🏎️',name:'Vitesse de la lumière'},
-  {id:'mirror_won',emoji:'🔄',name:"Monde à l'envers"},{id:'cauchemar_mirror',emoji:'🌀',name:'Dimension inversée'},
-  {id:'cauchemar_mirror_deathless',emoji:'🌟',name:'Au-delà du réel'},{id:'survie_5',emoji:'💪',name:'Survivant'},
-  {id:'survie_10',emoji:'🩸',name:'Résistant'},{id:'survie_20',emoji:'💀',name:'Indestructible'},
-  {id:'survie_50',emoji:'👑',name:'Légende vivante'},{id:'survie_deathless',emoji:'🩺',name:'Médecin urgentiste'},
-  {id:'survie_comeback',emoji:'🔋',name:'Dernier souffle'},
+  {id:'first_death',emoji:'💀'},{id:'centurion',emoji:'⚡'},
+  {id:'bebe_won',emoji:'🍼'},{id:'piquer_won',emoji:'⚡'},
+  {id:'cauchemar_won',emoji:'💀'},{id:'bebe_deathless',emoji:'🕊️'},
+  {id:'piquer_deathless',emoji:'🛡️'},{id:'cauchemar_deathless',emoji:'👑'},
+  {id:'bebe_speed',emoji:'⏱️'},{id:'cauchemar_speed',emoji:'🏎️'},
+  {id:'mirror_won',emoji:'🔄'},{id:'cauchemar_mirror',emoji:'🌀'},
+  {id:'cauchemar_mirror_deathless',emoji:'🌟'},{id:'survie_5',emoji:'💪'},
+  {id:'survie_10',emoji:'🩸'},{id:'survie_20',emoji:'💀'},
+  {id:'survie_50',emoji:'👑'},{id:'survie_deathless',emoji:'🩺'},
+  {id:'survie_comeback',emoji:'🔋'},
 ];
 let _ppUid = null, _ppCache = {};
 
@@ -1554,15 +1754,15 @@ async function openPlayerProfile(uid, pseudo) {
   document.getElementById('pp-bg-badge').textContent = '';
   document.getElementById('pp-vb').textContent = '';
   _ppDrawBall(document.getElementById('pp-ball'), 'default');
-  document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
-  document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
+  document.getElementById('pp-hof-content').innerHTML = `<span style="color:#224433;font-size:11px">${t_idx('idx.pp_loading')}</span>`;
+  document.getElementById('pp-ach-list').innerHTML = `<span class="pp-ach-none">${t_idx('idx.pp_loading')}</span>`;
   document.getElementById('pp-overlay').classList.add('open');
   const tabsEl = document.getElementById('pp-diff-tabs');
   tabsEl.innerHTML = '';
   PP_DIFFS.forEach((d, i) => {
     const btn = document.createElement('button');
     btn.className = 'pp-diff-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = d.label;
+    btn.textContent = t_idx('pp.diff.' + d.id);
     btn.onclick = () => { tabsEl.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); _ppShowDiff(d.id); };
     tabsEl.appendChild(btn);
   });
@@ -1578,7 +1778,7 @@ function fmtTimeMs(ms) {
 async function _ppShowDiff(diff) {
   if (_ppUid !== (document.getElementById('pp-pseudo-title').dataset.uid || _ppUid)) return;
   const el = document.getElementById('pp-hof-content');
-  el.innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
+  el.innerHTML = `<span style="color:#224433;font-size:11px">${t_idx('idx.pp_loading')}</span>`;
   try {
     if (!_ppCache[diff]) {
       const res = await fetch(`${FB_URL_INDEX}/${HOF_VER}/${diff}.json`);
@@ -1589,14 +1789,14 @@ async function _ppShowDiff(diff) {
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
     const rank = sorted.findIndex(e => e.uid === _ppUid);
-    if (rank === -1) { el.innerHTML = '<span class="pp-hof-none">Pas d\'entrée pour ce mode</span>'; return; }
+    if (rank === -1) { el.innerHTML = `<span class="pp-hof-none">${t_idx('idx.hof_no_entry')}</span>`; return; }
     const e = sorted[rank];
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = `<div class="pp-hof-entry">
       <span class="pp-hof-rank">${medals[rank] || '#' + (rank + 1)}</span>
-      ${isSurvival ? `<span class="pp-hof-time">${e.score} niveau(x)</span>` : `<span class="pp-hof-time">${fmtTimeMs(e.time)}</span><span class="pp-hof-deaths">${e.deaths} 💀</span>`}
+      ${isSurvival ? `<span class="pp-hof-time">${e.score} ${t_idx('idx.levels_short')}</span>` : `<span class="pp-hof-time">${fmtTimeMs(e.time)}</span><span class="pp-hof-deaths">${e.deaths} 💀</span>`}
     </div>`;
-  } catch { el.innerHTML = '<span class="pp-hof-none">Erreur</span>'; }
+  } catch { el.innerHTML = `<span class="pp-hof-none">${t_idx('idx.pp_error')}</span>`; }
 }
 
 function _d64(s) { const p=(4-s.length%4)%4; return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(s.length+p,'=')))); }
@@ -1608,7 +1808,7 @@ const _PP_SKIN_COLORS = {
   braise:  ['#ff8844','#cc0000'], spectre:['#aaaaee','#222244'],
   neant:   ['#996699','#000000'], arc:    null,
 };
-const _PP_BG_LABELS = { default:'▦ Grille', electrons:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
+function _ppBgLabel(bgId) { return t_idx('bg.' + bgId) || bgId; }
 
 function _ppDrawBall(canvas, skinId) {
   if (!canvas) return;
@@ -1649,7 +1849,7 @@ async function _ppLoadAch(uid) {
     if (emoteEl) emoteEl.textContent = _PP_EMOTES[emoteId] || '🐥';
     _ppDrawBall(document.getElementById('pp-ball'), skinId);
     const bgEl = document.getElementById('pp-bg-badge');
-    if (bgEl) { const t = _PP_BG_LABELS[bgId] || ''; bgEl.textContent = t; bgEl.style.display = t ? '' : 'none'; }
+    if (bgEl) { const lbl = _ppBgLabel(bgId); bgEl.textContent = lbl; bgEl.style.display = lbl && lbl !== bgId ? '' : 'none'; }
     const vbEl = document.getElementById('pp-vb');
     let vbVal = typeof data?.vb === 'number' ? data.vb : null;
     if (vbVal === null) { try { const r = await fetch(`${FB_VB_RANKS_URL}/${uid}.json`); if (r.ok) { const d = await r.json(); if (typeof d?.vb === 'number') vbVal = d.vb; } } catch {} }
@@ -1664,10 +1864,10 @@ async function _ppLoadAch(uid) {
         if (raw && typeof raw === 'object') ids = Object.keys(raw).map(k => _d64(k));
       }
     }
-    if (!ids || !ids.length) { el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>'; return; }
-    el.innerHTML = ids.map(id => { const a = ACH_NAMES.find(x => x.id === id); return a ? `<div class="pp-ach-item">${a.emoji} ${a.name}</div>` : ''; }).filter(Boolean).join('');
-    if (!el.innerHTML) el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
-  } catch { el.innerHTML = '<span class="pp-ach-none">Erreur</span>'; }
+    if (!ids || !ids.length) { el.innerHTML = `<span class="pp-ach-none">${t_idx('idx.ach_none')}</span>`; return; }
+    el.innerHTML = ids.map(id => { const a = ACH_NAMES.find(x => x.id === id); return a ? `<div class="pp-ach-item">${a.emoji} ${t_idx('ach.' + a.id)}</div>` : ''; }).filter(Boolean).join('');
+    if (!el.innerHTML) el.innerHTML = `<span class="pp-ach-none">${t_idx('idx.ach_none')}</span>`;
+  } catch { el.innerHTML = `<span class="pp-ach-none">${t_idx('idx.pp_error')}</span>`; }
 }
 </script>
 </body>

@@ -1387,7 +1387,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #audio-controls {
     position: fixed;
     top: 14px;
-    right: 54px;
+    right: 14px;
     z-index: 150;
     display: flex;
     gap: 4px;
@@ -1410,19 +1410,19 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #lang-toggle {
     position: fixed;
     top: 14px;
-    right: 14px;
+    right: 90px;
     z-index: 150;
     background: #0a1a14;
-    border: 1px solid #1a5a3a;
-    color: #336655;
+    border: 1px solid #00cc99;
     font-family: 'Courier New', monospace;
     font-size: 11px;
     letter-spacing: 2px;
-    padding: 3px 8px;
+    padding: 5px 11px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: border-color 0.15s;
+    box-shadow: 0 0 8px #00ffcc22;
   }
-  #lang-toggle:hover { border-color: #00ffcc; color: #00ffcc; }
+  #lang-toggle:hover { border-color: #00ffcc; box-shadow: 0 0 14px #00ffcc44; }
 
   /* ── MICRO NUMPAD ────────────────────────────────────────── */
   #micro-numpad {
@@ -1573,10 +1573,10 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <p id="auth-desc">Connecte-toi pour soumettre ton score.<br>Seul un pseudo de ton choix sera visible — jamais ton nom réel.</p>
     <button class="auth-google-btn" id="auth-google-btn">
       <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Continuer avec Google
+      <span data-i18n="auth.google">Continuer avec Google</span>
     </button>
     <p class="guest-note" id="auth-guest-note">ou</p>
-    <button class="auth-skip-btn" id="auth-guest-btn">Jouer en mode invité (HOF désactivé)</button>
+    <button class="auth-skip-btn" id="auth-guest-btn" data-i18n="auth.guest">Jouer en mode invité (HOF désactivé)</button>
     <div id="auth-status"></div>
   </div>
 </div>
@@ -1649,8 +1649,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <!-- Survival Game Over -->
 <div id="survival-gameover">
   <div id="sg-box">
-    <h2>💀 SURVIE TERMINÉE</h2>
-    <div id="sg-result">Tu as survécu à <span id="sg-score">0</span> niveau(x)</div>
+    <h2 id="sg-title">💀 SURVIE TERMINÉE</h2>
+    <div id="sg-result"><span id="sg-score">0</span></div>
     <input id="sg-pseudo" type="text" maxlength="24" placeholder="Ton pseudo…" autocomplete="off">
     <div id="sg-status"></div>
     <div id="sg-btns">
@@ -1984,6 +1984,229 @@ const TRANSLATIONS = {
     'micro.prompt': '▼  tape le code  ▼',
     'space.active': 'ESPACE  █',
     'space.inactive': 'ESPACE  ░',
+    // Auth
+    'auth.hof_title': '🏆 Hall of Fame',
+    'auth.hof_desc': 'Connecte-toi pour soumettre ton score.<br>Seul un pseudo de ton choix sera visible — jamais ton nom réel.',
+    'auth.google': 'Continuer avec Google',
+    'auth.guest': 'Jouer en mode invité (HOF désactivé)',
+    'auth.pseudo_title': '👤 Choisis ton pseudo',
+    'auth.pseudo_desc': 'Ce pseudo sera visible dans le Hall of Fame.\nTon vrai nom ne sera jamais utilisé ni affiché.',
+    'auth.pseudo_placeholder': 'Ton pseudo (2–20 caractères)',
+    'auth.pseudo_min': '⚠ Minimum 2 caractères',
+    'auth.pseudo_saving': 'Enregistrement…',
+    'auth.pseudo_error': '✗ Erreur — réessaie',
+    'auth.signin_error': '✗ Erreur de connexion',
+    'auth.signout_confirm': 'Se déconnecter ?',
+    'auth.signin_btn': '👤 Connexion',
+    'auth.no_pseudo': '(sans pseudo)',
+    'auth.guest_label': 'Mode invité',
+    // Campaign select
+    'camp.select.title': '⚡ Choisir une campagne',
+    'camp.survival.name': 'Mode Survie',
+    'camp.survival.desc': '3 vies — niveaux Cauchemar aléatoires — infini',
+    'camp.mirror.label': 'Mode miroir',
+    'camp.mirror.desc': 'Inverse les touches de contrôle — Q pilote les interrupteurs P, et vice-versa.',
+    // Campaign names
+    'camp.bebe.name': 'Pour les Bébés',
+    'camp.piquer.name': 'Ça commence à piquer',
+    'camp.cauchemar.name': 'Cauchemar',
+    // GG
+    'gg.text': '🎉 FÉLICITATIONS ! 🎉',
+    // Achievements
+    'ach.header': '🏅 HAUTS-FAITS',
+    'ach.toast.header': 'HAUT-FAIT DÉBLOQUÉ',
+    'ach.progress': '{done} / {total} débloqué(s)',
+    'ach.none': 'Aucun haut-fait débloqué',
+    'ach.first_death.name': 'Premier choc',
+    'ach.first_death.desc': 'Mourir pour la première fois',
+    'ach.centurion.name': 'Paratonnerre',
+    'ach.centurion.desc': 'Cumuler 100 morts au total',
+    'ach.bebe_won.name': 'Apprenti électricien',
+    'ach.bebe_won.desc': 'Terminer la campagne "Pour les Bébés"',
+    'ach.piquer_won.name': 'Résistance vaincue',
+    'ach.piquer_won.desc': 'Terminer la campagne "Ça commence à piquer"',
+    'ach.cauchemar_won.name': 'Survivant',
+    'ach.cauchemar_won.desc': 'Terminer la campagne "Cauchemar"',
+    'ach.bebe_deathless.name': 'Biberon propre',
+    'ach.bebe_deathless.desc': 'Terminer "Pour les Bébés" sans mourir',
+    'ach.piquer_deathless.name': 'Intouchable',
+    'ach.piquer_deathless.desc': 'Terminer "Piquer" sans mourir',
+    'ach.cauchemar_deathless.name': 'Dieu du circuit',
+    'ach.cauchemar_deathless.desc': 'Terminer "Cauchemar" sans mourir',
+    'ach.bebe_speed.name': 'Court-circuit',
+    'ach.bebe_speed.desc': 'Terminer "Bébés" en moins de 3 minutes',
+    'ach.cauchemar_speed.name': 'Vitesse de la lumière',
+    'ach.cauchemar_speed.desc': 'Terminer "Cauchemar" en moins de 15 minutes',
+    'ach.mirror_won.name': 'Monde à l\'envers',
+    'ach.mirror_won.desc': 'Terminer une campagne en mode miroir',
+    'ach.cauchemar_mirror.name': 'Dimension inversée',
+    'ach.cauchemar_mirror.desc': 'Terminer "Cauchemar" en mode miroir',
+    'ach.cauchemar_mirror_deathless.name': 'Au-delà du réel',
+    'ach.cauchemar_mirror_deathless.desc': 'Terminer "Cauchemar" en mode miroir sans mourir',
+    'ach.survie_5.name': 'Survivant',
+    'ach.survie_5.desc': 'Survivre à 5 niveaux en mode survie',
+    'ach.survie_10.name': 'Résistant',
+    'ach.survie_10.desc': 'Survivre à 10 niveaux en mode survie',
+    'ach.survie_20.name': 'Indestructible',
+    'ach.survie_20.desc': 'Survivre à 20 niveaux en mode survie',
+    'ach.survie_50.name': 'Légende vivante',
+    'ach.survie_50.desc': 'Survivre à 50 niveaux en mode survie',
+    'ach.survie_deathless.name': 'Médecin urgentiste',
+    'ach.survie_deathless.desc': 'Terminer 3 niveaux de survie sans mourir une seule fois',
+    'ach.survie_comeback.name': 'Dernier souffle',
+    'ach.survie_comeback.desc': 'Gagner un niveau avec une seule vie restante',
+    // Shop
+    'shop.title': '⚡ BOUTIQUE VOLTBUCKS',
+    'shop.tab.skins': '🔵 Boule',
+    'shop.tab.emotes': '😀 Emote',
+    'shop.tab.backgrounds': '🌌 Fond',
+    'shop.tab.bonus': '⚗️ Bonus',
+    'shop.free': 'Gratuit',
+    'shop.equipped': 'ÉQUIPÉ',
+    'shop.owned': 'POSSÉDÉ',
+    'shop.in_stock': 'EN STOCK',
+    'shop.in_stock_btn': '✓ En stock',
+    'shop.preview': 'Aperçu',
+    'shop.login_required': 'Connecte-toi pour effectuer des achats.',
+    'shop.buy_confirm': 'Acheter "{name}" pour ⚡{price} VB ?',
+    // Skin names
+    'skin.default.name': 'Électron',
+    'skin.plasma.name': 'Plasma',
+    'skin.soleil.name': 'Soleil',
+    'skin.venin.name': 'Venin',
+    'skin.braise.name': 'Braise',
+    'skin.spectre.name': 'Spectre',
+    'skin.neant.name': 'Néant',
+    'skin.arc.name': 'Arc-en-ciel',
+    // Emote names
+    'emote.none.name': 'Poussin',
+    'emote.bolt.name': 'Électrique',
+    'emote.skull.name': 'Mortel',
+    'emote.crown.name': 'Royauté',
+    'emote.ghost.name': 'Fantôme',
+    'emote.fire.name': 'En feu',
+    'emote.robot.name': 'Robot',
+    'emote.alien.name': 'Alien',
+    'emote.diamond.name': 'Diamant',
+    'emote.devil.name': 'Diable',
+    'emote.comet.name': 'Comète',
+    'emote.godmode.name': 'Transcendance',
+    // Background names
+    'bg.default.name': 'Grille',
+    'bg.electrons.name': 'Électrons',
+    'bg.stars.name': 'Étoiles filantes',
+    'bg.matrix.name': 'Pluie de code',
+    'bg.aurora.name': 'Aurore boréale',
+    'bg.void.name': 'Vide cosmique',
+    // bg labels (profile badge)
+    'bg.default.label': '▦ Grille',
+    'bg.electrons.label': '⚡ Électrons',
+    'bg.stars.label': '✦ Étoiles',
+    'bg.matrix.label': '⌨ Code',
+    'bg.aurora.label': '〜 Aurore',
+    'bg.void.label': '○ Vide',
+    // Consumable names/descs
+    'consum.heart.name': 'Cœur',
+    'consum.heart.desc': '+1 vie en mode survie',
+    'consum.fuse.name': 'Fusible',
+    'consum.fuse.desc': 'Verrouille un switch pour le niveau',
+    'consum.attenuator.name': 'Atténuateur',
+    'consum.attenuator.desc': 'Vitesse à 75% pour tout le niveau',
+    // Consumable use confirms
+    'consum.heart.confirm': '❤️ Utiliser le Cœur pour gagner +1 vie ?',
+    'consum.fuse.confirm': '🔌 Utiliser le Fusible ? Clique ensuite sur un switch pour le verrouiller fermé.',
+    'consum.attenuator.confirm': '🐢 Utiliser l\'Atténuateur ? La vitesse passe à 75% pour tout le niveau.',
+    'consum.fuse.hint': '🔌 CLIQUE SUR UN SWITCH POUR LE VERROUILLER',
+    'consum.fuse.toast': '🔌 Switch verrouillé !',
+    'consum.heart.toast': '❤️ +1 vie !',
+    'consum.attenuator.toast': '🐢 Vitesse -25% !',
+    // HUD consumable titles
+    'consum.heart.title': 'Cœur — +1 vie',
+    'consum.fuse.title': 'Fusible — verrouille un switch',
+    'consum.attenuator.title': 'Atténuateur — vitesse 75%',
+    // Survival
+    'surv.gameover': '💀 SURVIE TERMINÉE',
+    'surv.result': 'Tu as survécu à {score} niveau(x)',
+    'surv.pseudo_placeholder': 'Ton pseudo…',
+    'surv.hof_unavailable': '🔒 <strong style="color:#ff4422">HOF non disponible en mode invité.</strong><br>Connecte-toi pour enregistrer ton score.',
+    'surv.signin_google': 'Se connecter avec Google',
+    'surv.checking': 'Vérification…',
+    'surv.record_low': 'Ton record reste {prev} niveau(x) — score actuel insuffisant.',
+    'surv.new_record': '▲ Nouveau record ! (ancien : {prev})',
+    'surv.update_hof': 'METTRE À JOUR →',
+    'surv.enter_hof': 'ENTRER AU HOF →',
+    'surv.enter_pseudo': 'Entre ton pseudo.',
+    'surv.sending': 'Envoi…',
+    'surv.sent': '✓ Score soumis !',
+    'surv.error': '✗ Erreur, réessaie.',
+    'surv.retry': '↺ Rejouer',
+    'surv.skip': 'Passer',
+    // Finish (campaign)
+    'finish.title': '🏆 CAMPAGNE TERMINÉE !',
+    'finish.record': '🏆 NOUVEAU RECORD !',
+    'finish.retry': '💪 CAMPAGNE TERMINÉE !',
+    'finish.guest_hof': '🔒 <strong style="color:#ff4422">HOF non disponible en mode invité.</strong><br>Ton score sera perdu si tu continues sans te connecter.',
+    'finish.guest_skip': 'Jouer en invité (score perdu)',
+    'finish.signin_save': 'Se connecter pour sauvegarder mon score',
+    'finish.checking': 'Vérification du HOF…',
+    'finish.beat_record': '▲ Record battu ! (ancien : {prev}, {deaths} 💀)',
+    'finish.old_record': 'Ton record reste {prev} — {deaths} 💀 ({diff})',
+    'finish.admin_skip': '🔑 Run admin — score non soumis au HOF',
+    'finish.update_hof': 'METTRE À JOUR LE HOF →',
+    'finish.enter_hof': 'ENTRER AU HOF →',
+    'finish.sending': 'Envoi…',
+    'finish.saved': '✓ Enregistré !',
+    'finish.error': '✗ Erreur : ',
+    // HOF
+    'hof.title': '🏆 HALL OF FAME',
+    'hof.loading': 'Chargement…',
+    'hof.no_entry': 'Pas encore d\'entrée — sois le premier !',
+    'hof.delete_confirm': 'Supprimer cette entrée HOF ?',
+    'hof.delete_error': 'Erreur suppression : ',
+    'hof.error': 'Erreur : ',
+    'hof.levels': 'niveau(x)',
+    // Profile
+    'profile.title': '👤 PROFIL',
+    'profile.stats': 'Stats',
+    'profile.deaths': '💀 Morts totales',
+    'profile.achievements': '🏅 Hauts-faits',
+    'profile.best_times': 'Meilleur temps par campagne',
+    'profile.mirror': 'Mode miroir',
+    'profile.no_pseudo': '(sans pseudo)',
+    'profile.guest': 'Mode invité',
+    // pp-overlay
+    'pp.hof_title': '🏆 Scores HOF',
+    'pp.ach_title': '🏅 Hauts-faits débloqués',
+    'pp.ach_none': 'Aucun haut-fait débloqué',
+    'pp.loading_error': 'Erreur de chargement',
+    // Loading
+    'loading.msg': 'Chargement…',
+    'loading.retry': '↺ Réessayer',
+    // Misc
+    'admin.mode_on': '🔑 MODE ADMIN',
+    'admin.mode_off': '🔒 Admin désactivé',
+    'misc.by': 'par ',
+    'misc.reset_deaths': 'Réinitialiser le compteur de morts total ?',
+    'misc.mirror_confirm': 'Activer le mode miroir annulera la campagne en cours.\nContinuer ?',
+    'misc.free': 'Gratuit',
+    'misc.vb_retro': '🎁 +{vb} VB récupérés',
+    'misc.replay_restart': '↺ Revoir depuis le début',
+    'misc.tools': 'Outils',
+    // Sidebar buttons
+    'sidebar.choose_campaign': '⚡ Choisir une campagne',
+    'sidebar.profile': '👤 Profil',
+    'sidebar.achievements': '🏅 Hauts-Faits',
+    'sidebar.signin': '👤 Connexion',
+    'sidebar.shop': '⚡ Boutique VoltBucks',
+    'sidebar.hof': '🏆 Hall of Fame',
+    'sidebar.home': '⌂ Accueil',
+    'sidebar.support': 'Soutenir le jeu',
+    // Camp select screen
+    'camp.select.vb_earn': 'Gagner jusqu\'à ⚡{vb} VB',
+    // PP diff tabs
+    'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
+    'pp.diff.bebe_inv': '🔄 Bébés', 'pp.diff.piquer_inv': '🔄 Piquer', 'pp.diff.cauchemar_inv': '🔄 Cauchemar',
+    'pp.diff.survie': '💀 Survie',
   },
   en: {
     'sidebar.title': 'Levels',
@@ -2033,7 +2256,230 @@ const TRANSLATIONS = {
     'micro.title': '— MICROPROCESSOR —',
     'micro.prompt': '▼  type the code  ▼',
     'space.active': 'SPACE  █',
+    // Auth
+    'auth.hof_title': '🏆 Hall of Fame',
+    'auth.hof_desc': 'Sign in to submit your score.<br>Only a username of your choice will be visible — never your real name.',
+    'auth.google': 'Continue with Google',
+    'auth.guest': 'Play as guest (HOF disabled)',
+    'auth.pseudo_title': '👤 Choose your username',
+    'auth.pseudo_desc': 'This username will be visible in the Hall of Fame.\nYour real name will never be used or shown.',
+    'auth.pseudo_placeholder': 'Your username (2–20 chars)',
+    'auth.pseudo_min': '⚠ At least 2 characters',
+    'auth.pseudo_saving': 'Saving…',
+    'auth.pseudo_error': '✗ Error — try again',
+    'auth.signin_error': '✗ Sign-in error',
+    'auth.signout_confirm': 'Sign out?',
+    'auth.signin_btn': '👤 Sign in',
+    'auth.no_pseudo': '(no username)',
+    'auth.guest_label': 'Guest',
+    // Campaign select
+    'camp.select.title': '⚡ Choose a campaign',
+    'camp.survival.name': 'Survival Mode',
+    'camp.survival.desc': '3 lives — random Nightmare levels — endless',
+    'camp.mirror.label': 'Mirror mode',
+    'camp.mirror.desc': 'Swaps controls — Q drives P switches, and vice versa.',
+    // Campaign names
+    'camp.bebe.name': 'For Babies',
+    'camp.piquer.name': 'Getting Tricky',
+    'camp.cauchemar.name': 'Nightmare',
+    // GG
+    'gg.text': '🎉 CONGRATULATIONS! 🎉',
+    // Achievements
+    'ach.header': '🏅 ACHIEVEMENTS',
+    'ach.toast.header': 'ACHIEVEMENT UNLOCKED',
+    'ach.progress': '{done} / {total} unlocked',
+    'ach.none': 'No achievements yet',
+    'ach.first_death.name': 'First Shock',
+    'ach.first_death.desc': 'Die for the first time',
+    'ach.centurion.name': 'Lightning Rod',
+    'ach.centurion.desc': 'Accumulate 100 total deaths',
+    'ach.bebe_won.name': 'Apprentice Electrician',
+    'ach.bebe_won.desc': 'Complete the "For Babies" campaign',
+    'ach.piquer_won.name': 'Resistance Overcome',
+    'ach.piquer_won.desc': 'Complete the "Getting Tricky" campaign',
+    'ach.cauchemar_won.name': 'Survivor',
+    'ach.cauchemar_won.desc': 'Complete the "Nightmare" campaign',
+    'ach.bebe_deathless.name': 'Clean Bottle',
+    'ach.bebe_deathless.desc': 'Complete "For Babies" without dying',
+    'ach.piquer_deathless.name': 'Untouchable',
+    'ach.piquer_deathless.desc': 'Complete "Getting Tricky" without dying',
+    'ach.cauchemar_deathless.name': 'Circuit God',
+    'ach.cauchemar_deathless.desc': 'Complete "Nightmare" without dying',
+    'ach.bebe_speed.name': 'Short Circuit',
+    'ach.bebe_speed.desc': 'Complete "For Babies" in under 3 minutes',
+    'ach.cauchemar_speed.name': 'Speed of Light',
+    'ach.cauchemar_speed.desc': 'Complete "Nightmare" in under 15 minutes',
+    'ach.mirror_won.name': 'Upside Down',
+    'ach.mirror_won.desc': 'Complete a campaign in mirror mode',
+    'ach.cauchemar_mirror.name': 'Inverted Dimension',
+    'ach.cauchemar_mirror.desc': 'Complete "Nightmare" in mirror mode',
+    'ach.cauchemar_mirror_deathless.name': 'Beyond Reality',
+    'ach.cauchemar_mirror_deathless.desc': 'Complete "Nightmare" in mirror mode without dying',
+    'ach.survie_5.name': 'Survivor',
+    'ach.survie_5.desc': 'Survive 5 levels in survival mode',
+    'ach.survie_10.name': 'Resilient',
+    'ach.survie_10.desc': 'Survive 10 levels in survival mode',
+    'ach.survie_20.name': 'Indestructible',
+    'ach.survie_20.desc': 'Survive 20 levels in survival mode',
+    'ach.survie_50.name': 'Living Legend',
+    'ach.survie_50.desc': 'Survive 50 levels in survival mode',
+    'ach.survie_deathless.name': 'Emergency Doctor',
+    'ach.survie_deathless.desc': 'Complete 3 survival levels without dying once',
+    'ach.survie_comeback.name': 'Last Breath',
+    'ach.survie_comeback.desc': 'Win a level with only one life remaining',
+    // Shop
+    'shop.title': '⚡ VOLTBUCKS SHOP',
+    'shop.tab.skins': '🔵 Ball',
+    'shop.tab.emotes': '😀 Emote',
+    'shop.tab.backgrounds': '🌌 Background',
+    'shop.tab.bonus': '⚗️ Bonus',
+    'shop.free': 'Free',
+    'shop.equipped': 'EQUIPPED',
+    'shop.owned': 'OWNED',
+    'shop.in_stock': 'IN STOCK',
+    'shop.in_stock_btn': '✓ In stock',
+    'shop.preview': 'Preview',
+    'shop.login_required': 'Sign in to make purchases.',
+    'shop.buy_confirm': 'Buy "{name}" for ⚡{price} VB?',
+    // Skin names
+    'skin.default.name': 'Electron',
+    'skin.plasma.name': 'Plasma',
+    'skin.soleil.name': 'Sun',
+    'skin.venin.name': 'Venom',
+    'skin.braise.name': 'Ember',
+    'skin.spectre.name': 'Spectre',
+    'skin.neant.name': 'Void',
+    'skin.arc.name': 'Rainbow',
+    // Emote names
+    'emote.none.name': 'Chick',
+    'emote.bolt.name': 'Electric',
+    'emote.skull.name': 'Deadly',
+    'emote.crown.name': 'Royalty',
+    'emote.ghost.name': 'Ghost',
+    'emote.fire.name': 'On Fire',
+    'emote.robot.name': 'Robot',
+    'emote.alien.name': 'Alien',
+    'emote.diamond.name': 'Diamond',
+    'emote.devil.name': 'Devil',
+    'emote.comet.name': 'Comet',
+    'emote.godmode.name': 'Transcendence',
+    // Background names
+    'bg.default.name': 'Grid',
+    'bg.electrons.name': 'Electrons',
+    'bg.stars.name': 'Shooting Stars',
+    'bg.matrix.name': 'Code Rain',
+    'bg.aurora.name': 'Aurora',
+    'bg.void.name': 'Cosmic Void',
+    // bg labels (profile badge)
+    'bg.default.label': '▦ Grid',
+    'bg.electrons.label': '⚡ Electrons',
+    'bg.stars.label': '✦ Stars',
+    'bg.matrix.label': '⌨ Code',
+    'bg.aurora.label': '〜 Aurora',
+    'bg.void.label': '○ Void',
+    // Consumable names/descs
+    'consum.heart.name': 'Heart',
+    'consum.heart.desc': '+1 life in survival mode',
+    'consum.fuse.name': 'Fuse',
+    'consum.fuse.desc': 'Locks a switch for the whole level',
+    'consum.attenuator.name': 'Attenuator',
+    'consum.attenuator.desc': 'Speed at 75% for the whole level',
+    // Consumable use confirms
+    'consum.heart.confirm': '❤️ Use the Heart to gain +1 life?',
+    'consum.fuse.confirm': '🔌 Use the Fuse? Then click a switch to lock it closed.',
+    'consum.attenuator.confirm': '🐢 Use the Attenuator? Speed drops to 75% for the whole level.',
+    'consum.fuse.hint': '🔌 CLICK A SWITCH TO LOCK IT',
+    'consum.fuse.toast': '🔌 Switch locked!',
+    'consum.heart.toast': '❤️ +1 life!',
+    'consum.attenuator.toast': '🐢 Speed -25%!',
+    // HUD consumable titles
+    'consum.heart.title': 'Heart — +1 life',
+    'consum.fuse.title': 'Fuse — lock a switch',
+    'consum.attenuator.title': 'Attenuator — 75% speed',
+    // Survival
+    'surv.gameover': '💀 SURVIVAL OVER',
+    'surv.result': 'You survived {score} level(s)',
+    'surv.pseudo_placeholder': 'Your username…',
+    'surv.hof_unavailable': '🔒 <strong style="color:#ff4422">HOF not available as guest.</strong><br>Sign in to save your score.',
+    'surv.signin_google': 'Sign in with Google',
+    'surv.checking': 'Checking…',
+    'surv.record_low': 'Your record is {prev} level(s) — current score not high enough.',
+    'surv.new_record': '▲ New record! (previous: {prev})',
+    'surv.update_hof': 'UPDATE HOF →',
+    'surv.enter_hof': 'ENTER HOF →',
+    'surv.enter_pseudo': 'Enter your username.',
+    'surv.sending': 'Sending…',
+    'surv.sent': '✓ Score submitted!',
+    'surv.error': '✗ Error, try again.',
+    'surv.retry': '↺ Play again',
+    'surv.skip': 'Skip',
+    // Finish (campaign)
+    'finish.title': '🏆 CAMPAIGN COMPLETE!',
+    'finish.record': '🏆 NEW RECORD!',
+    'finish.retry': '💪 CAMPAIGN COMPLETE!',
+    'finish.guest_hof': '🔒 <strong style="color:#ff4422">HOF not available as guest.</strong><br>Sign in to save your score.',
+    'finish.guest_skip': 'Play as guest (score lost)',
+    'finish.signin_save': 'Sign in to save my score',
+    'finish.checking': 'Checking HOF…',
+    'finish.beat_record': '▲ Record beaten! (previous: {prev}, {deaths} 💀)',
+    'finish.old_record': 'Your record is {prev} — {deaths} 💀 ({diff})',
+    'finish.admin_skip': '🔑 Admin run — score not submitted to HOF',
+    'finish.update_hof': 'UPDATE HOF →',
+    'finish.enter_hof': 'ENTER HOF →',
+    'finish.sending': 'Sending…',
+    'finish.saved': '✓ Saved!',
+    'finish.error': '✗ Error: ',
+    // HOF
+    'hof.title': '🏆 HALL OF FAME',
+    'hof.loading': 'Loading…',
+    'hof.no_entry': 'No entry yet — be the first!',
+    'hof.delete_confirm': 'Delete this HOF entry?',
+    'hof.delete_error': 'Delete error: ',
+    'hof.error': 'Error: ',
+    'hof.levels': 'level(s)',
+    // Profile
+    'profile.title': '👤 PROFILE',
+    'profile.stats': 'Stats',
+    'profile.deaths': '💀 Total deaths',
+    'profile.achievements': '🏅 Achievements',
+    'profile.best_times': 'Best time per campaign',
+    'profile.mirror': 'Mirror mode',
+    'profile.no_pseudo': '(no username)',
+    'profile.guest': 'Guest',
+    // pp-overlay
+    'pp.hof_title': '🏆 HOF Scores',
+    'pp.ach_title': '🏅 Unlocked achievements',
+    'pp.ach_none': 'No achievements unlocked',
+    'pp.loading_error': 'Loading error',
+    // Loading
+    'loading.msg': 'Loading…',
+    'loading.retry': '↺ Retry',
+    // Misc
+    'admin.mode_on': '🔑 ADMIN MODE',
+    'admin.mode_off': '🔒 Admin disabled',
+    'misc.by': 'by ',
+    'misc.reset_deaths': 'Reset total death counter?',
+    'misc.mirror_confirm': 'Enabling mirror mode will cancel the current campaign.\nContinue?',
+    'misc.free': 'Free',
+    'misc.vb_retro': '🎁 +{vb} VB recovered',
+    'misc.replay_restart': '↺ Rewatch from the start',
+    'misc.tools': 'Tools',
+    // Sidebar buttons
+    'sidebar.choose_campaign': '⚡ Choose a campaign',
+    'sidebar.profile': '👤 Profile',
+    'sidebar.achievements': '🏅 Achievements',
+    'sidebar.signin': '👤 Sign in',
+    'sidebar.shop': '⚡ VoltBucks Shop',
+    'sidebar.hof': '🏆 Hall of Fame',
+    'sidebar.home': '⌂ Home',
+    'sidebar.support': 'Support the game',
+    // Camp select screen
+    'camp.select.vb_earn': 'Earn up to ⚡{vb} VB',
     'space.inactive': 'SPACE  ░',
+    // PP diff tabs
+    'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
+    'pp.diff.bebe_inv': '🔄 Babies', 'pp.diff.piquer_inv': '🔄 Getting Tricky', 'pp.diff.cauchemar_inv': '🔄 Nightmare',
+    'pp.diff.survie': '💀 Survival',
   }
 };
 
@@ -2044,6 +2490,9 @@ let humMuted  = localStorage.getItem('elecgame_mute_hum') === '1';
 function t(key) {
   return (TRANSLATIONS[currentLang] || TRANSLATIONS.fr)[key] || TRANSLATIONS.fr[key] || key;
 }
+// Helper: translated name/desc for data objects (ACHIEVEMENTS, EMOTES, etc.)
+function iname(item) { return t(item._nameKey || item.name); }
+function idesc(item) { return t(item._descKey || item.desc || ''); }
 
 function applyLang() {
   document.documentElement.lang = currentLang;
@@ -2081,7 +2530,101 @@ function applyLang() {
   if (_blr) { _blr.textContent = t('btn.load_replay'); _blr.title = t('replay.title'); }
   // Lang toggle label: show the language you'll switch TO
   const langBtn = document.getElementById('lang-toggle');
-  if (langBtn) langBtn.textContent = currentLang === 'fr' ? 'EN' : 'FR';
+  if (langBtn) langBtn.innerHTML =
+    `<span style="color:${currentLang==='fr'?'#00ffcc':'#2a5a40'}">FR</span><span style="color:#1a4535;margin:0 4px">·</span><span style="color:${currentLang==='en'?'#00ffcc':'#2a5a40'}">EN</span>`;
+  // Sidebar static buttons
+  const _sbCamp = document.getElementById('launch-camp-btn');
+  if (_sbCamp) _sbCamp.textContent = t('sidebar.choose_campaign');
+  const _sbProf = document.getElementById('profile-open-btn');
+  if (_sbProf) _sbProf.textContent = t('sidebar.profile');
+  const _sbAch = document.getElementById('ach-open-btn');
+  if (_sbAch) _sbAch.textContent = t('sidebar.achievements');
+  const _sbShop = document.getElementById('shop-open-btn');
+  if (_sbShop) _sbShop.textContent = t('sidebar.shop');
+  const _sbHof = document.getElementById('hof-open-btn');
+  if (_sbHof) _sbHof.textContent = t('sidebar.hof');
+  // Consumable HUD titles
+  const _hudH = document.getElementById('hud-heart');
+  if (_hudH) _hudH.title = t('consum.heart.title');
+  const _hudF = document.getElementById('hud-fuse');
+  if (_hudF) _hudF.title = t('consum.fuse.title');
+  const _hudA = document.getElementById('hud-attn');
+  if (_hudA) _hudA.title = t('consum.attenuator.title');
+  // Fuse hint
+  const _fuseHintEl = document.getElementById('fuse-hint');
+  if (_fuseHintEl) _fuseHintEl.textContent = t('consum.fuse.hint');
+  // Loading overlay
+  const _loadMsg = document.getElementById('loading-msg');
+  if (_loadMsg) _loadMsg.textContent = t('loading.msg');
+  const _loadRetry = document.getElementById('loading-retry');
+  if (_loadRetry) _loadRetry.textContent = t('loading.retry');
+  // Shop title
+  const _shopTitle = document.getElementById('shop-title');
+  if (_shopTitle) _shopTitle.textContent = t('shop.title');
+  // Shop tabs
+  document.querySelectorAll('.shop-tab[data-tab]').forEach(btn => {
+    const tabKey = { skins: 'shop.tab.skins', emotes: 'shop.tab.emotes', backgrounds: 'shop.tab.backgrounds', bonus: 'shop.tab.bonus' };
+    if (tabKey[btn.dataset.tab]) btn.textContent = t(tabKey[btn.dataset.tab]);
+  });
+  // Ach header
+  const _achHeader = document.getElementById('ach-header');
+  if (_achHeader) {
+    _achHeader.innerHTML = t('ach.header') + ' <button id="ach-close">✕</button>';
+    document.getElementById('ach-close').onclick = () => document.getElementById('ach-overlay').classList.remove('open');
+  }
+  // Profile header
+  const _profHeader = document.getElementById('profile-header');
+  if (_profHeader) {
+    _profHeader.innerHTML = t('profile.title') + '<button id="profile-close">✕</button>';
+    document.getElementById('profile-close').onclick = () => document.getElementById('profile-overlay').classList.remove('open');
+  }
+  // HOF header
+  const _hofH2 = document.querySelector('#hof-header h2');
+  if (_hofH2) _hofH2.textContent = t('hof.title');
+  // Survival gameover
+  const _sgH2 = document.getElementById('sg-title');
+  if (_sgH2) _sgH2.textContent = t('surv.gameover');
+  const _sgRetry = document.getElementById('sg-retry');
+  if (_sgRetry) _sgRetry.textContent = t('surv.retry');
+  const _sgSkip2 = document.getElementById('sg-skip2');
+  if (_sgSkip2) _sgSkip2.textContent = t('surv.skip');
+  const _sgPseudo = document.getElementById('sg-pseudo');
+  if (_sgPseudo) _sgPseudo.placeholder = t('surv.pseudo_placeholder');
+  // GG overlay
+  const _ggText = document.getElementById('gg-text');
+  if (_ggText) _ggText.textContent = t('gg.text');
+  // Campaign select title
+  const _campTitle = document.getElementById('camp-select-title');
+  if (_campTitle) _campTitle.textContent = t('camp.select.title');
+  // Survival button
+  const _survName = document.querySelector('#survival-start-btn .camp-name');
+  if (_survName) _survName.textContent = t('camp.survival.name');
+  const _survDesc = document.querySelector('#survival-start-btn .camp-desc');
+  if (_survDesc) _survDesc.textContent = t('camp.survival.desc');
+  // Mirror toggle
+  const _mirrorLabel = document.querySelector('.invert-toggle-label');
+  if (_mirrorLabel) _mirrorLabel.textContent = t('camp.mirror.label');
+  const _mirrorDesc = document.getElementById('invert-camp-desc');
+  if (_mirrorDesc) _mirrorDesc.textContent = t('camp.mirror.desc');
+  // Auth overlay
+  const _authDesc = document.getElementById('auth-desc');
+  if (_authDesc) _authDesc.innerHTML = t('auth.hof_desc');
+  const _authGoogle = document.getElementById('auth-google-btn');
+  if (_authGoogle) { const svg = _authGoogle.querySelector('svg'); _authGoogle.innerHTML = ''; if (svg) _authGoogle.appendChild(svg); _authGoogle.append(' ' + t('auth.google')); }
+  const _authGuest = document.getElementById('auth-guest-btn');
+  if (_authGuest) _authGuest.textContent = t('auth.guest');
+  const _pseudoIn = document.getElementById('pseudo-input');
+  if (_pseudoIn) _pseudoIn.placeholder = t('auth.pseudo_placeholder');
+  // Misc tools label
+  const _toolsLabel = document.querySelector('.tools-label');
+  if (_toolsLabel) _toolsLabel.textContent = t('misc.tools');
+  // pp-overlay titles
+  const _ppHofTitle = document.getElementById('pp-hof-title');
+  if (_ppHofTitle) _ppHofTitle.textContent = t('pp.hof_title');
+  const _ppAchTitle = document.getElementById('pp-ach-title');
+  if (_ppAchTitle) _ppAchTitle.textContent = t('pp.ach_title');
+  // Auth sidebar btn (only when not logged in)
+  updateAuthUI();
 }
 
 // ── ADMIN MODE ─────────────────────────────────────────────
@@ -2099,7 +2642,7 @@ function toggleAdmin() {
   localStorage.setItem('elecgame_admin', adminMode ? '1' : '0');
   updateAdminUI();
   // Brief flash on canvas
-  const msg = adminMode ? '🔑 MODE ADMIN' : '🔒 Admin désactivé';
+  const msg = adminMode ? t('admin.mode_on') : t('admin.mode_off');
   drawOverlay && (bulbFlash = 0.3);
   const el = document.getElementById('admin-badge');
   el.style.color = adminMode ? '#ffcc44' : '#666';
@@ -2229,7 +2772,7 @@ const LEVELS = [
 // ── CAMPAIGN DEFINITIONS ───────────────────────────────────
 const CAMPAIGNS = {
   bebe: {
-    id: 'bebe', name: 'Pour les Bébés', emoji: '🍼',
+    id: 'bebe', name: 'Pour les Bébés', emoji: '🍼', _nameKey: 'camp.bebe.name',
     color: '#44ff88', desc: '',
     levels: [
       { idx: 0 }, { idx: 1 }, { idx: 2 },
@@ -2242,7 +2785,7 @@ const CAMPAIGNS = {
     ]
   },
   piquer: {
-    id: 'piquer', name: 'Ça commence à piquer', emoji: '⚡',
+    id: 'piquer', name: 'Ça commence à piquer', emoji: '⚡', _nameKey: 'camp.piquer.name',
     color: '#ffaa00', desc: '',
     levels: [
       { idx: 0 }, { idx: 1 }, { idx: 2 },
@@ -2257,7 +2800,7 @@ const CAMPAIGNS = {
     ]
   },
   cauchemar: {
-    id: 'cauchemar', name: 'Cauchemar', emoji: '💀',
+    id: 'cauchemar', name: 'Cauchemar', emoji: '💀', _nameKey: 'camp.cauchemar.name',
     color: '#ff4466', desc: '',
     levels: [
       { file: "levels/Le Pistolet.json",             name: 'Le Pistolet' },
@@ -2383,7 +2926,7 @@ function selectLevel(idx) {
   const levelTitleEl = document.getElementById('level-title');
   if (levelTitleEl) levelTitleEl.textContent = LEVELS[idx].name || '';
   const authorEl = document.getElementById('level-author');
-  if (authorEl) authorEl.textContent = LEVELS[idx].made_by ? 'par ' + LEVELS[idx].made_by : '';
+  if (authorEl) authorEl.textContent = LEVELS[idx].made_by ? t('misc.by') + LEVELS[idx].made_by : '';
   LEVELS.forEach((lv, i) => { (lv._btns || []).forEach(b => b.classList.toggle('active', i === idx)); });
   document.getElementById('replay-save-wrap').style.display = 'none';
   document.getElementById('next-level-wrap').style.display = 'none';
@@ -2435,7 +2978,7 @@ for (const [campId, camp] of Object.entries(CAMPAIGNS)) {
   const label = document.createElement('span');
   label.className = 'lvl-group-label camp-label';
   label.style.color = camp.color;
-  label.innerHTML = '<span>' + camp.emoji + '</span><span>' + camp.name.toUpperCase() + '</span>';
+  label.innerHTML = '<span>' + camp.emoji + '</span><span>' + iname(camp).toUpperCase() + '</span>';
   lsDiv.appendChild(label);
   for (const entry of camp.levels) {
     if (entry.isGG) continue; // pas de bouton sidebar pour le niveau GG
@@ -2623,7 +3166,7 @@ function updateDeathDisplay() {
   if (cd) cd.textContent = '💀 camp: ' + campDeaths;
 }
 function resetDeaths() {
-  if (!confirm('Réinitialiser le compteur de morts total ?')) return;
+  if (!confirm(t('misc.reset_deaths'))) return;
   deathCount = 0;
   writeSave({ deaths: 0 });
   updateDeathDisplay();
@@ -2637,7 +3180,7 @@ function updateCampaignHUD() {
     badge.classList.toggle('active', campRunning);
     if (campRunning) {
       const camp = CAMPAIGNS[currentCampaignId];
-      badge.textContent = camp.emoji + ' ' + camp.name.toUpperCase() + (invertControls ? '  🔄' : '');
+      badge.textContent = camp.emoji + ' ' + iname(camp).toUpperCase() + (invertControls ? '  🔄' : '');
     }
   }
   if (cd) cd.classList.toggle('active', campRunning);
@@ -2669,9 +3212,9 @@ function openCampSelect() {
     btn.innerHTML = `
       <div class="camp-btn-badge" style="border-color:${camp.color}33;color:${camp.color}">${camp.emoji}</div>
       <div class="camp-btn-body">
-        <span class="camp-name">${camp.name}</span>
+        <span class="camp-name">${iname(camp)}</span>
         <div class="camp-meta">
-          <span class="camp-desc">${n} niveau${n > 1 ? 'x' : ''}</span>
+          <span class="camp-desc">${n} ${currentLang === 'en' ? 'level' + (n > 1 ? 's' : '') : 'niveau' + (n > 1 ? 'x' : '')}</span>
           <div style="display:flex;align-items:center;gap:8px">
             <div class="camp-difficulty">${dots}</div>
             <span style="font-size:9px;letter-spacing:1px;opacity:0.7">⚡${vb} VB</span>
@@ -2699,8 +3242,8 @@ function openCampSelect() {
   libreBtn.innerHTML = `
     <div class="camp-btn-badge" style="border-color:#2a4a3a33;color:#3a6650">🎮</div>
     <div class="camp-btn-body">
-      <span class="camp-name">Mode libre</span>
-      <span class="camp-desc">Choisir ses niveaux dans la liste</span>
+      <span class="camp-name">${currentLang === 'en' ? 'Free Play' : 'Mode libre'}</span>
+      <span class="camp-desc">${currentLang === 'en' ? 'Choose levels from the list' : 'Choisir ses niveaux dans la liste'}</span>
     </div>`;
   libreBtn.onclick = () => {
     currentCampaignId = 'libre';
@@ -2806,7 +3349,7 @@ function _applyInvertUI() {
 function toggleInvert() {
   // Si campagne en cours → confirmation
   if (campRunning && !invertControls) {
-    const ok = confirm('Activer le mode miroir annulera la campagne en cours.\nContinuer ?');
+    const ok = confirm(t('misc.mirror_confirm'));
     if (!ok) return;
     campStop();
     campRunning = false;
@@ -2830,14 +3373,14 @@ let   _loadingRetryFn  = null;
 function _showLoading(msg) {
   _loadingEl.classList.remove('error');
   _loadingEl.classList.add('visible');
-  _loadingMsg.textContent = msg || 'Chargement…';
+  _loadingMsg.textContent = msg || t('loading.msg');
 }
 function _hideLoading() {
   _loadingEl.classList.remove('visible', 'error');
 }
 function _showLoadingError(msg, retryFn) {
   _loadingEl.classList.add('error');
-  _loadingMsg.textContent = msg || 'Échec du chargement';
+  _loadingMsg.textContent = msg || t('alert.load_failed');
   _loadingRetryFn = retryFn || null;
 }
 _loadingRetryBtn.onclick = () => {
@@ -2846,7 +3389,7 @@ _loadingRetryBtn.onclick = () => {
 
 // Charge un niveau JSON avec affichage loading + gestion erreur propre
 function _fetchLevel(lv, onSuccess) {
-  _showLoading('Chargement…');
+  _showLoading(t('loading.msg'));
   const doFetch = () => {
     fetch(lv._file)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -3036,30 +3579,30 @@ function startGGCelebration(finalTime, finalDeaths, camp) {
 
 const ACHIEVEMENTS = [
   // — Morts —
-  { id:'first_death',      emoji:'💀', name:'Premier choc',          desc:'Mourir pour la première fois' },
-  { id:'centurion',        emoji:'⚡', name:'Paratonnerre',           desc:'Cumuler 100 morts au total' },
+  { id:'first_death',      emoji:'💀', name:'Premier choc',          desc:'Mourir pour la première fois',              _nameKey:'ach.first_death.name',              _descKey:'ach.first_death.desc' },
+  { id:'centurion',        emoji:'⚡', name:'Paratonnerre',           desc:'Cumuler 100 morts au total',                _nameKey:'ach.centurion.name',                _descKey:'ach.centurion.desc' },
   // — Campagnes —
-  { id:'bebe_won',         emoji:'🍼', name:'Apprenti électricien',   desc:'Terminer la campagne "Pour les Bébés"' },
-  { id:'piquer_won',       emoji:'⚡', name:'Résistance vaincue',     desc:'Terminer la campagne "Ça commence à piquer"' },
-  { id:'cauchemar_won',    emoji:'💀', name:'Survivant',              desc:'Terminer la campagne "Cauchemar"' },
+  { id:'bebe_won',         emoji:'🍼', name:'Apprenti électricien',   desc:'Terminer la campagne "Pour les Bébés"',     _nameKey:'ach.bebe_won.name',                 _descKey:'ach.bebe_won.desc' },
+  { id:'piquer_won',       emoji:'⚡', name:'Résistance vaincue',     desc:'Terminer la campagne "Ça commence à piquer"',_nameKey:'ach.piquer_won.name',              _descKey:'ach.piquer_won.desc' },
+  { id:'cauchemar_won',    emoji:'💀', name:'Survivant',              desc:'Terminer la campagne "Cauchemar"',          _nameKey:'ach.cauchemar_won.name',            _descKey:'ach.cauchemar_won.desc' },
   // — Sans mourir —
-  { id:'bebe_deathless',   emoji:'🕊️', name:'Biberon propre',         desc:'Terminer "Pour les Bébés" sans mourir' },
-  { id:'piquer_deathless', emoji:'🛡️', name:'Intouchable',            desc:'Terminer "Piquer" sans mourir' },
-  { id:'cauchemar_deathless', emoji:'👑', name:'Dieu du circuit',     desc:'Terminer "Cauchemar" sans mourir' },
+  { id:'bebe_deathless',   emoji:'🕊️', name:'Biberon propre',         desc:'Terminer "Pour les Bébés" sans mourir',    _nameKey:'ach.bebe_deathless.name',           _descKey:'ach.bebe_deathless.desc' },
+  { id:'piquer_deathless', emoji:'🛡️', name:'Intouchable',            desc:'Terminer "Piquer" sans mourir',            _nameKey:'ach.piquer_deathless.name',         _descKey:'ach.piquer_deathless.desc' },
+  { id:'cauchemar_deathless', emoji:'👑', name:'Dieu du circuit',     desc:'Terminer "Cauchemar" sans mourir',         _nameKey:'ach.cauchemar_deathless.name',      _descKey:'ach.cauchemar_deathless.desc' },
   // — Vitesse —
-  { id:'bebe_speed',       emoji:'⏱️', name:'Court-circuit',          desc:'Terminer "Bébés" en moins de 3 minutes' },
-  { id:'cauchemar_speed',  emoji:'🏎️', name:'Vitesse de la lumière',  desc:'Terminer "Cauchemar" en moins de 15 minutes' },
+  { id:'bebe_speed',       emoji:'⏱️', name:'Court-circuit',          desc:'Terminer "Bébés" en moins de 3 minutes',   _nameKey:'ach.bebe_speed.name',               _descKey:'ach.bebe_speed.desc' },
+  { id:'cauchemar_speed',  emoji:'🏎️', name:'Vitesse de la lumière',  desc:'Terminer "Cauchemar" en moins de 15 minutes',_nameKey:'ach.cauchemar_speed.name',        _descKey:'ach.cauchemar_speed.desc' },
   // — Miroir —
-  { id:'mirror_won',       emoji:'🔄', name:'Monde à l\'envers',      desc:'Terminer une campagne en mode miroir' },
-  { id:'cauchemar_mirror', emoji:'🌀', name:'Dimension inversée',     desc:'Terminer "Cauchemar" en mode miroir' },
-  { id:'cauchemar_mirror_deathless', emoji:'🌟', name:'Au-delà du réel', desc:'Terminer "Cauchemar" en mode miroir sans mourir' },
+  { id:'mirror_won',       emoji:'🔄', name:'Monde à l\'envers',      desc:'Terminer une campagne en mode miroir',     _nameKey:'ach.mirror_won.name',               _descKey:'ach.mirror_won.desc' },
+  { id:'cauchemar_mirror', emoji:'🌀', name:'Dimension inversée',     desc:'Terminer "Cauchemar" en mode miroir',      _nameKey:'ach.cauchemar_mirror.name',         _descKey:'ach.cauchemar_mirror.desc' },
+  { id:'cauchemar_mirror_deathless', emoji:'🌟', name:'Au-delà du réel', desc:'Terminer "Cauchemar" en mode miroir sans mourir', _nameKey:'ach.cauchemar_mirror_deathless.name', _descKey:'ach.cauchemar_mirror_deathless.desc' },
   // — Survie —
-  { id:'survie_5',         emoji:'💪', name:'Survivant',              desc:'Survivre à 5 niveaux en mode survie' },
-  { id:'survie_10',        emoji:'🩸', name:'Résistant',              desc:'Survivre à 10 niveaux en mode survie' },
-  { id:'survie_20',        emoji:'💀', name:'Indestructible',         desc:'Survivre à 20 niveaux en mode survie' },
-  { id:'survie_50',        emoji:'👑', name:'Légende vivante',        desc:'Survivre à 50 niveaux en mode survie' },
-  { id:'survie_deathless', emoji:'🩺', name:'Médecin urgentiste',     desc:'Terminer 3 niveaux de survie sans mourir une seule fois' },
-  { id:'survie_comeback',  emoji:'🔋', name:'Dernier souffle',        desc:'Gagner un niveau avec une seule vie restante' },
+  { id:'survie_5',         emoji:'💪', name:'Survivant',              desc:'Survivre à 5 niveaux en mode survie',      _nameKey:'ach.survie_5.name',                 _descKey:'ach.survie_5.desc' },
+  { id:'survie_10',        emoji:'🩸', name:'Résistant',              desc:'Survivre à 10 niveaux en mode survie',     _nameKey:'ach.survie_10.name',                _descKey:'ach.survie_10.desc' },
+  { id:'survie_20',        emoji:'💀', name:'Indestructible',         desc:'Survivre à 20 niveaux en mode survie',     _nameKey:'ach.survie_20.name',                _descKey:'ach.survie_20.desc' },
+  { id:'survie_50',        emoji:'👑', name:'Légende vivante',        desc:'Survivre à 50 niveaux en mode survie',     _nameKey:'ach.survie_50.name',                _descKey:'ach.survie_50.desc' },
+  { id:'survie_deathless', emoji:'🩺', name:'Médecin urgentiste',     desc:'Terminer 3 niveaux de survie sans mourir une seule fois', _nameKey:'ach.survie_deathless.name', _descKey:'ach.survie_deathless.desc' },
+  { id:'survie_comeback',  emoji:'🔋', name:'Dernier souffle',        desc:'Gagner un niveau avec une seule vie restante', _nameKey:'ach.survie_comeback.name',      _descKey:'ach.survie_comeback.desc' },
 ];
 
 const _ACH_LS = 'elecgame_achievements';
@@ -3148,8 +3691,9 @@ function _nextToast() {
   const ach = _toastQueue.shift();
   const el  = document.getElementById('ach-toast');
   document.getElementById('ach-toast-emoji').textContent = ach.emoji;
-  document.getElementById('ach-toast-name').textContent  = ach.name;
-  document.getElementById('ach-toast-desc').textContent  = ach.desc;
+  document.getElementById('ach-toast-header').textContent = t('ach.toast.header');
+  document.getElementById('ach-toast-name').textContent  = iname(ach);
+  document.getElementById('ach-toast-desc').textContent  = idesc(ach);
   el.classList.add('show');
   setTimeout(() => {
     el.classList.remove('show');
@@ -3300,6 +3844,7 @@ async function _openSurvivalGameOver() {
   const submitEl = document.getElementById('sg-submit');
   const statusEl = document.getElementById('sg-status');
   document.getElementById('sg-score').textContent = survivalScore;
+  document.getElementById('sg-result').innerHTML = t('surv.result').replace('{score}', `<strong>${survivalScore}</strong>`);
   statusEl.style.color = '#446655';
 
   if (!currentUser) {
@@ -3310,12 +3855,11 @@ async function _openSurvivalGameOver() {
     statusEl.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
         <div style="font-size:11px;letter-spacing:1px;line-height:1.7;text-align:center;border:1px solid #ff664433;background:#1a0800;padding:8px 14px">
-          🔒 <strong style="color:#ff4422">HOF non disponible en mode invité.</strong><br>
-          Connecte-toi pour enregistrer ton score.
+          ${t('surv.hof_unavailable')}
         </div>
         <button class="auth-google-btn" id="sg-google-btn" style="width:100%;font-size:12px">
           <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Se connecter avec Google
+          ${t('surv.signin_google')}
         </button>
       </div>`;
     overlay.classList.add('open');
@@ -3330,7 +3874,7 @@ async function _openSurvivalGameOver() {
             _openSurvivalGameOver();
           }
         };
-      } catch(e) { if (e.code !== 'auth/popup-closed-by-user') statusEl.textContent = '✗ Erreur de connexion'; }
+      } catch(e) { if (e.code !== 'auth/popup-closed-by-user') statusEl.textContent = t('auth.signin_error'); }
     };
     return;
   }
@@ -3339,7 +3883,7 @@ async function _openSurvivalGameOver() {
   pseudoEl.style.display = '';
   if (currentPseudo) pseudoEl.value = currentPseudo;
   statusEl.style.color = '#446655';
-  statusEl.textContent = 'Vérification…';
+  statusEl.textContent = t('surv.checking');
   submitEl.style.display = '';
   submitEl.disabled = true;
   overlay.classList.add('open');
@@ -3365,15 +3909,15 @@ async function _openSurvivalGameOver() {
 
   if (_survivalPrevScore !== null && survivalScore <= _survivalPrevScore) {
     statusEl.style.color = '#663333';
-    statusEl.textContent = `Ton record reste ${_survivalPrevScore} niveau(x) — score actuel insuffisant.`;
+    statusEl.textContent = t('surv.record_low').replace('{prev}', _survivalPrevScore);
     submitEl.style.display = 'none';
   } else {
     statusEl.textContent = _survivalPrevScore !== null
-      ? `▲ Nouveau record ! (ancien : ${_survivalPrevScore})`
+      ? t('surv.new_record').replace('{prev}', _survivalPrevScore)
       : (currentPseudo ? '👤 ' + currentPseudo : '');
     statusEl.style.color = _survivalPrevScore !== null ? '#00ffcc' : '#446655';
     submitEl.disabled = false;
-    submitEl.textContent = _survivalPrevKey ? 'METTRE À JOUR →' : 'ENTRER AU HOF →';
+    submitEl.textContent = _survivalPrevKey ? t('surv.update_hof') : t('surv.enter_hof');
     submitEl.onclick = () => _submitSurvivalScore(_survivalPrevKey);
   }
 }
@@ -3383,8 +3927,8 @@ async function _submitSurvivalScore(prevKey = null) {
   const statusEl = document.getElementById('sg-status');
   const submitEl = document.getElementById('sg-submit');
   const pseudo = pseudoEl.value.trim();
-  if (!pseudo) { statusEl.textContent = 'Entre ton pseudo.'; return; }
-  statusEl.textContent = 'Envoi…';
+  if (!pseudo) { statusEl.textContent = t('surv.enter_pseudo'); return; }
+  statusEl.textContent = t('surv.sending');
   submitEl.disabled = true;
   try {
     const token = await currentUser.getIdToken(true);
@@ -3398,13 +3942,13 @@ async function _submitSurvivalScore(prevKey = null) {
       body: JSON.stringify(entry)
     });
     statusEl.style.color = '#00ffcc';
-    statusEl.textContent = '✓ Score soumis !';
+    statusEl.textContent = t('surv.sent');
     submitEl.disabled = true;
     submitEl.style.opacity = '0.4';
     if (!currentPseudo) { currentPseudo = pseudo; updateAuthUI(); }
   } catch {
     statusEl.style.color = '#ff4444';
-    statusEl.textContent = '✗ Erreur, réessaie.';
+    statusEl.textContent = t('surv.error');
     submitEl.disabled = false;
   }
 }
@@ -3422,7 +3966,7 @@ function openAchievements() {
   const done  = _achDone.size;
   const total = ACHIEVEMENTS.length;
   document.getElementById('ach-progress').textContent =
-    done + ' / ' + total + ' débloqué' + (done > 1 ? 's' : '');
+    t('ach.progress').replace('{done}', done).replace('{total}', total);
   const list = document.getElementById('ach-list');
   list.innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = _achDone.has(a.id);
@@ -3430,8 +3974,8 @@ function openAchievements() {
     return `<div class="ach-item${unlocked ? ' unlocked' : ''}">
       <div class="ach-emoji">${a.emoji}</div>
       <div class="ach-info">
-        <div class="ach-name">${a.name}${vb ? `<span class="ach-vb${unlocked ? ' earned' : ''}">⚡${vb} VB</span>` : ''}</div>
-        <div class="ach-desc">${unlocked ? a.desc : '???'}</div>
+        <div class="ach-name">${iname(a)}${vb ? `<span class="ach-vb${unlocked ? ' earned' : ''}">⚡${vb} VB</span>` : ''}</div>
+        <div class="ach-desc">${unlocked ? idesc(a) : '???'}</div>
       </div>
     </div>`;
   }).join('');
@@ -3444,13 +3988,13 @@ document.getElementById('profile-close').onclick = () => document.getElementById
 document.getElementById('profile-open-btn').onclick = () => { closeMenu(); openProfile(); };
 
 function openProfile() {
-  const pseudo = currentPseudo || (currentUser ? '(sans pseudo)' : 'Mode invité');
+  const pseudo = currentPseudo || (currentUser ? t('auth.no_pseudo') : t('auth.guest_label'));
   const campRows = ['bebe', 'piquer', 'cauchemar'].map(id => {
     const s = getCampScore(id);
     const camp = CAMPAIGNS[id];
     const val  = s ? campFmtTime(s.time) + ' / ' + s.deaths + '💀' : null;
     return `<div class="prof-row">
-      <span class="prof-label">${camp.emoji} ${camp.name}</span>
+      <span class="prof-label">${camp.emoji} ${iname(camp)}</span>
       <span class="prof-val${val ? '' : ' empty'}">${val || '—'}</span>
     </div>`;
   });
@@ -3460,7 +4004,7 @@ function openProfile() {
     const camp = CAMPAIGNS[baseId];
     const val  = s ? campFmtTime(s.time) + ' / ' + s.deaths + '💀' : null;
     return `<div class="prof-row">
-      <span class="prof-label" style="color:#2a6a6a">🔄 ${camp.name}</span>
+      <span class="prof-label" style="color:#2a6a6a">🔄 ${iname(camp)}</span>
       <span class="prof-val${val ? '' : ' empty'}">${val || '—'}</span>
     </div>`;
   });
@@ -3474,22 +4018,22 @@ function openProfile() {
       <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:#aa7700;margin-top:4px">⚡ ${voltbucks} VB</div>
     </div>
     <div>
-      <div class="prof-section-title">Stats</div>
+      <div class="prof-section-title">${t('profile.stats')}</div>
       <div class="prof-row">
-        <span class="prof-label">💀 Morts totales</span>
+        <span class="prof-label">${t('profile.deaths')}</span>
         <span class="prof-val">${deathCount}</span>
       </div>
       <div class="prof-row">
-        <span class="prof-label">🏅 Hauts-faits</span>
+        <span class="prof-label">${t('profile.achievements')}</span>
         <span class="prof-val">${achCount} / ${achTotal}</span>
       </div>
     </div>
     <div>
-      <div class="prof-section-title">Meilleur temps par campagne</div>
+      <div class="prof-section-title">${t('profile.best_times')}</div>
       ${campRows.join('')}
     </div>
     <div>
-      <div class="prof-section-title">Mode miroir</div>
+      <div class="prof-section-title">${t('profile.mirror')}</div>
       ${mirrorRows.join('')}
     </div>
   `;
@@ -3714,15 +4258,15 @@ function openAuthOverlay(mode, onDone) {
         };
       } catch(e) {
         if (e.code !== 'auth/popup-closed-by-user') {
-          statusEl.textContent = '✗ Erreur de connexion';
+          statusEl.textContent = t('auth.signin_error');
         }
       }
     };
     guestBtn.onclick = () => { overlay.classList.remove('open'); };
 
   } else if (mode === 'pseudo') {
-    title.textContent = '👤 Choisis ton pseudo';
-    desc.textContent  = 'Ce pseudo sera visible dans le Hall of Fame.\nTon vrai nom ne sera jamais utilisé ni affiché.';
+    title.textContent = t('auth.pseudo_title');
+    desc.textContent  = t('auth.pseudo_desc');
     googleBtn.style.display = 'none';
     guestNote.style.display = 'none';
     guestBtn.style.display  = 'none';
@@ -3740,13 +4284,13 @@ function openAuthOverlay(mode, onDone) {
     }
     document.getElementById('pseudo-submit-btn').onclick = async () => {
       const val = document.getElementById('pseudo-input').value.trim();
-      if (val.length < 2) { statusEl.textContent = '⚠ Minimum 2 caractères'; return; }
-      statusEl.textContent = 'Enregistrement…';
+      if (val.length < 2) { statusEl.textContent = t('auth.pseudo_min'); return; }
+      statusEl.textContent = t('auth.pseudo_saving');
       try {
         await savePseudo(currentUser.uid, val);
         overlay.classList.remove('open');
         if (onDone) onDone();
-      } catch { statusEl.textContent = '✗ Erreur — réessaie'; }
+      } catch { statusEl.textContent = t('auth.pseudo_error'); }
     };
   }
 
@@ -3772,10 +4316,10 @@ function updateAuthUI() {
     btn.style.borderColor = '#00ffcc';
     btn.style.color = '#00ffcc';
     btn.onclick = () => {
-      if (confirm('Se déconnecter ?')) _fbAuth.signOut();
+      if (confirm(t('auth.signout_confirm'))) _fbAuth.signOut();
     };
   } else {
-    btn.textContent = '👤 Connexion';
+    btn.textContent = t('auth.signin_btn');
     btn.style.borderColor = '#4488ff';
     btn.style.color = '#4488ff';
     btn.onclick = () => { closeMenu(); openAuthOverlay('login', null); };
@@ -3793,13 +4337,13 @@ let _hofVersion = HOF_VERSION, _hofDiff = null;
 const HOF_VERSIONS = ['v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1']; // add new versions here
 const HOF_DIFFS    = ['bebe', 'piquer', 'cauchemar', 'bebe_inv', 'piquer_inv', 'cauchemar_inv', 'survie'];
 const HOF_DIFF_META = {
-  bebe:          { label: '🍼 Bébés',          color: '#44ff88' },
-  piquer:        { label: '⚡ Piquer',          color: '#ffaa00' },
-  cauchemar:     { label: '💀 Cauchemar',       color: '#ff4466' },
-  bebe_inv:      { label: '🔄 Bébés',     color: '#99ffcc' },
-  piquer_inv:    { label: '🔄 Piquer',    color: '#ffcc66' },
-  cauchemar_inv: { label: '🔄 Cauchemar', color: '#ff88aa' },
-  survie:        { label: '💀 Survie',    color: '#ff4466', survival: true },
+  bebe:          { key: 'pp.diff.bebe',          color: '#44ff88' },
+  piquer:        { key: 'pp.diff.piquer',         color: '#ffaa00' },
+  cauchemar:     { key: 'pp.diff.cauchemar',      color: '#ff4466' },
+  bebe_inv:      { key: 'pp.diff.bebe_inv',       color: '#99ffcc' },
+  piquer_inv:    { key: 'pp.diff.piquer_inv',     color: '#ffcc66' },
+  cauchemar_inv: { key: 'pp.diff.cauchemar_inv',  color: '#ff88aa' },
+  survie:        { key: 'pp.diff.survie',         color: '#ff4466', survival: true },
 };
 // Retourne le diffId effectif selon le mode miroir actif
 function _diffId() { return currentCampaignId + (invertControls ? '_inv' : ''); }
@@ -3909,7 +4453,7 @@ async function hofFetch(version, diff) {
 function hofRenderBody(entries, isSurvival = false) {
   const body = document.getElementById('hof-body');
   if (!entries.length) {
-    body.innerHTML = '<div class="hof-loading">Pas encore d\'entrée — sois le premier !</div>';
+    body.innerHTML = `<div class="hof-loading">${t('hof.no_entry')}</div>`;
     return;
   }
   const medals = ['🥇','🥈','🥉'];
@@ -3920,7 +4464,7 @@ function hofRenderBody(entries, isSurvival = false) {
   if (isSurvival) {
     body.innerHTML = `<table class="hof-table">
       <thead><tr>
-        <th>#</th><th>Pseudo</th><th>⚡ Niveaux</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
+        <th>#</th><th>Pseudo</th><th>⚡ ${currentLang === 'en' ? 'Levels' : 'Niveaux'}</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
@@ -3935,7 +4479,7 @@ function hofRenderBody(entries, isSurvival = false) {
   }
   body.innerHTML = `<table class="hof-table">
     <thead><tr>
-      <th>#</th><th>Pseudo</th><th>Temps</th><th>💀 Morts</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
+      <th>#</th><th>Pseudo</th><th>${currentLang === 'en' ? 'Time' : 'Temps'}</th><th>💀 ${currentLang === 'en' ? 'Deaths' : 'Morts'}</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
@@ -3981,7 +4525,7 @@ function hofBuildTabs(activeVersion, activeDiff) {
       btn.className = 'hof-diff-tab' + (d === activeDiff ? ' active' : '');
       btn.style.color = d === activeDiff ? meta.color : '#446655';
       if (d === activeDiff) btn.style.borderBottomColor = meta.color;
-      btn.textContent = meta.label;
+      btn.textContent = t(meta.key);
       btn.onclick = () => openHOF(activeVersion, d);
       diffRow.appendChild(btn);
     });
@@ -4011,7 +4555,7 @@ async function openHOF(version = HOF_VERSION, diff = null) {
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
   hofBuildSpecials();
-  document.getElementById('hof-body').innerHTML = '<div class="hof-loading">Chargement…</div>';
+  document.getElementById('hof-body').innerHTML = `<div class="hof-loading">${t('hof.loading')}</div>`;
   const entries = await hofFetch(version, diff);
   hofRenderBody(entries, diff === 'survie');
 }
@@ -4026,7 +4570,7 @@ document.getElementById('hof-body').addEventListener('click', async e => {
   const btn = e.target.closest('.hof-del-btn');
   if (btn && currentUser?.uid === ADMIN_UID) {
     const key = btn.dataset.key;
-    if (!key || !confirm(`Supprimer cette entrée HOF ?`)) return;
+    if (!key || !confirm(t('hof.delete_confirm'))) return;
     try {
       const token = await currentUser.getIdToken();
       const path = _hofDiff
@@ -4034,20 +4578,16 @@ document.getElementById('hof-body').addEventListener('click', async e => {
         : `${FB_URL}/${_hofVersion}/${key}.json?auth=${token}`;
       const res = await fetch(path, { method: 'DELETE' });
       if (res.ok) { btn.closest('tr').remove(); }
-      else alert('Erreur suppression : ' + res.status);
-    } catch(err) { alert('Erreur : ' + err.message); }
+      else alert(t('hof.delete_error') + res.status);
+    } catch(err) { alert(t('hof.error') + err.message); }
   }
 });
 
 // ── PLAYER PROFILE ─────────────────────────────────────────
 const PP_DIFFS = [
-  { id: 'bebe',          label: '🍼 Bébés' },
-  { id: 'piquer',        label: '⚡ Piquer' },
-  { id: 'cauchemar',     label: '💀 Cauchemar' },
-  { id: 'bebe_inv',      label: '🔄 Bébés' },
-  { id: 'piquer_inv',    label: '🔄 Piquer' },
-  { id: 'cauchemar_inv', label: '🔄 Cauchemar' },
-  { id: 'survie',        label: '💀 Survie' },
+  { id: 'bebe' }, { id: 'piquer' }, { id: 'cauchemar' },
+  { id: 'bebe_inv' }, { id: 'piquer_inv' }, { id: 'cauchemar_inv' },
+  { id: 'survie' },
 ];
 let _ppUid = null;
 let _ppHofCache = {};
@@ -4082,8 +4622,8 @@ async function openPlayerProfile(uid, pseudo) {
   document.getElementById('pp-bg-badge').textContent = '';
   document.getElementById('pp-vb').textContent = '';
   _ppDrawBallPreview(document.getElementById('pp-ball'), 'default');
-  document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
-  document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
+  document.getElementById('pp-hof-content').innerHTML = `<span style="color:#224433;font-size:11px">${t('loading.msg')}</span>`;
+  document.getElementById('pp-ach-list').innerHTML = `<span class="pp-ach-none">${t('loading.msg')}</span>`;
   document.getElementById('pp-overlay').classList.add('open');
 
   // Build diff tabs
@@ -4092,7 +4632,7 @@ async function openPlayerProfile(uid, pseudo) {
   PP_DIFFS.forEach((d, i) => {
     const btn = document.createElement('button');
     btn.className = 'pp-diff-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = d.label;
+    btn.textContent = t('pp.diff.' + d.id);
     btn.dataset.diff = d.id;
     btn.onclick = () => {
       tabsEl.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.remove('active'));
@@ -4109,7 +4649,7 @@ async function openPlayerProfile(uid, pseudo) {
 
 async function _ppShowDiff(diff) {
   const el = document.getElementById('pp-hof-content');
-  el.innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
+  el.innerHTML = `<span style="color:#224433;font-size:11px">${t('loading.msg')}</span>`;
   try {
     if (!_ppHofCache[diff]) {
       const res = await fetch(`${FB_URL}/${HOF_VERSION}/${diff}.json`);
@@ -4122,23 +4662,23 @@ async function _ppShowDiff(diff) {
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
     const rank = sorted.findIndex(e => e.uid === _ppUid);
     if (rank === -1) {
-      el.innerHTML = '<span class="pp-hof-none">Pas d\'entrée pour ce mode</span>';
+      el.innerHTML = `<span class="pp-hof-none">${currentLang === 'en' ? 'No entry for this mode' : 'Pas d\'entrée pour ce mode'}</span>`;
       return;
     }
     const e = sorted[rank];
     const medals = ['🥇', '🥈', '🥉'];
     const _bonusEmojiPP = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
     const bonusBadge = isSurvival && Array.isArray(e.bonuses) && e.bonuses.length
-      ? `<span title="Bonus utilisés" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmojiPP[b]||'').join('')}</span>`
+      ? `<span title="${currentLang === 'en' ? 'Bonuses used' : 'Bonus utilisés'}" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmojiPP[b]||'').join('')}</span>`
       : '';
     el.innerHTML = `<div class="pp-hof-entry">
       <span class="pp-hof-rank">${medals[rank] || '#' + (rank + 1)}</span>
       ${isSurvival
-        ? `<span class="pp-hof-time">${e.score} niveau(x)${bonusBadge}</span>`
+        ? `<span class="pp-hof-time">${e.score} ${t('hof.levels')}${bonusBadge}</span>`
         : `<span class="pp-hof-time">${campFmtTime(e.time)}</span><span class="pp-hof-deaths">${e.deaths} 💀</span>`}
     </div>`;
   } catch {
-    el.innerHTML = '<span class="pp-hof-none">Erreur de chargement</span>';
+    el.innerHTML = `<span class="pp-hof-none">${t('pp.loading_error')}</span>`;
   }
 }
 
@@ -4155,9 +4695,9 @@ async function _ppLoadAchievements(uid) {
     const skinId = data?.skin || 'default';
     _ppDrawBallPreview(document.getElementById('pp-ball'), skinId);
     const bgId = data?.bg || 'default';
-    const bgLabels = { default:'▦ Grille', electrons:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
+    const bgLabelKey = { default:'bg.default.label', electrons:'bg.electrons.label', stars:'bg.stars.label', matrix:'bg.matrix.label', aurora:'bg.aurora.label', void:'bg.void.label' };
     const bgEl = document.getElementById('pp-bg-badge');
-    if (bgEl) { const t = bgLabels[bgId] || ''; bgEl.textContent = t; bgEl.style.display = t ? '' : 'none'; }
+    if (bgEl) { const lbl = bgLabelKey[bgId] ? t(bgLabelKey[bgId]) : ''; bgEl.textContent = lbl; bgEl.style.display = lbl ? '' : 'none'; }
     const vbEl = document.getElementById('pp-vb');
     let vbVal = typeof data?.vb === 'number' ? data.vb : null;
     if (vbVal === null) { try { const r = await fetch(`${FB_VB_RANKS}/${uid}.json`); if (r.ok) { const d = await r.json(); if (typeof d?.vb === 'number') vbVal = d.vb; } } catch {} }
@@ -4172,16 +4712,16 @@ async function _ppLoadAchievements(uid) {
       }
     }
     if (!ids || !ids.length) {
-      el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
+      el.innerHTML = `<span class="pp-ach-none">${t('pp.ach_none')}</span>`;
       return;
     }
     el.innerHTML = ids.map(id => {
       const ach = ACHIEVEMENTS.find(a => a.id === id);
-      return ach ? `<div class="pp-ach-item">${ach.emoji} ${ach.name}</div>` : '';
+      return ach ? `<div class="pp-ach-item">${ach.emoji} ${iname(ach)}</div>` : '';
     }).filter(Boolean).join('');
-    if (!el.innerHTML) el.innerHTML = '<span class="pp-ach-none">Aucun haut-fait débloqué</span>';
+    if (!el.innerHTML) el.innerHTML = `<span class="pp-ach-none">${t('pp.ach_none')}</span>`;
   } catch {
-    el.innerHTML = '<span class="pp-ach-none">Erreur de chargement</span>';
+    el.innerHTML = `<span class="pp-ach-none">${t('pp.loading_error')}</span>`;
   }
 }
 document.getElementById('hof-open-btn').onclick = () => {
@@ -4315,7 +4855,7 @@ async function loadDoneFromFirebase() {
       }).catch(() => {});
       setTimeout(() => {
         const el = document.getElementById('vb-toast');
-        if (el) { el.textContent = `🎁 +${retro} VB récupérés`; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 3000); }
+        if (el) { el.textContent = t('misc.vb_retro').replace('{vb}', retro); el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 3000); }
       }, 1500);
     }
     // Push vers Firebase les hauts-faits locaux absents de Firebase
@@ -4344,27 +4884,27 @@ _updateVBDisplay();
 // ── SHOP & SKINS ────────────────────────────────────────────
 // ── EMOTES & BACKGROUNDS ───────────────────────────────────
 const EMOTES = [
-  { id: 'none',    emoji: '🐥', name: 'Poussin',         price: 0 },
-  { id: 'bolt',    emoji: '⚡', name: 'Électrique',      price: 150 },
-  { id: 'skull',   emoji: '💀', name: 'Mortel',          price: 200 },
-  { id: 'crown',   emoji: '👑', name: 'Royauté',         price: 500 },
-  { id: 'ghost',   emoji: '👻', name: 'Fantôme',         price: 300 },
-  { id: 'fire',    emoji: '🔥', name: 'En feu',          price: 300 },
-  { id: 'robot',   emoji: '🤖', name: 'Robot',           price: 400 },
-  { id: 'alien',   emoji: '👾', name: 'Alien',           price: 400 },
-  { id: 'diamond', emoji: '💎', name: 'Diamant',         price: 600 },
-  { id: 'devil',   emoji: '😈', name: 'Diable',          price: 600 },
-  { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800 },
-  { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500 },
+  { id: 'none',    emoji: '🐥', name: 'Poussin',         price: 0,    _nameKey: 'emote.none.name' },
+  { id: 'bolt',    emoji: '⚡', name: 'Électrique',      price: 150,  _nameKey: 'emote.bolt.name' },
+  { id: 'skull',   emoji: '💀', name: 'Mortel',          price: 200,  _nameKey: 'emote.skull.name' },
+  { id: 'crown',   emoji: '👑', name: 'Royauté',         price: 500,  _nameKey: 'emote.crown.name' },
+  { id: 'ghost',   emoji: '👻', name: 'Fantôme',         price: 300,  _nameKey: 'emote.ghost.name' },
+  { id: 'fire',    emoji: '🔥', name: 'En feu',          price: 300,  _nameKey: 'emote.fire.name' },
+  { id: 'robot',   emoji: '🤖', name: 'Robot',           price: 400,  _nameKey: 'emote.robot.name' },
+  { id: 'alien',   emoji: '👾', name: 'Alien',           price: 400,  _nameKey: 'emote.alien.name' },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',         price: 600,  _nameKey: 'emote.diamond.name' },
+  { id: 'devil',   emoji: '😈', name: 'Diable',          price: 600,  _nameKey: 'emote.devil.name' },
+  { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800,  _nameKey: 'emote.comet.name' },
+  { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500, _nameKey: 'emote.godmode.name' },
 ];
 
 const BACKGROUNDS = [
-  { id: 'default',   name: 'Grille',           price: 0 },
-  { id: 'electrons', name: 'Électrons',        price: 300 },
-  { id: 'stars',     name: 'Étoiles filantes', price: 400 },
-  { id: 'matrix',    name: 'Pluie de code',    price: 500 },
-  { id: 'aurora',    name: 'Aurore boréale',   price: 600 },
-  { id: 'void',      name: 'Vide cosmique',    price: 300 },
+  { id: 'default',   name: 'Grille',           price: 0,   _nameKey: 'bg.default.name' },
+  { id: 'electrons', name: 'Électrons',        price: 300, _nameKey: 'bg.electrons.name' },
+  { id: 'stars',     name: 'Étoiles filantes', price: 400, _nameKey: 'bg.stars.name' },
+  { id: 'matrix',    name: 'Pluie de code',    price: 500, _nameKey: 'bg.matrix.name' },
+  { id: 'aurora',    name: 'Aurore boréale',   price: 600, _nameKey: 'bg.aurora.name' },
+  { id: 'void',      name: 'Vide cosmique',    price: 300, _nameKey: 'bg.void.name' },
 ];
 
 const _EMOTE_LS  = 'elecgame_emote';
@@ -4374,9 +4914,9 @@ let _equippedBg    = localStorage.getItem(_BG_LS)    || 'default';
 
 // ── CONSUMABLES ─────────────────────────────────────────────
 const CONSUMABLES = [
-  { id: 'heart',      emoji: '❤️', name: 'Cœur',        price: 500,  desc: '+1 vie en mode survie' },
-  { id: 'fuse',       emoji: '🔌', name: 'Fusible',      price: 800,  desc: 'Verrouille un switch pour le niveau' },
-  { id: 'attenuator', emoji: '🐢', name: 'Atténuateur',  price: 600,  desc: 'Vitesse à 75% pour tout le niveau' },
+  { id: 'heart',      emoji: '❤️', name: 'Cœur',        price: 500,  desc: '+1 vie en mode survie',              _nameKey: 'consum.heart.name',      _descKey: 'consum.heart.desc' },
+  { id: 'fuse',       emoji: '🔌', name: 'Fusible',      price: 800,  desc: 'Verrouille un switch pour le niveau', _nameKey: 'consum.fuse.name',       _descKey: 'consum.fuse.desc' },
+  { id: 'attenuator', emoji: '🐢', name: 'Atténuateur',  price: 600,  desc: 'Vitesse à 75% pour tout le niveau',  _nameKey: 'consum.attenuator.name', _descKey: 'consum.attenuator.desc' },
 ];
 const _CONSUM_LS = 'elecgame_consumables';
 let _consumables = JSON.parse(localStorage.getItem(_CONSUM_LS) || '{}');
@@ -4412,19 +4952,19 @@ function _updateConsumHUD() {
 
 function _useHeart() {
   if (!_consumables.heart || !survivalRunning) return;
-  if (!confirm('❤️ Utiliser le Cœur pour gagner +1 vie ?')) return;
+  if (!confirm(t('consum.heart.confirm'))) return;
   _consumables.heart = false; _saveConsumables();
   survivalLives = Math.min(survivalLives + 1, 6);
   updateSurvivalHUD();
   _runUsedConsumables.add('heart');
   _updateConsumHUD();
   const el = document.getElementById('vb-toast');
-  if (el) { el.textContent = '❤️ +1 vie !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  if (el) { el.textContent = t('consum.heart.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
 }
 
 function _useFuse() {
   if (!_consumables.fuse || survivalRunning) return;
-  if (!confirm('🔌 Utiliser le Fusible ? Clique ensuite sur un switch pour le verrouiller fermé.')) return;
+  if (!confirm(t('consum.fuse.confirm'))) return;
   _fuseMode = true;
   _updateConsumHUD();
   const el = document.getElementById('fuse-hint');
@@ -4442,18 +4982,18 @@ function _applyFuseToSwitch(eid, swRef) {
   _updateConsumHUD();
   document.getElementById('fuse-hint').style.display = 'none';
   const el = document.getElementById('vb-toast');
-  if (el) { el.textContent = '🔌 Switch verrouillé !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  if (el) { el.textContent = t('consum.fuse.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
 }
 
 function _useAttenuator() {
   if (!_consumables.attenuator || _attenuatorActive || survivalRunning) return;
-  if (!confirm('🐢 Utiliser l\'Atténuateur ? La vitesse passe à 75% pour tout le niveau.')) return;
+  if (!confirm(t('consum.attenuator.confirm'))) return;
   _consumables.attenuator = false; _saveConsumables();
   _attenuatorActive = true;
   _runUsedConsumables.add('attenuator');
   _updateConsumHUD();
   const el = document.getElementById('vb-toast');
-  if (el) { el.textContent = '🐢 Vitesse -25% !'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  if (el) { el.textContent = t('consum.attenuator.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
 }
 
 function _saveCosmetics() {
@@ -4471,49 +5011,49 @@ function _saveCosmetics() {
 
 const BALL_SKINS = [
   {
-    id: 'default', name: 'Électron', price: 0,
+    id: 'default', name: 'Électron', price: 0, _nameKey: 'skin.default.name',
     glow: '#88ddff', shadow: '#88ddff',
     outer: [['rgba(80,180,255,0.6)', 0], ['rgba(0,80,255,0)', 1]],
     inner: [['#ffffff', 0], ['#88ccff', 0.5], ['#0055ff', 1]],
   },
   {
-    id: 'plasma', name: 'Plasma', price: 300,
+    id: 'plasma', name: 'Plasma', price: 300, _nameKey: 'skin.plasma.name',
     glow: '#ff44ff', shadow: '#ff00ff',
     outer: [['rgba(255,80,255,0.6)', 0], ['rgba(180,0,255,0)', 1]],
     inner: [['#ffffff', 0], ['#ff88ff', 0.5], ['#aa00ff', 1]],
   },
   {
-    id: 'soleil', name: 'Soleil', price: 300,
+    id: 'soleil', name: 'Soleil', price: 300, _nameKey: 'skin.soleil.name',
     glow: '#ffcc00', shadow: '#ff8800',
     outer: [['rgba(255,200,0,0.6)', 0], ['rgba(255,100,0,0)', 1]],
     inner: [['#ffffff', 0], ['#ffdd44', 0.5], ['#ff6600', 1]],
   },
   {
-    id: 'venin', name: 'Venin', price: 400,
+    id: 'venin', name: 'Venin', price: 400, _nameKey: 'skin.venin.name',
     glow: '#44ff44', shadow: '#00ff44',
     outer: [['rgba(0,255,80,0.6)', 0], ['rgba(0,180,0,0)', 1]],
     inner: [['#ffffff', 0], ['#88ff88', 0.5], ['#006600', 1]],
   },
   {
-    id: 'braise', name: 'Braise', price: 400,
+    id: 'braise', name: 'Braise', price: 400, _nameKey: 'skin.braise.name',
     glow: '#ff6600', shadow: '#ff2200',
     outer: [['rgba(255,100,0,0.65)', 0], ['rgba(200,0,0,0)', 1]],
     inner: [['#ffffff', 0], ['#ff8844', 0.5], ['#cc0000', 1]],
   },
   {
-    id: 'spectre', name: 'Spectre', price: 600,
+    id: 'spectre', name: 'Spectre', price: 600, _nameKey: 'skin.spectre.name',
     glow: '#aaaaff', shadow: '#6666ff',
     outer: [['rgba(180,180,255,0.4)', 0], ['rgba(80,80,255,0)', 1]],
     inner: [['#eeeeee', 0], ['#aaaaee', 0.4], ['#222244', 0.85], ['rgba(0,0,0,0)', 1]],
   },
   {
-    id: 'neant', name: 'Néant', price: 800,
+    id: 'neant', name: 'Néant', price: 800, _nameKey: 'skin.neant.name',
     glow: '#220022', shadow: '#440044',
     outer: [['rgba(80,0,80,0.5)', 0], ['rgba(0,0,0,0)', 1]],
     inner: [['#996699', 0], ['#330033', 0.5], ['#000000', 1]],
   },
   {
-    id: 'arc', name: 'Arc-en-ciel', price: 1200,
+    id: 'arc', name: 'Arc-en-ciel', price: 1200, _nameKey: 'skin.arc.name',
     glow: '#ff88ff', shadow: '#ff88ff',
     outer: null, // dessin spécial
     inner: null,
@@ -4562,12 +5102,12 @@ function _renderShopSkins() {
     const equipped = _equippedSkin === s.id;
     const canAfford = voltbucks >= s.price;
     const cls = equipped ? 'shop-item equipped' : owned ? 'shop-item owned' : 'shop-item' + (canAfford ? '' : ' broke');
-    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
-    const price = s.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + s.price + ' VB';
-    return `<div class="${cls}" data-skin="${s.id}" title="${s.name}">
+    const badge = equipped ? `<span class="shop-item-badge">${t('shop.equipped')}</span>` : owned ? `<span class="shop-item-badge">${t('shop.owned')}</span>` : '';
+    const price = s.price === 0 ? t('shop.free') : owned ? '✓' : '⚡' + s.price + ' VB';
+    return `<div class="${cls}" data-skin="${s.id}" title="${iname(s)}">
       ${badge}
       <canvas class="shop-item-preview" width="60" height="60" data-skin-preview="${s.id}"></canvas>
-      <div class="shop-item-name">${s.name}</div>
+      <div class="shop-item-name">${iname(s)}</div>
       <div class="shop-item-price">${price}</div>
     </div>`;
   }).join('');
@@ -4632,9 +5172,9 @@ function _shopItemClick(skinId) {
     document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
     return;
   }
-  if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
+  if (!currentUser) { alert(t('shop.login_required')); return; }
   if (voltbucks < skin.price) { return; }
-  if (!confirm(`Acheter "${skin.name}" pour ⚡${skin.price} VB ?`)) return;
+  if (!confirm(t('shop.buy_confirm').replace('{name}', iname(skin)).replace('{price}', skin.price))) return;
   voltbucks -= skin.price;
   _ownedItems.add(skinId);
   _equippedSkin = skinId;
@@ -4652,12 +5192,12 @@ function _renderShopEmotes() {
     const equipped = _equippedEmote === e.id;
     const canAfford = voltbucks >= e.price;
     const cls = 'shop-item' + (equipped ? ' equipped' : owned ? ' owned' : canAfford ? '' : ' broke');
-    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
-    const price = e.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + e.price + ' VB';
+    const badge = equipped ? `<span class="shop-item-badge">${t('shop.equipped')}</span>` : owned ? `<span class="shop-item-badge">${t('shop.owned')}</span>` : '';
+    const price = e.price === 0 ? t('shop.free') : owned ? '✓' : '⚡' + e.price + ' VB';
     return `<div class="${cls}" data-emote="${e.id}">
       ${badge}
       <div style="font-size:32px;line-height:1.2;padding:4px 0">${e.emoji}</div>
-      <div class="shop-item-name">${e.name}</div>
+      <div class="shop-item-name">${iname(e)}</div>
       <div class="shop-item-price">${price}</div>
     </div>`;
   }).join('');
@@ -4671,9 +5211,9 @@ function _renderShopEmotes() {
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
-      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
+      if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < emote.price) return;
-      if (!confirm(`Acheter "${emote.name}" pour ⚡${emote.price} VB ?`)) return;
+      if (!confirm(t('shop.buy_confirm').replace('{name}', iname(emote)).replace('{price}', emote.price))) return;
       voltbucks -= emote.price; _ownedItems.add(key); _equippedEmote = emote.id;
       _saveInventory(); _saveCosmetics(); _syncVB(); _renderShopEmotes();
       document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
@@ -4691,14 +5231,14 @@ function _renderShopBgs() {
     const equipped = _equippedBg === bg.id;
     const canAfford = voltbucks >= bg.price;
     const cls = 'shop-item' + (equipped ? ' equipped' : owned ? ' owned' : canAfford ? '' : ' broke');
-    const badge = equipped ? '<span class="shop-item-badge">ÉQUIPÉ</span>' : owned ? '<span class="shop-item-badge">POSSÉDÉ</span>' : '';
-    const price = bg.price === 0 ? 'Gratuit' : owned ? '✓' : '⚡' + bg.price + ' VB';
+    const badge = equipped ? `<span class="shop-item-badge">${t('shop.equipped')}</span>` : owned ? `<span class="shop-item-badge">${t('shop.owned')}</span>` : '';
+    const price = bg.price === 0 ? t('shop.free') : owned ? '✓' : '⚡' + bg.price + ' VB';
     const preview = _bgPreviewStyle(bg.id);
-    const previewBtn = !equipped ? `<button class="shop-bg-preview" data-bg-preview="${bg.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid #1a4535;color:#336655;cursor:pointer;padding:2px 6px;margin-top:2px">Aperçu</button>` : '';
+    const previewBtn = !equipped ? `<button class="shop-bg-preview" data-bg-preview="${bg.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid #1a4535;color:#336655;cursor:pointer;padding:2px 6px;margin-top:2px">${t('shop.preview')}</button>` : '';
     return `<div class="${cls}" data-bg="${bg.id}">
       ${badge}
       <div style="width:80px;height:50px;border:1px solid #1a4535;border-radius:2px;overflow:hidden;${preview}"></div>
-      <div class="shop-item-name">${bg.name}</div>
+      <div class="shop-item-name">${iname(bg)}</div>
       <div class="shop-item-price">${price}</div>
       ${previewBtn}
     </div>`;
@@ -4733,9 +5273,9 @@ function _renderShopBgs() {
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
-      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
+      if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < bg.price) return;
-      if (!confirm(`Acheter "${bg.name}" pour ⚡${bg.price} VB ?`)) return;
+      if (!confirm(t('shop.buy_confirm').replace('{name}', iname(bg)).replace('{price}', bg.price))) return;
       voltbucks -= bg.price; _ownedItems.add(key); _equippedBg = bg.id;
       _saveInventory(); _saveCosmetics(); _syncVB(); _applyBackground(); _renderShopBgs();
       document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
@@ -4886,15 +5426,15 @@ function _renderShopBonus() {
     const owned = !!_consumables[c.id];
     const canAfford = voltbucks >= c.price;
     const cls = owned ? 'shop-bg-item owned' : 'shop-bg-item' + (canAfford ? '' : ' broke');
-    const badge = owned ? '<span class="shop-item-badge">EN STOCK</span>' : '';
-    const btnLabel = owned ? '✓ En stock' : canAfford ? `⚡${c.price} VB` : `⚡${c.price} VB`;
+    const badge = owned ? `<span class="shop-item-badge">${t('shop.in_stock')}</span>` : '';
+    const btnLabel = owned ? t('shop.in_stock_btn') : `⚡${c.price} VB`;
     const btnDisabled = owned || (!canAfford && !owned) ? '' : '';
     const btnStyle = owned ? 'opacity:0.5;cursor:default' : canAfford ? '' : 'opacity:0.4;cursor:default';
     return `<div class="${cls}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;min-width:120px">
       ${badge}
       <div style="font-size:36px">${c.emoji}</div>
-      <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;color:#00ffcc">${c.name}</div>
-      <div style="font-family:'Courier New',monospace;font-size:9px;color:#336655;text-align:center;letter-spacing:1px">${c.desc}</div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;color:#00ffcc">${iname(c)}</div>
+      <div style="font-family:'Courier New',monospace;font-size:9px;color:#336655;text-align:center;letter-spacing:1px">${idesc(c)}</div>
       <button class="shop-consum-buy" data-consum="${c.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid ${owned?'#1a5a3a':canAfford?'#336644':'#2a2a2a'};color:${owned?'#336655':canAfford?'#00ffcc':'#333'};padding:3px 10px;cursor:${owned||!canAfford?'default':'pointer'};${btnStyle}">${btnLabel}</button>
     </div>`;
   }).join('');
@@ -4904,9 +5444,9 @@ function _renderShopBonus() {
       const id = btn.dataset.consum;
       const item = CONSUMABLES.find(c => c.id === id);
       if (!item || _consumables[id]) return;
-      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
+      if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < item.price) return;
-      if (!confirm(`Acheter "${item.name}" pour ⚡${item.price} VB ?`)) return;
+      if (!confirm(t('shop.buy_confirm').replace('{name}', iname(item)).replace('{price}', item.price))) return;
       voltbucks -= item.price;
       _consumables[id] = true;
       _saveConsumables(); _syncVB(); _renderShopBonus();
@@ -4940,24 +5480,23 @@ async function openFinish(timeMs, deaths) {
   submitBtn.disabled = false;
   submitBtn.style.opacity = '';
   submitBtn.style.display = 'none';
-  scoreEl.innerHTML = `Temps : <span>${campFmtTime(timeMs)}</span>   Morts : <span>${deaths}</span>`;
-  titleEl.textContent = '🏆 CAMPAGNE TERMINÉE ! ' + camp.emoji;
+  scoreEl.innerHTML = `${currentLang === 'en' ? 'Time' : 'Temps'} : <span>${campFmtTime(timeMs)}</span>   ${currentLang === 'en' ? 'Deaths' : 'Morts'} : <span>${deaths}</span>`;
+  titleEl.textContent = t('finish.title') + ' ' + camp.emoji;
 
   // Mode invité — propose de se connecter pour ne pas perdre le score
   if (!currentUser || !currentPseudo) {
     submitBtn.style.display = 'none';
     pseudoIn.style.display  = 'none';
-    skipBtn.textContent = 'Jouer en invité (score perdu)';
+    skipBtn.textContent = t('finish.guest_skip');
     statusEl.style.color = '#ff6644';
     statusEl.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
         <div style="font-size:13px;letter-spacing:1px;line-height:1.7;text-align:center;border:1px solid #ff664433;background:#1a0800;padding:10px 16px">
-          🔒 <strong style="color:#ff4422">HOF non disponible en mode invité.</strong><br>
-          Ton score sera perdu si tu continues sans te connecter.
+          ${t('finish.guest_hof')}
         </div>
         <button class="auth-google-btn" id="finish-google-btn" style="width:100%">
           <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Se connecter pour sauvegarder mon score
+          ${t('finish.signin_save')}
         </button>
       </div>`;
     overlay.classList.add('open');
@@ -4973,15 +5512,15 @@ async function openFinish(timeMs, deaths) {
             openFinish(timeMs, deaths);
           }
         };
-      } catch(e) { if (e.code !== 'auth/popup-closed-by-user') statusEl.textContent = '✗ Erreur de connexion'; }
+      } catch(e) { if (e.code !== 'auth/popup-closed-by-user') statusEl.textContent = t('auth.signin_error'); }
     };
     return;
   }
 
   // Open overlay now while Firebase check runs
   statusEl.style.color = '#446655';
-  statusEl.textContent = 'Vérification du HOF…';
-  skipBtn.textContent  = 'Passer';
+  statusEl.textContent = t('finish.checking');
+  skipBtn.textContent  = t('surv.skip');
   overlay.classList.add('open');
 
   // Fetch best score cross-device (localStorage + Firebase by uid)
@@ -4996,14 +5535,14 @@ async function openFinish(timeMs, deaths) {
   let comparison = '';
   if (!isFirstRun) {
     if (isBetter) {
-      comparison = `<br><span style="color:#00ffcc">▲ Record battu ! (ancien : ${campFmtTime(prevTime)}, ${prevDeaths} 💀)</span>`;
+      comparison = `<br><span style="color:#00ffcc">${t('finish.beat_record').replace('{prev}', campFmtTime(prevTime)).replace('{deaths}', prevDeaths)}</span>`;
     } else {
       const diff = timeMs - prevTime;
-      comparison = `<br><span style="color:#663333">Ton record reste ${campFmtTime(prevTime)} — ${prevDeaths} 💀 (${diff > 0 ? '+' + campFmtTime(diff) : ''})</span>`;
+      comparison = `<br><span style="color:#663333">${t('finish.old_record').replace('{prev}', campFmtTime(prevTime)).replace('{deaths}', prevDeaths).replace('{diff}', diff > 0 ? '+' + campFmtTime(diff) : '')}</span>`;
     }
   }
-  scoreEl.innerHTML = `Temps : <span>${campFmtTime(timeMs)}</span>   Morts : <span>${deaths}</span>${comparison}`;
-  titleEl.textContent = (isFirstRun ? '🏆 CAMPAGNE TERMINÉE !' : isBetter ? '🏆 NOUVEAU RECORD !' : '💪 CAMPAGNE TERMINÉE !') + ' ' + camp.emoji;
+  scoreEl.innerHTML = `${currentLang === 'en' ? 'Time' : 'Temps'} : <span>${campFmtTime(timeMs)}</span>   ${currentLang === 'en' ? 'Deaths' : 'Morts'} : <span>${deaths}</span>${comparison}`;
+  titleEl.textContent = (isFirstRun ? t('finish.title') : isBetter ? t('finish.record') : t('finish.retry')) + ' ' + camp.emoji;
   statusEl.textContent = '';
 
   // Admin skip invalidates HOF submission
@@ -5011,15 +5550,15 @@ async function openFinish(timeMs, deaths) {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.3';
     statusEl.style.color = '#ffaa00';
-    statusEl.textContent = '🔑 Run admin — score non soumis au HOF';
+    statusEl.textContent = t('finish.admin_skip');
   } else if (!isBetter) {
     submitBtn.style.display = 'none';
-    skipBtn.textContent = 'Voir le Hall of Fame';
+    skipBtn.textContent = t('hof.title');
   } else {
     submitBtn.style.display = '';
     submitBtn.style.opacity = '';
-    submitBtn.textContent = prevKey ? 'METTRE À JOUR LE HOF →' : 'ENTRER AU HOF →';
-    skipBtn.textContent = 'Passer';
+    submitBtn.textContent = prevKey ? t('finish.update_hof') : t('finish.enter_hof');
+    skipBtn.textContent = t('surv.skip');
     statusEl.style.color = '#446655';
     statusEl.textContent = '👤 ' + currentPseudo;
   }
@@ -5031,7 +5570,7 @@ async function openFinish(timeMs, deaths) {
 
   submitBtn.onclick = async () => {
     submitBtn.disabled = true;
-    statusEl.textContent = 'Envoi…';
+    statusEl.textContent = t('finish.sending');
     try {
       const token  = await currentUser.getIdToken(true);
       const pseudo = currentPseudo;
@@ -5054,10 +5593,10 @@ async function openFinish(timeMs, deaths) {
       }
 
       setCampScore(diffId, timeMs, deaths, key);
-      statusEl.textContent = '✓ Enregistré !';
+      statusEl.textContent = t('finish.saved');
       setTimeout(() => { overlay.classList.remove('open'); openHOF(); }, 900);
     } catch(err) {
-      statusEl.textContent = '✗ Erreur : ' + err.message;
+      statusEl.textContent = t('finish.error') + err.message;
       submitBtn.disabled = false;
     }
   };
@@ -5140,7 +5679,7 @@ function updateReplay() {
     // Proposer de revoir depuis le début
     const nlWrap = document.getElementById('next-level-wrap');
     const nlBtn  = document.getElementById('next-level-btn');
-    nlBtn.textContent = '↺ Revoir depuis le début';
+    nlBtn.textContent = t('misc.replay_restart');
     nlBtn.onclick = () => { nlWrap.style.display = 'none'; loadReplayFile(replayData); };
     nlWrap.style.display = 'block';
   }
