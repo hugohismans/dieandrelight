@@ -2197,6 +2197,9 @@ const TRANSLATIONS = {
     'surv.sending': 'Envoi…',
     'surv.sent': '✓ Score soumis !',
     'surv.error': '✗ Erreur, réessaie.',
+    'hof.fallback_err': '✗ Erreur Firebase ({code}). Copie ton score et envoie-le à l\'admin sur Discord pour un ajout manuel.',
+    'hof.copy_score': '📋 Copier mon score',
+    'hof.copied': '✓ Copié ! Envoie ça à l\'admin sur Discord.',
     'surv.retry': '↺ Rejouer',
     'surv.skip': 'Passer',
     // Finish (campaign)
@@ -2473,6 +2476,9 @@ const TRANSLATIONS = {
     'surv.sending': 'Sending…',
     'surv.sent': '✓ Score submitted!',
     'surv.error': '✗ Error, try again.',
+    'hof.fallback_err': '✗ Firebase error ({code}). Copy your score and send it to the Discord admin for manual entry.',
+    'hof.copy_score': '📋 Copy my score',
+    'hof.copied': '✓ Copied! Send this to the admin on Discord.',
     'surv.retry': '↺ Play again',
     'surv.skip': 'Skip',
     // Finish (campaign)
@@ -4015,12 +4021,42 @@ async function _openSurvivalGameOver() {
   }
 }
 
+function _showHofFallback(statusEl, submitEl, { pseudo, diff, time, deaths, score, uid }) {
+  const code = statusEl._lastHofErrCode || '?';
+  const lines = [
+    '=== Score HOF non enregistré / HOF score not saved ===',
+    `Pseudo : ${pseudo}`,
+    `Diff   : ${diff}`,
+    time   !== undefined ? `Temps  : ${campFmtTime(time)} (${time}ms)` : '',
+    deaths !== undefined ? `Morts  : ${deaths}` : '',
+    score  !== undefined ? `Score  : ${score}` : '',
+    `UID    : ${uid}`,
+    `Date   : ${new Date().toISOString()}`,
+    `Code   : HTTP ${code}`,
+  ].filter(Boolean).join('\n');
+
+  statusEl.style.color = '#ff6644';
+  statusEl.innerHTML =
+    t('hof.fallback_err').replace('{code}', code) +
+    `<br><button id="_hof-copy-btn" style="margin-top:7px;padding:4px 12px;border:1px solid #ffaa44;color:#ffaa44;background:transparent;cursor:pointer;font-family:inherit;font-size:11px;border-radius:3px">${t('hof.copy_score')}</button>` +
+    `<span id="_hof-copy-ok" style="display:none;color:#00cc88;font-size:11px;margin-left:8px"></span>`;
+
+  document.getElementById('_hof-copy-btn').onclick = () => {
+    navigator.clipboard.writeText(lines).then(() => {
+      const ok = document.getElementById('_hof-copy-ok');
+      if (ok) { ok.textContent = t('hof.copied'); ok.style.display = 'inline'; }
+    }).catch(() => { prompt('Copie ce texte :', lines); });
+  };
+  if (submitEl) submitEl.disabled = false;
+}
+
 async function _submitSurvivalScore(prevKey = null) {
   const pseudoEl = document.getElementById('sg-pseudo');
   const statusEl = document.getElementById('sg-status');
   const submitEl = document.getElementById('sg-submit');
   const pseudo = currentPseudo || pseudoEl.value.trim();
   if (!pseudo) { statusEl.textContent = t('surv.enter_pseudo'); return; }
+  statusEl.style.color = '#446655';
   statusEl.textContent = t('surv.sending');
   submitEl.disabled = true;
   try {
@@ -4029,20 +4065,22 @@ async function _submitSurvivalScore(prevKey = null) {
     const url = prevKey
       ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json?auth=${token}`
       : `${FB_URL}/${HOF_VERSION}/survie.json?auth=${token}`;
-    await fetch(url, {
+    const res = await fetch(url, {
       method: prevKey ? 'PUT' : 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(entry)
     });
+    if (!res.ok) {
+      statusEl._lastHofErrCode = res.status;
+      throw new Error('HTTP ' + res.status);
+    }
     statusEl.style.color = '#00ffcc';
     statusEl.textContent = t('surv.sent');
     submitEl.disabled = true;
     submitEl.style.opacity = '0.4';
     if (!currentPseudo) { currentPseudo = pseudo; updateAuthUI(); }
-  } catch {
-    statusEl.style.color = '#ff4444';
-    statusEl.textContent = t('surv.error');
-    submitEl.disabled = false;
+  } catch(err) {
+    _showHofFallback(statusEl, submitEl, { pseudo, diff: 'survie', score: survivalScore, uid: currentUser?.uid });
   }
 }
 
@@ -5689,6 +5727,7 @@ async function openFinish(timeMs, deaths) {
 
   submitBtn.onclick = async () => {
     submitBtn.disabled = true;
+    statusEl.style.color = '#446655';
     statusEl.textContent = t('finish.sending');
     try {
       const token  = await currentUser.getIdToken(true);
@@ -5701,22 +5740,21 @@ async function openFinish(timeMs, deaths) {
         const res = await fetch(`${fbBase}/${key}.json?auth=${token}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) { statusEl._lastHofErrCode = res.status; throw new Error('HTTP ' + res.status); }
       } else {
         const res = await fetch(`${fbBase}.json?auth=${token}`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        key = data.name;
+        if (!res.ok) { statusEl._lastHofErrCode = res.status; throw new Error('HTTP ' + res.status); }
+        key = (await res.json()).name;
       }
 
       setCampScore(diffId, timeMs, deaths, key);
+      statusEl.style.color = '#00ffcc';
       statusEl.textContent = t('finish.saved');
       setTimeout(() => { overlay.classList.remove('open'); openHOF(); }, 900);
     } catch(err) {
-      statusEl.textContent = t('finish.error') + err.message;
-      submitBtn.disabled = false;
+      _showHofFallback(statusEl, submitBtn, { pseudo: currentPseudo, diff: diffId, time: timeMs, deaths, uid: currentUser?.uid });
     }
   };
 }
