@@ -288,7 +288,6 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     position: fixed;
     top: 32px;
     left: 64px;
-    transform: translateX(-50%);
     z-index: 150;
     color: #1a4535;
     font-family: 'Courier New', monospace;
@@ -2552,6 +2551,7 @@ function openCampSelect() {
   btnsEl.innerHTML = '';
   // difficulté visuelle : 1 = facile (bebe), 2 = moyen, 3 = difficile (cauchemar)
   const CAMP_DIFF = { bebe: 1, piquer: 2, cauchemar: 3 };
+  const CAMP_VB   = { bebe: 1, piquer: 10, cauchemar: 50 };
   for (const [id, camp] of Object.entries(CAMPAIGNS)) {
     const btn = document.createElement('button');
     btn.className = 'camp-select-btn';
@@ -2560,6 +2560,7 @@ function openCampSelect() {
     btn.style.color = camp.color;
     const n = camp.levels.length;
     const diff = CAMP_DIFF[id] || 1;
+    const vb = CAMP_VB[id] || 0;
     const dots = [1,2,3].map(d =>
       `<span style="background:${d <= diff ? camp.color : 'transparent'};border:1px solid ${camp.color}66"></span>`
     ).join('');
@@ -2569,7 +2570,10 @@ function openCampSelect() {
         <span class="camp-name">${camp.name}</span>
         <div class="camp-meta">
           <span class="camp-desc">${n} niveau${n > 1 ? 'x' : ''}</span>
-          <div class="camp-difficulty">${dots}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="camp-difficulty">${dots}</div>
+            <span style="font-size:9px;letter-spacing:1px;opacity:0.7">⚡${vb} VB</span>
+          </div>
         </div>
       </div>`;
     btn.onmouseenter = () => { btn.style.boxShadow = '0 0 28px ' + camp.color + '38, inset 0 0 40px ' + camp.color + '0c'; };
@@ -4025,7 +4029,7 @@ async function _ppLoadAchievements(uid) {
     const skinId = data?.skin || 'default';
     _ppDrawBallPreview(document.getElementById('pp-ball'), skinId);
     const bgId = data?.bg || 'default';
-    const bgLabels = { default:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
+    const bgLabels = { default:'▦ Grille', electrons:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
     const bgEl = document.getElementById('pp-bg-badge');
     if (bgEl) bgEl.textContent = bgLabels[bgId] || '';
     let ids = data?.achievements;
@@ -4196,11 +4200,12 @@ const EMOTES = [
 ];
 
 const BACKGROUNDS = [
-  { id: 'default',  name: 'Électrons',        price: 0 },
-  { id: 'stars',    name: 'Étoiles filantes', price: 400 },
-  { id: 'matrix',   name: 'Pluie de code',    price: 500 },
-  { id: 'aurora',   name: 'Aurore boréale',   price: 600 },
-  { id: 'void',     name: 'Vide cosmique',    price: 300 },
+  { id: 'default',   name: 'Grille',           price: 0 },
+  { id: 'electrons', name: 'Électrons',        price: 300 },
+  { id: 'stars',     name: 'Étoiles filantes', price: 400 },
+  { id: 'matrix',    name: 'Pluie de code',    price: 500 },
+  { id: 'aurora',    name: 'Aurore boréale',   price: 600 },
+  { id: 'void',      name: 'Vide cosmique',    price: 300 },
 ];
 
 const _EMOTE_LS  = 'elecgame_emote';
@@ -4516,8 +4521,30 @@ function _applyBackground() {
   const c = cvs.getContext('2d');
   const W = () => cvs.width, H = () => cvs.height;
 
-  if (_equippedBg === 'default') { document.body.classList.add('bg-electrons-active'); _startDefaultBg(); return; }
-  document.body.classList.remove('bg-electrons-active');
+  document.body.classList.toggle('bg-electrons-active', _equippedBg === 'default' || _equippedBg === 'electrons');
+
+  if (_equippedBg === 'default') {
+    // Fond gratuit : grille CSS + lueur lente
+    let tx = Math.random(), ty = Math.random();
+    let gvx = 0.0003 + Math.random() * 0.0002, gvy = 0.0002 + Math.random() * 0.0003;
+    function frameGlow() {
+      tx += gvx; ty += gvy;
+      if (tx > 1 || tx < 0) gvx = -gvx;
+      if (ty > 1 || ty < 0) gvy = -gvy;
+      c.clearRect(0, 0, cvs.width, cvs.height);
+      const gx = tx * cvs.width, gy = ty * cvs.height;
+      const gr = Math.min(cvs.width, cvs.height) * 0.45;
+      const grd = c.createRadialGradient(gx, gy, 0, gx, gy, gr);
+      grd.addColorStop(0, 'rgba(0,255,140,0.045)');
+      grd.addColorStop(1, 'transparent');
+      c.fillStyle = grd; c.fillRect(0, 0, cvs.width, cvs.height);
+      _bgAnimId = requestAnimationFrame(frameGlow);
+    }
+    _bgAnimId = requestAnimationFrame(frameGlow);
+    return;
+  }
+
+  if (_equippedBg === 'electrons') { _startDefaultBg(); return; }
 
   if (_equippedBg === 'void') {
     c.clearRect(0, 0, cvs.width, cvs.height);
