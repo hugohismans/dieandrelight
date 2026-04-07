@@ -3047,6 +3047,7 @@ for (const [campId, camp] of Object.entries(CAMPAIGNS)) {
         LEVELS.push({
           name: entry.name || entry.file.split('/').pop().replace('.json', ''),
           isGG: entry.isGG || false,
+          bgHint: entry.bgHint || null,
           get hint() { return t('hint.restart'); },
           _file: entry.file, _json: null,
           make() { if (!this._json) throw new Error('not loaded'); return makeCustomLevel(this._json); }
