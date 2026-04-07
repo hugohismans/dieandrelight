@@ -2237,6 +2237,7 @@ const TRANSLATIONS = {
     'auth.pseudo_error': '✗ Erreur — réessaie',
     'auth.signin_error': '✗ Erreur de connexion',
     'auth.signout_confirm': 'Se déconnecter ?',
+    'auth.signout_btn': 'Déconnexion',
     'auth.signin_btn': '👤 Connexion',
     'auth.no_pseudo': '(sans pseudo)',
     'auth.guest_label': 'Mode invité',
@@ -2516,6 +2517,7 @@ const TRANSLATIONS = {
     'auth.pseudo_error': '✗ Error — try again',
     'auth.signin_error': '✗ Sign-in error',
     'auth.signout_confirm': 'Sign out?',
+    'auth.signout_btn': 'Sign out',
     'auth.signin_btn': '👤 Sign in',
     'auth.no_pseudo': '(no username)',
     'auth.guest_label': 'Guest',
@@ -4975,7 +4977,7 @@ function updateAuthUI() {
   const btn = document.getElementById('auth-sidebar-btn');
   if (!btn) return;
   if (currentUser && currentPseudo) {
-    btn.textContent = '👤 ' + currentPseudo;
+    btn.textContent = '👤 ' + t('auth.signout_btn');
     btn.style.borderColor = '#00ffcc';
     btn.style.color = '#00ffcc';
     btn.onclick = () => {
