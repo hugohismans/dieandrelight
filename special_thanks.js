@@ -7,7 +7,6 @@ const SPECIAL_THANKS = [
   { pseudo: 'Alex',                        fr: 'Testeur',              en: 'Tester' },
   { pseudo: 'AccurateCatFish',             fr: 'Testeur',              en: 'Tester' },
   { pseudo: 'Frigolite',                   fr: 'Créateur de niveau',   en: 'Level creator' },
-  { pseudo: 'Philippe 1er (roi des Belges)', fr: 'Merci de servir à rien', en: 'Thanks for nothing' },
 ];
 
 // Retourne la couleur CSS en fonction du rôle (utilise toujours le champ fr pour la détection).
