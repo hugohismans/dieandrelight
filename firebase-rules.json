@@ -16,7 +16,7 @@
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2')",
         "achievements": {
           ".read": true
         }

@@ -634,6 +634,7 @@ canvas#bg {
 .hof-table tr:nth-child(3) td { color: #cc8844; }
 .hof-rank { color: #224433; font-size: 11px; }
 .hof-pseudo { color: inherit; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.hof-pseudo span { text-decoration: none; }
 .hof-pseudo:hover { color: #00ffcc !important; }
 .hof-time { color: #00ffcc; font-variant-numeric: tabular-nums; }
 .hof-deaths { color: #663333; }
@@ -1801,7 +1802,7 @@ async function renderAchRanks() {
         <span class="ach-rank-pos">${medals[i]||(i+1)}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:baseline;gap:6px">
-            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}"><span style="margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span>${escHtml(e.pseudo)}</span>
+            <span style="font-size:13px;flex-shrink:0;margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span><span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
             <span class="ach-rank-count">${e.count}/${ACH_TOTAL}</span>
           </div>
           <div style="height:2px;background:#aa44ff22;border-radius:1px;margin-top:3px">
@@ -1833,7 +1834,7 @@ async function renderVBRanks() {
     el.innerHTML = entries.map((e, i) =>
       `<div class="ihof-row ${cls[i]||''}">
         <span class="ihof-rank">${medals[i]||(i+1)}</span>
-        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}"><span style="margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span>${escHtml(e.pseudo)}</span>
+        <span style="font-size:13px;flex-shrink:0;margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span><span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
         <span class="ihof-time" style="color:#ffe066">⚡${e.vb} VB</span>
       </div>`
     ).join('');
