@@ -3387,7 +3387,7 @@ async function _submitSurvivalScore(prevKey = null) {
   statusEl.textContent = 'Envoi…';
   submitEl.disabled = true;
   try {
-    const token = await currentUser.getIdToken();
+    const token = await currentUser.getIdToken(true);
     const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now(), device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
     const url = prevKey
       ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json?auth=${token}`
@@ -5033,7 +5033,7 @@ async function openFinish(timeMs, deaths) {
     submitBtn.disabled = true;
     statusEl.textContent = 'Envoi…';
     try {
-      const token  = await currentUser.getIdToken();
+      const token  = await currentUser.getIdToken(true);
       const pseudo = currentPseudo;
       const entry  = { pseudo, uid: currentUser.uid, time: timeMs, deaths, ts: Date.now(), version: HOF_VERSION, diff: diffId, device: detectDevice() };
       const fbBase = `${FB_URL}/${HOF_VERSION}/${diffId}`;
