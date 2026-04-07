@@ -4021,33 +4021,44 @@ async function _openSurvivalGameOver() {
   }
 }
 
-function _showHofFallback(statusEl, submitEl, { pseudo, diff, time, deaths, score, uid }) {
+async function _showHofFallback(statusEl, submitEl, { pseudo, diff, time, deaths, score, uid }) {
   const code = statusEl._lastHofErrCode || '?';
   const lines = [
-    '=== Score HOF non enregistré / HOF score not saved ===',
-    `Pseudo : ${pseudo}`,
-    `Diff   : ${diff}`,
-    time   !== undefined ? `Temps  : ${campFmtTime(time)} (${time}ms)` : '',
-    deaths !== undefined ? `Morts  : ${deaths}` : '',
-    score  !== undefined ? `Score  : ${score}` : '',
-    `UID    : ${uid}`,
-    `Date   : ${new Date().toISOString()}`,
-    `Code   : HTTP ${code}`,
+    '🚨 **Score HOF non enregistré (erreur Firebase)**',
+    `👤 Pseudo : **${pseudo}**`,
+    `🎮 Diff   : \`${diff}\``,
+    time   !== undefined ? `⏱ Temps  : \`${campFmtTime(time)}\` (${time}ms)` : '',
+    deaths !== undefined ? `💀 Morts  : \`${deaths}\`` : '',
+    score  !== undefined ? `🏅 Score  : \`${score}\`` : '',
+    `🆔 UID    : \`${uid}\``,
+    `📅 Date   : \`${new Date().toISOString()}\``,
+    `❌ Code   : HTTP ${code}`,
+    `_→ Ajout manuel requis_`,
   ].filter(Boolean).join('\n');
 
-  statusEl.style.color = '#ff6644';
-  statusEl.innerHTML =
-    t('hof.fallback_err').replace('{code}', code) +
-    `<br><button id="_hof-copy-btn" style="margin-top:7px;padding:4px 12px;border:1px solid #ffaa44;color:#ffaa44;background:transparent;cursor:pointer;font-family:inherit;font-size:11px;border-radius:3px">${t('hof.copy_score')}</button>` +
-    `<span id="_hof-copy-ok" style="display:none;color:#00cc88;font-size:11px;margin-left:8px"></span>`;
+  statusEl.style.color = '#ffaa44';
+  statusEl.textContent = currentLang === 'en' ? '⏳ Sending to Discord…' : '⏳ Envoi sur Discord…';
+  if (submitEl) submitEl.disabled = true;
 
-  document.getElementById('_hof-copy-btn').onclick = () => {
-    navigator.clipboard.writeText(lines).then(() => {
-      const ok = document.getElementById('_hof-copy-ok');
-      if (ok) { ok.textContent = t('hof.copied'); ok.style.display = 'inline'; }
-    }).catch(() => { prompt('Copie ce texte :', lines); });
-  };
-  if (submitEl) submitEl.disabled = false;
+  try {
+    const res = await fetch(SUBMIT_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: lines })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    statusEl.style.color = '#00cc88';
+    statusEl.textContent = currentLang === 'en'
+      ? '✓ Sent to Discord! The admin will add it manually.'
+      : '✓ Envoyé sur Discord ! L\'admin va l\'ajouter manuellement.';
+  } catch {
+    statusEl.style.color = '#ff4444';
+    statusEl.textContent = (currentLang === 'en'
+      ? '✗ Firebase + Discord both failed (HTTP ' + code + '). Screenshot this and send it to the admin: '
+      : '✗ Firebase + Discord en échec (HTTP ' + code + '). Screenshot et envoie à l\'admin : ')
+      + `pseudo=${pseudo} diff=${diff}` + (time !== undefined ? ` time=${time}ms deaths=${deaths}` : ` score=${score}`);
+    if (submitEl) submitEl.disabled = false;
+  }
 }
 
 async function _submitSurvivalScore(prevKey = null) {
