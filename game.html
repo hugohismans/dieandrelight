@@ -5126,7 +5126,7 @@ function hofRenderBody(entries, isSurvival = false) {
   const delBtn = (e) => isAdmin
     ? `<td><button class="hof-del-btn" data-key="${e._fbKey || ''}" title="Supprimer">🗑️</button></td>`
     : '<td></td>';
-  const emote = (e) => _hofEmoteMap[e.uid] ? `<span style="font-size:14px;margin-right:3px">${_hofEmoteMap[e.uid]}</span>` : '';
+  const emote = (e) => `<span style="font-size:14px;margin-right:3px">${_hofEmoteMap[e.uid] || '🐥'}</span>`;
   if (isSurvival) {
     body.innerHTML = `<table class="hof-table">
       <thead><tr>

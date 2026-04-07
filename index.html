@@ -1667,7 +1667,7 @@ async function renderHOF() {
     const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
     if (isSurvival) {
       el.innerHTML = entries.map((e, i) => {
-        const emote = emoteMap[e.uid] || '';
+        const emote = emoteMap[e.uid] || '🐥';
         const bonuses = Array.isArray(e.bonuses) && e.bonuses.length
           ? `<span title="${currentLang === 'en' ? 'Bonuses used' : 'Bonus utilisés'}" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmoji[b]||'').join('')}</span>`
           : '';
@@ -1680,7 +1680,7 @@ async function renderHOF() {
       }).join('');
     } else {
       el.innerHTML = entries.map((e, i) => {
-        const emote = emoteMap[e.uid] || '';
+        const emote = emoteMap[e.uid] || '🐥';
         return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
           ${emote ? `<span style="font-size:14px;margin-right:3px">${emote}</span>` : ''}
@@ -1719,7 +1719,7 @@ async function renderAchRanks() {
         <span class="ach-rank-pos">${medals[i]||(i+1)}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:baseline;gap:6px">
-            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && e.emote !== 'none' ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote] || e.emote}</span>` : ''}${escHtml(e.pseudo)}</span>
+            <span class="ach-rank-pseudo pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}"><span style="margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span>${escHtml(e.pseudo)}</span>
             <span class="ach-rank-count">${e.count}/${ACH_TOTAL}</span>
           </div>
           <div style="height:2px;background:#aa44ff22;border-radius:1px;margin-top:3px">
@@ -1751,7 +1751,7 @@ async function renderVBRanks() {
     el.innerHTML = entries.map((e, i) =>
       `<div class="ihof-row ${cls[i]||''}">
         <span class="ihof-rank">${medals[i]||(i+1)}</span>
-        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${e.emote && e.emote !== 'none' ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote] || e.emote}</span>` : ''}${escHtml(e.pseudo)}</span>
+        <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}"><span style="margin-right:3px">${e.emote && e.emote !== 'none' ? (_PP_EMOTES[e.emote] || e.emote) : '🐥'}</span>${escHtml(e.pseudo)}</span>
         <span class="ihof-time" style="color:#ffe066">⚡${e.vb} VB</span>
       </div>`
     ).join('');
@@ -2057,7 +2057,7 @@ async function _idxRenderHofModal() {
     if (!entries.length) { body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_empty')}</div>`; return; }
     const medals = ['🥇','🥈','🥉'];
     const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
-    const emote = (e) => emoteMap[e.uid] ? `<span style="margin-right:3px">${emoteMap[e.uid]}</span>` : '';
+    const emote = (e) => `<span style="margin-right:3px">${emoteMap[e.uid] || '🐥'}</span>`;
     if (isSurv) {
       body.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace">
         <thead><tr style="color:#446655;border-bottom:1px solid #00cc9933">
