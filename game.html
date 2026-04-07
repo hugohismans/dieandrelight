@@ -36,9 +36,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background:
-      radial-gradient(circle, #0e3020 1px, transparent 1px) 0 0 / 36px 36px,
-      #08080f;
+    background: #08080f;
     font-family: 'Courier New', monospace;
     color: #00ffcc;
     user-select: none;
@@ -47,6 +45,11 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+  body.bg-electrons-active {
+    background:
+      radial-gradient(circle, #0e3020 1px, transparent 1px) 0 0 / 36px 36px,
+      #08080f;
   }
 
   /* ── BACKGROUND LAYERS ────────────────────────────────────── */
@@ -4511,7 +4514,8 @@ function _applyBackground() {
   const c = cvs.getContext('2d');
   const W = () => cvs.width, H = () => cvs.height;
 
-  if (_equippedBg === 'default') { _startDefaultBg(); return; }
+  if (_equippedBg === 'default') { document.body.classList.add('bg-electrons-active'); _startDefaultBg(); return; }
+  document.body.classList.remove('bg-electrons-active');
 
   if (_equippedBg === 'void') {
     c.clearRect(0, 0, cvs.width, cvs.height);
@@ -4520,24 +4524,29 @@ function _applyBackground() {
 
   if (_equippedBg === 'stars') {
     for (let i = 0; i < 25; i++) _bgParticles.push({
-      x: Math.random() * cvs.width, y: Math.random() * cvs.height,
-      vx: -(1.5 + Math.random() * 3), vy: 0.2 + Math.random() * 0.5,
-      len: 40 + Math.random() * 80, alpha: 0.3 + Math.random() * 0.5,
+      x: Math.random() * cvs.width * 1.2, y: Math.random() * cvs.height * 0.6,
+      vx: -(2 + Math.random() * 2.5), vy: 1.2 + Math.random() * 1.5,
+      len: 50 + Math.random() * 90, alpha: 0.35 + Math.random() * 0.45,
       color: ['#ffffff','#aaddff','#ffeeaa'][Math.floor(Math.random()*3)],
     });
     function frameSt() {
       c.clearRect(0, 0, cvs.width, cvs.height);
       for (const s of _bgParticles) {
         s.x += s.vx; s.y += s.vy;
-        if (s.x < -s.len) { s.x = cvs.width + 10; s.y = Math.random() * cvs.height; }
-        if (s.y > cvs.height + 10) { s.y = -10; s.x = Math.random() * cvs.width; }
+        // Respawn en haut-droite quand sorti de l'écran
+        if (s.x < -s.len || s.y > cvs.height + s.len) {
+          s.x = cvs.width * 0.2 + Math.random() * cvs.width * 1.2;
+          s.y = -10 - Math.random() * cvs.height * 0.3;
+        }
+        // La traîne part en sens inverse du déplacement (haut-droite)
+        const ratio = s.vy / Math.abs(s.vx);
         c.save();
-        const g = c.createLinearGradient(s.x, s.y, s.x + s.len, s.y - s.len * 0.15);
+        const g = c.createLinearGradient(s.x, s.y, s.x + s.len, s.y - s.len * ratio);
         g.addColorStop(0, 'transparent');
         g.addColorStop(1, s.color);
         c.globalAlpha = s.alpha;
         c.strokeStyle = g; c.lineWidth = 1.5;
-        c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + s.len, s.y - s.len * 0.15); c.stroke();
+        c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + s.len, s.y - s.len * ratio); c.stroke();
         c.restore();
       }
       _bgAnimId = requestAnimationFrame(frameSt);
@@ -6871,17 +6880,17 @@ loop();
     cvs.width = cvs.offsetWidth || window.innerWidth;
     cvs.height = cvs.offsetHeight || window.innerHeight;
     const ctx = cvs.getContext('2d');
-    const N = 10;
+    const N = 35;
     let W = cvs.width, H = cvs.height;
     const electrons = [];
     function rand(min, max) { return min + Math.random() * (max - min); }
     const COLORS = ['#00ffcc', '#00ddaa', '#00ffaa', '#44ffcc', '#00ccff'];
     for (let i = 0; i < N; i++) electrons.push({
       x: rand(0, W), y: rand(0, H),
-      vx: rand(-0.25, 0.25), vy: rand(-0.25, 0.25),
-      r: rand(1.2, 2.2), alpha: rand(0.08, 0.20),
+      vx: rand(-0.4, 0.4), vy: rand(-0.4, 0.4),
+      r: rand(1.5, 3.0), alpha: rand(0.18, 0.40),
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      trail: [], trailMax: Math.floor(rand(8, 18))
+      trail: [], trailMax: Math.floor(rand(10, 22))
     });
     function frame() {
       ctx.clearRect(0, 0, W, H);
