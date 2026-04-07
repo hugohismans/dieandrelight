@@ -3265,7 +3265,6 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 
 // Init audio control buttons
 document.getElementById('btn-mute-all').addEventListener('click', toggleMuteAll);
-document.getElementById('btn-mute-hum').addEventListener('click', toggleMuteHum);
 applyAudioMuteUI();
 
 // ── LEVELS ─────────────────────────────────────────────────
@@ -5956,7 +5955,7 @@ let _bgParticles = [];
 
 function _applyBackground() {
   const cvs = document.getElementById('bg-electrons');
-  if (_bgAnimId) { cancelAnimationFrame(_bgAnimId); _bgAnimId = null; }
+  if (window._bgAnimId) { cancelAnimationFrame(window._bgAnimId); window._bgAnimId = null; }
   _bgParticles = [];
   cvs.width = cvs.offsetWidth || window.innerWidth;
   cvs.height = cvs.offsetHeight || window.innerHeight;
@@ -8396,9 +8395,9 @@ loop();
         ctx.fillStyle = e.color; ctx.fill();
       }
       ctx.globalAlpha = 1;
-      _bgAnimId = requestAnimationFrame(frame);
+      window._bgAnimId = requestAnimationFrame(frame);
     }
-    _bgAnimId = requestAnimationFrame(frame);
+    window._bgAnimId = requestAnimationFrame(frame);
     window.addEventListener('resize', () => { W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; });
   }
 
