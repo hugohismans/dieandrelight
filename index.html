@@ -1478,7 +1478,7 @@ async function renderVBRanks() {
   const el = document.getElementById('vb-rank-list');
   el.innerHTML = '<div class="panel-empty">Chargement…</div>';
   try {
-    const res = await fetch(`${FB_VB_RANKS_URL}.json`);
+    const res = await fetch(`${FB_ACH_RANKS}.json`);
     const data = res.ok ? await res.json() : null;
     if (!data) { el.innerHTML = '<div class="panel-empty">Pas encore de données.</div>'; return; }
     const entries = Object.entries(data)
