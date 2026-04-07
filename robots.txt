@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /levels/
+
+Sitemap: https://dieandrelight.be/sitemap.xml
