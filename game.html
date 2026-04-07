@@ -1718,6 +1718,10 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div id="shop-header">
       <div id="shop-title">⚡ BOUTIQUE VOLTBUCKS</div>
       <div id="shop-balance"></div>
+      <div id="shop-admin-btns" style="display:none;gap:4px;flex-shrink:0">
+        <button onclick="earnVoltbucks(1000,'admin')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">+1000</button>
+        <button onclick="voltbucks=Math.max(0,voltbucks-1000);_updateVBDisplay();_syncVB();document.getElementById('shop-balance').textContent='⚡ '+voltbucks+' VB'" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">-1000</button>
+      </div>
       <button id="shop-close">✕</button>
     </div>
     <div id="shop-tabs">
@@ -4330,7 +4334,6 @@ async function loadDoneFromFirebase() {
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
     HOF_DIFFS.filter(d => d !== 'survie').forEach(diff => _getAccountBestScore(diff).catch(() => {}));
-    _renderAdminVBBtn();
   } catch(e) {}
 }
 
@@ -4548,6 +4551,8 @@ function openShop() {
   else if (_shopTab === 'backgrounds') _renderShopBgs();
   else if (_shopTab === 'bonus') _renderShopBonus();
   document.getElementById('shop-overlay').classList.add('open');
+  const adminBtns = document.getElementById('shop-admin-btns');
+  if (adminBtns) adminBtns.style.display = (currentUser && currentUser.uid === ADMIN_UID) ? 'flex' : 'none';
 }
 
 function _renderShopSkins() {
@@ -4911,18 +4916,6 @@ function _renderShopBonus() {
   });
 }
 
-// Bouton admin +1000 VB (visible uniquement pour Lesups)
-function _renderAdminVBBtn() {
-  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
-  const existing = document.getElementById('admin-vb-btn');
-  if (existing) return;
-  const btn = document.createElement('button');
-  btn.id = 'admin-vb-btn';
-  btn.textContent = '+1000 VB (admin)';
-  btn.style.cssText = 'position:fixed;bottom:60px;right:14px;z-index:300;font-family:Courier New,monospace;font-size:10px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:4px 10px;cursor:pointer';
-  btn.onclick = () => { earnVoltbucks(1000, 'admin'); };
-  document.body.appendChild(btn);
-}
 
 // ── Finish overlay (campaign complete) ─────────────────────
 async function openFinish(timeMs, deaths) {
