@@ -228,6 +228,72 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   }
   #skip-btn:hover, #prev-btn:hover { border-color: #ffcc44; color: #ffcc44; box-shadow: 0 0 12px #ffaa0055; }
 
+  /* ── ADMIN PANEL ────────────────────────────────────────── */
+  #admin-panel-overlay {
+    display: none; position: fixed; inset: 0; z-index: 900;
+    background: #000000cc; align-items: center; justify-content: center;
+  }
+  #admin-panel-overlay.open { display: flex; }
+  #admin-panel-box {
+    background: #080c08; border: 1px solid #ffaa00;
+    box-shadow: 0 0 40px #ffaa0033, inset 0 0 30px #0a0600;
+    width: min(820px, 96vw); max-height: 88vh;
+    display: flex; flex-direction: column;
+    font-family: 'Courier New', monospace; color: #ffcc44;
+    border-radius: 4px; overflow: hidden;
+  }
+  #admin-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-bottom: 1px solid #ffaa0055;
+    background: #0d0800; flex-shrink: 0;
+  }
+  #admin-panel-header h2 { font-size: 13px; letter-spacing: 3px; color: #ffaa00; flex: 1; }
+  #admin-panel-close { background: none; border: none; color: #ffaa00; font-size: 16px; cursor: pointer; }
+  #admin-panel-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid #ffaa0033; flex-shrink: 0;
+  }
+  .ap-tab {
+    background: none; border: none; border-right: 1px solid #ffaa0033;
+    color: #886622; font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 2px; padding: 7px 14px; cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .ap-tab:hover { color: #ffcc44; background: #ffaa0011; }
+  .ap-tab.active { color: #ffcc44; background: #ffaa0018; border-bottom: 2px solid #ffaa00; }
+  #admin-panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .ap-section { display: none; }
+  .ap-section.active { display: block; }
+  .ap-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .ap-label { font-size: 10px; letter-spacing: 1px; color: #886622; min-width: 80px; }
+  .ap-input {
+    background: #0d0800; border: 1px solid #ffaa0066; color: #ffcc44;
+    font-family: 'Courier New', monospace; font-size: 12px;
+    padding: 5px 10px; border-radius: 3px; outline: none; flex: 1; min-width: 120px;
+  }
+  .ap-input:focus { border-color: #ffaa00; }
+  .ap-btn {
+    background: #1a0800; border: 1px solid #ffaa0088; color: #ffaa00;
+    font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 1px;
+    padding: 5px 14px; cursor: pointer; border-radius: 3px; transition: all 0.15s;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .ap-btn:hover { border-color: #ffcc44; color: #ffcc44; box-shadow: 0 0 10px #ffaa0044; }
+  .ap-btn.danger { border-color: #cc2200aa; color: #ff4422; }
+  .ap-btn.danger:hover { border-color: #ff4422; box-shadow: 0 0 10px #ff442244; }
+  .ap-btn.success { border-color: #00cc6688; color: #00cc66; }
+  .ap-btn.success:hover { border-color: #00ff88; box-shadow: 0 0 10px #00cc6644; }
+  .ap-status { font-size: 11px; min-height: 16px; margin: 6px 0; color: #664422; }
+  .ap-divider { border: none; border-top: 1px solid #ffaa0022; margin: 12px 0; }
+  .ap-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .ap-table th { color: #886622; font-weight: normal; text-align: left; padding: 4px 8px; border-bottom: 1px solid #ffaa0033; letter-spacing: 1px; }
+  .ap-table td { padding: 5px 8px; border-bottom: 1px solid #ffaa0011; color: #ccaa55; vertical-align: middle; }
+  .ap-table tr:hover td { background: #ffaa0009; }
+  .ap-mini-btn { background: none; border: 1px solid #ffaa0055; color: #886622; font-family: 'Courier New', monospace; font-size: 9px; padding: 2px 7px; cursor: pointer; border-radius: 2px; }
+  .ap-mini-btn:hover { border-color: #ffaa00; color: #ffcc44; }
+  .ap-mini-btn.del { border-color: #cc220055; color: #cc4422; }
+  .ap-mini-btn.del:hover { border-color: #ff4422; color: #ff6644; }
+  .ap-info { font-size: 10px; color: #556644; letter-spacing: 1px; margin: 6px 0; }
+
   /* ── DEATH COUNTER ──────────────────────────────────────── */
   #vb-counter {
     position: fixed;
@@ -1609,6 +1675,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <div id="admin-nav">
   <button id="prev-btn">⏮ PREV</button>
   <button id="skip-btn">⏭ SKIP</button>
+  <button id="admin-panel-btn">🔑 PANEL</button>
 </div>
 
 <!-- Audio controls -->
@@ -1798,6 +1865,123 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div id="finish-btns">
       <button id="finish-submit">ENTRER AU HOF →</button>
       <button id="finish-skip">Passer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel-overlay">
+  <div id="admin-panel-box">
+    <div id="admin-panel-header">
+      <h2>🔑 PANNEAU ADMIN</h2>
+      <button id="admin-panel-close">✕</button>
+    </div>
+    <div id="admin-panel-tabs">
+      <button class="ap-tab active" data-ap="vb">⚡ VoltBucks</button>
+      <button class="ap-tab" data-ap="hof">🏆 HOF</button>
+      <button class="ap-tab" data-ap="tools">🛠 Outils</button>
+    </div>
+    <div id="admin-panel-body">
+
+      <!-- TAB VB -->
+      <div class="ap-section active" id="ap-vb">
+        <div class="ap-info">Cherche un joueur par pseudo pour modifier ses VoltBucks.</div>
+        <div class="ap-row">
+          <span class="ap-label">Pseudo</span>
+          <input class="ap-input" id="ap-vb-pseudo" placeholder="pseudo exact…" maxlength="24">
+          <button class="ap-btn" id="ap-vb-search">Chercher</button>
+        </div>
+        <div class="ap-status" id="ap-vb-status"></div>
+        <div id="ap-vb-result" style="display:none">
+          <div class="ap-row">
+            <span class="ap-label">UID</span><span id="ap-vb-uid" style="font-size:10px;color:#664422;word-break:break-all"></span>
+          </div>
+          <div class="ap-row">
+            <span class="ap-label">Solde actuel</span><span id="ap-vb-current" style="color:#ffcc44;font-size:14px"></span>
+          </div>
+          <hr class="ap-divider">
+          <div class="ap-row">
+            <span class="ap-label">Modifier</span>
+            <input class="ap-input" id="ap-vb-amount" type="number" placeholder="ex: +500 ou -200" style="max-width:130px">
+            <button class="ap-btn success" id="ap-vb-apply">Appliquer</button>
+          </div>
+          <div class="ap-row">
+            <span class="ap-label">Définir à</span>
+            <input class="ap-input" id="ap-vb-set" type="number" placeholder="montant exact" style="max-width:130px">
+            <button class="ap-btn" id="ap-vb-setbtn">Fixer</button>
+          </div>
+          <div class="ap-status" id="ap-vb-save-status"></div>
+        </div>
+      </div>
+
+      <!-- TAB HOF -->
+      <div class="ap-section" id="ap-hof">
+        <div class="ap-info">Voir, modifier et ajouter des entrées HOF.</div>
+        <div class="ap-row">
+          <span class="ap-label">Diff</span>
+          <select class="ap-input" id="ap-hof-diff" style="max-width:180px">
+            <option value="cauchemar">cauchemar</option>
+            <option value="piquer">piquer</option>
+            <option value="bebe">bebe</option>
+            <option value="cauchemar_inv">cauchemar_inv</option>
+            <option value="piquer_inv">piquer_inv</option>
+            <option value="bebe_inv">bebe_inv</option>
+            <option value="survie">survie</option>
+          </select>
+          <button class="ap-btn" id="ap-hof-load">Charger</button>
+        </div>
+        <div class="ap-status" id="ap-hof-status"></div>
+        <div id="ap-hof-table-wrap" style="overflow-x:auto"></div>
+        <hr class="ap-divider">
+        <div class="ap-info">➕ Ajouter une entrée manuellement</div>
+        <div class="ap-row">
+          <span class="ap-label">Pseudo</span><input class="ap-input" id="ap-hof-add-pseudo" placeholder="pseudo" maxlength="20">
+          <span class="ap-label">UID</span><input class="ap-input" id="ap-hof-add-uid" placeholder="uid Firebase" maxlength="40">
+        </div>
+        <div class="ap-row" id="ap-hof-add-time-row">
+          <span class="ap-label">Temps (ms)</span><input class="ap-input" id="ap-hof-add-time" type="number" placeholder="ex: 170000">
+          <span class="ap-label">Morts</span><input class="ap-input" id="ap-hof-add-deaths" type="number" placeholder="ex: 1" style="max-width:80px">
+        </div>
+        <div class="ap-row" id="ap-hof-add-score-row" style="display:none">
+          <span class="ap-label">Score</span><input class="ap-input" id="ap-hof-add-score" type="number" placeholder="ex: 12">
+        </div>
+        <div class="ap-row">
+          <button class="ap-btn success" id="ap-hof-add-btn">➕ Ajouter au HOF</button>
+        </div>
+        <div class="ap-status" id="ap-hof-add-status"></div>
+      </div>
+
+      <!-- TAB OUTILS -->
+      <div class="ap-section" id="ap-tools">
+        <div class="ap-info">Outils avancés — à utiliser avec précaution.</div>
+        <hr class="ap-divider">
+        <div class="ap-row">
+          <span class="ap-label" style="min-width:140px">Supprimer toutes les entrées HOF d'un UID</span>
+        </div>
+        <div class="ap-row">
+          <input class="ap-input" id="ap-ban-uid" placeholder="uid Firebase" maxlength="40">
+          <select class="ap-input" id="ap-ban-diff" style="max-width:160px">
+            <option value="*">toutes les diffs</option>
+            <option value="cauchemar">cauchemar</option>
+            <option value="piquer">piquer</option>
+            <option value="bebe">bebe</option>
+            <option value="cauchemar_inv">cauchemar_inv</option>
+            <option value="piquer_inv">piquer_inv</option>
+            <option value="bebe_inv">bebe_inv</option>
+            <option value="survie">survie</option>
+          </select>
+          <button class="ap-btn danger" id="ap-ban-btn">🗑 Purger</button>
+        </div>
+        <div class="ap-status" id="ap-ban-status"></div>
+        <hr class="ap-divider">
+        <div class="ap-info">Rechercher un UID par pseudo (dans pseudos/)</div>
+        <div class="ap-row">
+          <input class="ap-input" id="ap-uid-lookup-pseudo" placeholder="pseudo exact…" maxlength="24">
+          <button class="ap-btn" id="ap-uid-lookup-btn">Trouver UID</button>
+        </div>
+        <div class="ap-status" id="ap-uid-lookup-status"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2720,6 +2904,268 @@ function toggleAdmin() {
 }
 
 let adminSkipped = false; // true si skip utilisé pendant un run campagne
+
+// ── ADMIN PANEL ─────────────────────────────────────────────
+const ADMIN_UID = 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2';
+const _FB_BASE  = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app';
+
+function openAdminPanel() {
+  document.getElementById('admin-panel-overlay').classList.add('open');
+}
+document.getElementById('admin-panel-close').onclick = () => {
+  document.getElementById('admin-panel-overlay').classList.remove('open');
+};
+document.getElementById('admin-panel-btn').onclick = openAdminPanel;
+
+// Tabs
+document.querySelectorAll('.ap-tab').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.ap-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.ap-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('ap-' + btn.dataset.ap).classList.add('active');
+    // show/hide time vs score fields in HOF add form
+    _apHofToggleFields();
+  };
+});
+
+// ── VB TAB ──
+async function _apAdminToken() {
+  if (!currentUser || currentUser.uid !== ADMIN_UID) throw new Error('not admin');
+  return await currentUser.getIdToken(true);
+}
+
+document.getElementById('ap-vb-search').onclick = async () => {
+  const pseudo = document.getElementById('ap-vb-pseudo').value.trim().toLowerCase();
+  const st = document.getElementById('ap-vb-status');
+  const res = document.getElementById('ap-vb-result');
+  if (!pseudo) { st.textContent = 'Entre un pseudo.'; return; }
+  st.style.color = '#886622'; st.textContent = 'Recherche…'; res.style.display = 'none';
+  try {
+    const token = await _apAdminToken();
+    // Lookup UID via pseudos/
+    const r1 = await fetch(`${_FB_BASE}/pseudos/${encodeURIComponent(pseudo)}.json?auth=${token}`);
+    const uid = await r1.json();
+    if (!uid || typeof uid !== 'string') { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+    // Fetch VB
+    const r2 = await fetch(`${_FB_BASE}/users/${uid}/voltbucks.json?auth=${token}`);
+    const vb  = await r2.json();
+    document.getElementById('ap-vb-uid').textContent     = uid;
+    document.getElementById('ap-vb-current').textContent = '⚡ ' + (typeof vb === 'number' ? vb : '?') + ' VB';
+    document.getElementById('ap-vb-uid').dataset.uid = uid;
+    document.getElementById('ap-vb-uid').dataset.pseudo = pseudo;
+    document.getElementById('ap-vb-uid').dataset.vb = typeof vb === 'number' ? vb : 0;
+    res.style.display = ''; st.textContent = '';
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+async function _apSaveVB(newVb) {
+  const el  = document.getElementById('ap-vb-uid');
+  const uid = el.dataset.uid;
+  const pseudo = el.dataset.pseudo;
+  const st  = document.getElementById('ap-vb-save-status');
+  if (!uid) { st.textContent = 'Cherche un joueur d\'abord.'; return; }
+  st.style.color = '#886622'; st.textContent = 'Sauvegarde…';
+  try {
+    const token = await _apAdminToken();
+    await fetch(`${_FB_BASE}/users/${uid}/voltbucks.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(newVb)
+    });
+    await fetch(`${_FB_BASE}/voltbucks_ranks/${uid}.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pseudo, vb: newVb, ts: Date.now() })
+    });
+    await fetch(`${_FB_BASE}/achievement_ranks/${uid}/vb.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(newVb)
+    });
+    el.dataset.vb = newVb;
+    document.getElementById('ap-vb-current').textContent = '⚡ ' + newVb + ' VB';
+    st.style.color = '#00cc66'; st.textContent = '✓ Sauvegardé ! (' + newVb + ' VB)';
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+}
+
+document.getElementById('ap-vb-apply').onclick = () => {
+  const delta = parseInt(document.getElementById('ap-vb-amount').value);
+  if (isNaN(delta)) { document.getElementById('ap-vb-save-status').textContent = 'Montant invalide.'; return; }
+  const cur = parseInt(document.getElementById('ap-vb-uid').dataset.vb) || 0;
+  _apSaveVB(Math.max(0, cur + delta));
+};
+document.getElementById('ap-vb-setbtn').onclick = () => {
+  const val = parseInt(document.getElementById('ap-vb-set').value);
+  if (isNaN(val) || val < 0) { document.getElementById('ap-vb-save-status').textContent = 'Valeur invalide.'; return; }
+  _apSaveVB(val);
+};
+
+// ── HOF TAB ──
+let _apHofData = {}; // key → entry
+
+function _apHofToggleFields() {
+  const diff = document.getElementById('ap-hof-diff').value;
+  const isSurv = diff === 'survie';
+  document.getElementById('ap-hof-add-time-row').style.display  = isSurv ? 'none' : '';
+  document.getElementById('ap-hof-add-score-row').style.display = isSurv ? '' : 'none';
+}
+document.getElementById('ap-hof-diff').onchange = _apHofToggleFields;
+
+function _apFmtTime(ms) {
+  if (!ms) return '?';
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000), cs = Math.floor((ms % 1000) / 10);
+  return `${m}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+
+document.getElementById('ap-hof-load').onclick = async () => {
+  const diff = document.getElementById('ap-hof-diff').value;
+  const st = document.getElementById('ap-hof-status');
+  st.style.color = '#886622'; st.textContent = 'Chargement…';
+  _apHofToggleFields();
+  try {
+    const token = await _apAdminToken();
+    const r = await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${diff}.json?auth=${token}`);
+    const data = await r.json();
+    _apHofData = data || {};
+    _apRenderHofTable(diff);
+    st.textContent = Object.keys(_apHofData).length + ' entrées';
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+function _apRenderHofTable(diff) {
+  const wrap = document.getElementById('ap-hof-table-wrap');
+  const isSurv = diff === 'survie';
+  const entries = Object.entries(_apHofData).sort((a,b) =>
+    isSurv ? (b[1].score||0) - (a[1].score||0) : (a[1].time||0) - (b[1].time||0)
+  );
+  if (!entries.length) { wrap.innerHTML = '<div class="ap-info">Aucune entrée.</div>'; return; }
+  const cols = isSurv
+    ? '<th>#</th><th>Pseudo</th><th>Score</th><th>Device</th><th>UID</th><th></th>'
+    : '<th>#</th><th>Pseudo</th><th>Temps</th><th>Morts</th><th>Device</th><th>UID</th><th></th>';
+  const rows = entries.map(([key, e], i) => {
+    const uid = e.uid || '';
+    const shortUid = uid.slice(0,8) + '…';
+    const cells = isSurv
+      ? `<td>${i+1}</td><td>${e.pseudo||'?'}</td><td>${e.score??'?'}</td><td>${e.device||''}</td><td title="${uid}">${shortUid}</td>`
+      : `<td>${i+1}</td><td>${e.pseudo||'?'}</td><td>${_apFmtTime(e.time)}</td><td>${e.deaths??'?'}</td><td>${e.device||''}</td><td title="${uid}">${shortUid}</td>`;
+    return `<tr>
+      ${cells}
+      <td>
+        <button class="ap-mini-btn" onclick="_apHofEdit('${key}','${diff}')">✏</button>
+        <button class="ap-mini-btn del" onclick="_apHofDelete('${key}','${diff}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table class="ap-table"><thead><tr>${cols}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+async function _apHofDelete(key, diff) {
+  const st = document.getElementById('ap-hof-status');
+  const entry = _apHofData[key];
+  if (!confirm(`Supprimer ${entry?.pseudo} (${key}) ?`)) return;
+  st.style.color = '#886622'; st.textContent = 'Suppression…';
+  try {
+    const token = await _apAdminToken();
+    const r = await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${diff}/${key}.json?auth=${token}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    delete _apHofData[key];
+    _apRenderHofTable(diff);
+    st.style.color = '#00cc66'; st.textContent = '✓ Supprimé.';
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+}
+
+function _apHofEdit(key, diff) {
+  const e = _apHofData[key];
+  if (!e) return;
+  const isSurv = diff === 'survie';
+  document.getElementById('ap-hof-add-pseudo').value = e.pseudo || '';
+  document.getElementById('ap-hof-add-uid').value    = e.uid    || '';
+  if (isSurv) {
+    document.getElementById('ap-hof-add-score').value = e.score ?? '';
+  } else {
+    document.getElementById('ap-hof-add-time').value   = e.time   ?? '';
+    document.getElementById('ap-hof-add-deaths').value = e.deaths ?? '';
+  }
+  document.getElementById('ap-hof-add-btn').dataset.editKey = key;
+  document.getElementById('ap-hof-add-status').textContent = '✏ Mode édition — clique "Ajouter" pour sauvegarder.';
+  document.getElementById('ap-hof-add-status').style.color = '#ffaa00';
+}
+
+document.getElementById('ap-hof-add-btn').onclick = async () => {
+  const diff    = document.getElementById('ap-hof-diff').value;
+  const pseudo  = document.getElementById('ap-hof-add-pseudo').value.trim();
+  const uid     = document.getElementById('ap-hof-add-uid').value.trim();
+  const isSurv  = diff === 'survie';
+  const st      = document.getElementById('ap-hof-add-status');
+  const editKey = document.getElementById('ap-hof-add-btn').dataset.editKey || null;
+  if (!pseudo || !uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo et UID requis.'; return; }
+  const entry = { pseudo, uid, ts: Date.now(), version: HOF_VERSION, diff, device: 'admin' };
+  if (isSurv) {
+    const score = parseInt(document.getElementById('ap-hof-add-score').value);
+    if (isNaN(score)) { st.style.color = '#ff4444'; st.textContent = 'Score invalide.'; return; }
+    entry.score = score;
+  } else {
+    const time   = parseInt(document.getElementById('ap-hof-add-time').value);
+    const deaths = parseInt(document.getElementById('ap-hof-add-deaths').value);
+    if (isNaN(time) || isNaN(deaths)) { st.style.color = '#ff4444'; st.textContent = 'Temps/morts invalides.'; return; }
+    entry.time = time; entry.deaths = deaths;
+  }
+  st.style.color = '#886622'; st.textContent = 'Envoi…';
+  try {
+    const token = await _apAdminToken();
+    const url = editKey
+      ? `${_FB_BASE}/hof/${HOF_VERSION}/${diff}/${editKey}.json?auth=${token}`
+      : `${_FB_BASE}/hof/${HOF_VERSION}/${diff}.json?auth=${token}`;
+    const r = await fetch(url, {
+      method: editKey ? 'PUT' : 'POST',
+      headers: {'Content-Type':'application/json'}, body: JSON.stringify(entry)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const newKey = editKey || (await r.json()).name;
+    _apHofData[newKey] = entry;
+    if (editKey) delete document.getElementById('ap-hof-add-btn').dataset.editKey;
+    _apRenderHofTable(diff);
+    st.style.color = '#00cc66'; st.textContent = editKey ? '✓ Mis à jour !' : '✓ Entrée ajoutée !';
+    // Reset form
+    ['ap-hof-add-pseudo','ap-hof-add-uid','ap-hof-add-time','ap-hof-add-deaths','ap-hof-add-score'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+// ── TOOLS TAB ──
+document.getElementById('ap-ban-btn').onclick = async () => {
+  const uid  = document.getElementById('ap-ban-uid').value.trim();
+  const diff = document.getElementById('ap-ban-diff').value;
+  const st   = document.getElementById('ap-ban-status');
+  if (!uid) { st.textContent = 'UID requis.'; return; }
+  const diffs = diff === '*' ? ['bebe','piquer','cauchemar','bebe_inv','piquer_inv','cauchemar_inv','survie'] : [diff];
+  if (!confirm(`Purger ${uid} de [${diffs.join(', ')}] ?`)) return;
+  st.style.color = '#886622'; st.textContent = 'Purge en cours…';
+  try {
+    const token = await _apAdminToken();
+    let total = 0;
+    for (const d of diffs) {
+      const r = await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${d}.json?auth=${token}`);
+      const data = await r.json();
+      if (!data) continue;
+      const toDelete = Object.entries(data).filter(([,e]) => e.uid === uid).map(([k]) => k);
+      for (const k of toDelete) {
+        await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${d}/${k}.json?auth=${token}`, { method: 'DELETE' });
+        total++;
+      }
+    }
+    st.style.color = '#00cc66'; st.textContent = `✓ ${total} entrée(s) supprimée(s).`;
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+document.getElementById('ap-uid-lookup-btn').onclick = async () => {
+  const pseudo = document.getElementById('ap-uid-lookup-pseudo').value.trim().toLowerCase();
+  const st = document.getElementById('ap-uid-lookup-status');
+  if (!pseudo) return;
+  st.style.color = '#886622'; st.textContent = 'Recherche…';
+  try {
+    const token = await _apAdminToken();
+    const r = await fetch(`${_FB_BASE}/pseudos/${encodeURIComponent(pseudo)}.json?auth=${token}`);
+    const uid = await r.json();
+    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+    st.style.color = '#ffcc44'; st.textContent = `UID : ${uid}`;
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
 
 function skipLevel() {
   if (campRunning) adminSkipped = true;
