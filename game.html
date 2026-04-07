@@ -4467,6 +4467,22 @@ async function _openSurvivalGameOver() {
   }
 }
 
+// Wrapper Firebase write avec retry auto sur 401 (token propagation issue)
+async function _fbWrite(url, method, body, attempt = 0) {
+  const token = await currentUser.getIdToken(true);
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401 && attempt < 2) {
+    // Petit délai puis retry — token parfois rejeté le temps que Firebase propage le refresh
+    await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+    return _fbWrite(url, method, body, attempt + 1);
+  }
+  return res;
+}
+
 async function _showHofFallback(statusEl, submitEl, { pseudo, diff, time, deaths, score, uid }) {
   const code = statusEl._lastHofErrCode || '?';
   const lines = [
@@ -4517,16 +4533,11 @@ async function _submitSurvivalScore(prevKey = null) {
   statusEl.textContent = t('surv.sending');
   submitEl.disabled = true;
   try {
-    const token = await currentUser.getIdToken(true);
-    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now(), device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
+    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now() - 2000, device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
     const url = prevKey
-      ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json?auth=${token}`
-      : `${FB_URL}/${HOF_VERSION}/survie.json?auth=${token}`;
-    const res = await fetch(url, {
-      method: prevKey ? 'PUT' : 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(entry)
-    });
+      ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json`
+      : `${FB_URL}/${HOF_VERSION}/survie.json`;
+    const res = await _fbWrite(url, prevKey ? 'PUT' : 'POST', entry);
     if (!res.ok) {
       statusEl._lastHofErrCode = res.status;
       throw new Error('HTTP ' + res.status);
@@ -6187,21 +6198,16 @@ async function openFinish(timeMs, deaths) {
     statusEl.style.color = '#446655';
     statusEl.textContent = t('finish.sending');
     try {
-      const token  = await currentUser.getIdToken(true);
       const pseudo = currentPseudo;
-      const entry  = { pseudo, uid: currentUser.uid, time: timeMs, deaths, ts: Date.now(), version: HOF_VERSION, diff: diffId, device: detectDevice() };
+      const entry  = { pseudo, uid: currentUser.uid, time: timeMs, deaths, ts: Date.now() - 2000, version: HOF_VERSION, diff: diffId, device: detectDevice() };
       const fbBase = `${FB_URL}/${HOF_VERSION}/${diffId}`;
       let key = prevKey;
 
       if (key) {
-        const res = await fetch(`${fbBase}/${key}.json?auth=${token}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
-        });
+        const res = await _fbWrite(`${fbBase}/${key}.json`, 'PUT', entry);
         if (!res.ok) { statusEl._lastHofErrCode = res.status; throw new Error('HTTP ' + res.status); }
       } else {
-        const res = await fetch(`${fbBase}.json?auth=${token}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
-        });
+        const res = await _fbWrite(`${fbBase}.json`, 'POST', entry);
         if (!res.ok) { statusEl._lastHofErrCode = res.status; throw new Error('HTTP ' + res.status); }
         key = (await res.json()).name;
       }
