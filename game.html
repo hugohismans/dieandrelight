@@ -1993,6 +1993,7 @@ const TRANSLATIONS = {
     'auth.pseudo_desc': 'Ce pseudo sera visible dans le Hall of Fame.\nTon vrai nom ne sera jamais utilisé ni affiché.',
     'auth.pseudo_placeholder': 'Ton pseudo (2–20 caractères)',
     'auth.pseudo_min': '⚠ Minimum 2 caractères',
+    'auth.pseudo_taken': '⚠ Ce pseudo est déjà utilisé',
     'auth.pseudo_saving': 'Enregistrement…',
     'auth.pseudo_error': '✗ Erreur — réessaie',
     'auth.signin_error': '✗ Erreur de connexion',
@@ -2265,6 +2266,7 @@ const TRANSLATIONS = {
     'auth.pseudo_desc': 'This username will be visible in the Hall of Fame.\nYour real name will never be used or shown.',
     'auth.pseudo_placeholder': 'Your username (2–20 chars)',
     'auth.pseudo_min': '⚠ At least 2 characters',
+    'auth.pseudo_taken': '⚠ This username is already taken',
     'auth.pseudo_saving': 'Saving…',
     'auth.pseudo_error': '✗ Error — try again',
     'auth.signin_error': '✗ Sign-in error',
@@ -3787,7 +3789,7 @@ function updateSurvivalHUD() {
   document.getElementById('sg-lives').textContent =
     '❤️'.repeat(lives) + '🖤'.repeat(Math.max(0, 3 - lives));
   document.getElementById('sg-counter').textContent =
-    survivalScore + ' niveau' + (survivalScore > 1 ? 'x' : '');
+    survivalScore + ' ' + t('hof.levels');
 }
 
 function goSurvivalLevel(entry) {
@@ -3880,8 +3882,14 @@ async function _openSurvivalGameOver() {
   }
 
   // Connecté — vérifier Firebase pour un score existant
-  pseudoEl.style.display = '';
-  if (currentPseudo) pseudoEl.value = currentPseudo;
+  // Si pseudo déjà connu, cacher le champ (inutile)
+  if (currentPseudo) {
+    pseudoEl.style.display = 'none';
+    pseudoEl.value = currentPseudo;
+  } else {
+    pseudoEl.style.display = '';
+    pseudoEl.value = '';
+  }
   statusEl.style.color = '#446655';
   statusEl.textContent = t('surv.checking');
   submitEl.style.display = '';
@@ -3926,7 +3934,7 @@ async function _submitSurvivalScore(prevKey = null) {
   const pseudoEl = document.getElementById('sg-pseudo');
   const statusEl = document.getElementById('sg-status');
   const submitEl = document.getElementById('sg-submit');
-  const pseudo = pseudoEl.value.trim();
+  const pseudo = currentPseudo || pseudoEl.value.trim();
   if (!pseudo) { statusEl.textContent = t('surv.enter_pseudo'); return; }
   statusEl.textContent = t('surv.sending');
   submitEl.disabled = true;
@@ -4181,7 +4189,8 @@ document.getElementById('submit-send').onclick = async () => {
 // ── AUTH ───────────────────────────────────────────────────
 let currentUser  = null;   // firebase user object or null
 let currentPseudo = null;  // chosen pseudo (from /users/{uid}/pseudo)
-const FB_USERS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
+const FB_USERS_URL   = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
+const FB_PSEUDOS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/pseudos';
 
 // Auth state changes (login / logout)
 let _authReadyResolve = null;
@@ -4212,13 +4221,36 @@ async function loadPseudo(uid) {
   } catch { currentPseudo = null; }
 }
 
+async function _isPseudoAvailable(val, uid) {
+  try {
+    const res = await fetch(`${FB_PSEUDOS_URL}/${encodeURIComponent(val.toLowerCase())}.json`);
+    if (!res.ok) return true; // règles pas encore config → on laisse passer
+    const existing = await res.json();
+    return existing === null || existing === uid;
+  } catch { return true; }
+}
+
+async function _registerPseudo(val, uid, token, oldPseudo) {
+  const key = encodeURIComponent(val.toLowerCase());
+  await fetch(`${FB_PSEUDOS_URL}/${key}.json?auth=${token}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(uid)
+  });
+  if (oldPseudo && oldPseudo.toLowerCase() !== val.toLowerCase()) {
+    await fetch(`${FB_PSEUDOS_URL}/${encodeURIComponent(oldPseudo.toLowerCase())}.json?auth=${token}`, { method: 'DELETE' });
+  }
+}
+
 async function savePseudo(uid, pseudo) {
+  const available = await _isPseudoAvailable(pseudo, uid);
+  if (!available) throw new Error('taken');
   const token = await currentUser.getIdToken();
   await fetch(`${FB_USERS_URL}/${uid}.json?auth=${token}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pseudo })
   });
+  await _registerPseudo(pseudo, uid, token, currentPseudo);
   currentPseudo = pseudo;
 }
 
@@ -4234,8 +4266,8 @@ function openAuthOverlay(mode, onDone) {
   statusEl.textContent = '';
 
   if (mode === 'login') {
-    title.textContent = '🏆 Hall of Fame';
-    desc.textContent  = 'Connecte-toi pour soumettre ton score.\nSeul un pseudo de ton choix sera visible — jamais ton nom réel.';
+    title.textContent = t('auth.hof_title');
+    desc.innerHTML    = t('auth.hof_desc');
     googleBtn.style.display = '';
     guestNote.style.display = '';
     guestBtn.style.display  = '';
@@ -4290,7 +4322,9 @@ function openAuthOverlay(mode, onDone) {
         await savePseudo(currentUser.uid, val);
         overlay.classList.remove('open');
         if (onDone) onDone();
-      } catch { statusEl.textContent = t('auth.pseudo_error'); }
+      } catch(e) {
+        statusEl.textContent = e.message === 'taken' ? t('auth.pseudo_taken') : t('auth.pseudo_error');
+      }
     };
   }
 

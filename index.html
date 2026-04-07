@@ -902,6 +902,7 @@ const TRANSLATIONS_IDX = {
     'idx.levels_short': 'niv.',
     'idx.no_pseudo': 'Pas encore de pseudo',
     'idx.pseudo_min': '⚠ Minimum 2 caractères',
+    'idx.pseudo_taken': '⚠ Ce pseudo est déjà utilisé',
     'idx.pseudo_saving': 'Enregistrement…',
     'idx.pseudo_saved': '✓ Pseudo enregistré !',
     'idx.pseudo_error': '✗ Erreur : ',
@@ -955,6 +956,7 @@ const TRANSLATIONS_IDX = {
     'idx.levels_short': 'lvl.',
     'idx.no_pseudo': 'No username yet',
     'idx.pseudo_min': '⚠ At least 2 characters',
+    'idx.pseudo_taken': '⚠ This username is already taken',
     'idx.pseudo_saving': 'Saving…',
     'idx.pseudo_saved': '✓ Username saved!',
     'idx.pseudo_error': '✗ Error: ',
@@ -992,7 +994,8 @@ const _fbApp = firebase.initializeApp({
 const _fbAuth = firebase.auth();
 const _googleProvider = new firebase.auth.GoogleAuthProvider();
 _googleProvider.setCustomParameters({ prompt: 'select_account' });
-const FB_USERS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
+const FB_USERS_URL   = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
+const FB_PSEUDOS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/pseudos';
 
 let _idxUser = null, _idxPseudo = null;
 
@@ -1044,12 +1047,28 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
   if (val.length < 2) { statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_min'); return; }
   statusEl.style.color = '#446655'; statusEl.textContent = t_idx('idx.pseudo_saving');
   try {
+    // Vérifier disponibilité
+    const checkRes = await fetch(`${FB_PSEUDOS_URL}/${encodeURIComponent(val.toLowerCase())}.json`);
+    if (checkRes.ok) {
+      const existing = await checkRes.json();
+      if (existing !== null && existing !== _idxUser.uid) {
+        statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_taken'); return;
+      }
+    }
     const token = await _idxUser.getIdToken();
     const res = await fetch(`${FB_USERS_URL}/${_idxUser.uid}.json?auth=${token}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pseudo: val })
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    // Enregistrer dans l'index pseudos
+    await fetch(`${FB_PSEUDOS_URL}/${encodeURIComponent(val.toLowerCase())}.json?auth=${token}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(_idxUser.uid)
+    });
+    // Supprimer l'ancien pseudo de l'index si changé
+    if (_idxPseudo && _idxPseudo.toLowerCase() !== val.toLowerCase()) {
+      await fetch(`${FB_PSEUDOS_URL}/${encodeURIComponent(_idxPseudo.toLowerCase())}.json?auth=${token}`, { method: 'DELETE' });
+    }
     _idxPseudo = val;
     pseudoEl.textContent = '👤 ' + val;
     document.getElementById('pseudo-edit-row').style.display = 'none';
