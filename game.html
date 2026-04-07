@@ -5124,6 +5124,7 @@ function hofRenderBody(entries, isSurvival = false) {
   const delBtn = (e) => isAdmin
     ? `<td><button class="hof-del-btn" data-key="${e._fbKey || ''}" title="Supprimer">🗑️</button></td>`
     : '<td></td>';
+  const emote = (e) => _hofEmoteMap[e.uid] ? `<span style="font-size:14px;margin-right:3px">${_hofEmoteMap[e.uid]}</span>` : '';
   if (isSurvival) {
     body.innerHTML = `<table class="hof-table">
       <thead><tr>
@@ -5131,7 +5132,7 @@ function hofRenderBody(entries, isSurvival = false) {
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
-        <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</td>
+        <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${emote(e)}${escHtml(e.pseudo)}</td>
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
         <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
@@ -5146,7 +5147,7 @@ function hofRenderBody(entries, isSurvival = false) {
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
-      <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</td>
+      <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${emote(e)}${escHtml(e.pseudo)}</td>
       <td class="hof-time">${campFmtTime(e.time)}</td>
       <td class="hof-deaths">${e.deaths}</td>
       <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
@@ -5211,6 +5212,8 @@ function hofBuildSpecials() {
 }
 
 const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
+let _hofEmoteMap = {};
+
 async function openHOF(version = HOF_VERSION, diff = null) {
   if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = HOF_DIFFS.includes(_diffId()) ? _diffId() : 'bebe';
   if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null; // old flat versions
@@ -5219,7 +5222,14 @@ async function openHOF(version = HOF_VERSION, diff = null) {
   hofBuildTabs(version, diff);
   hofBuildSpecials();
   document.getElementById('hof-body').innerHTML = `<div class="hof-loading">${t('hof.loading')}</div>`;
-  const entries = await hofFetch(version, diff);
+  const [entries, achData] = await Promise.all([
+    hofFetch(version, diff),
+    fetch(`${FB_ACH_RANKS}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+  ]);
+  _hofEmoteMap = {};
+  if (achData) Object.entries(achData).forEach(([uid, a]) => {
+    if (a?.emote) { const eo = EMOTES.find(e => e.id === a.emote); if (eo) _hofEmoteMap[uid] = eo.emoji; }
+  });
   hofRenderBody(entries, diff === 'survie');
 }
 

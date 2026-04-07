@@ -539,6 +539,57 @@ canvas#bg {
 }
 #editor-link:hover { color: #00ffcc; text-shadow: 0 0 14px #00ffcc88; border-color: #00cc99; }
 
+/* ── SECONDARY BUTTONS ───────────────────────────────────── */
+#secondary-btns {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  margin-top: 4px;
+}
+.sec-btn {
+  background: none; border: 1px solid #1a4535; color: #336655;
+  font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 6px 14px; cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+  border-radius: 2px;
+}
+.sec-btn:hover { border-color: #00cc99; color: #00cc99; box-shadow: 0 0 10px #00cc9922; }
+
+/* ── IDX MODALS ──────────────────────────────────────────── */
+.idx-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: #000000cc; align-items: center; justify-content: center;
+}
+.idx-modal-overlay.open { display: flex; }
+.idx-modal-box {
+  background: #060e0a; border: 1px solid #00cc99;
+  box-shadow: 0 0 40px #00cc9933, inset 0 0 30px #00ffcc08;
+  width: min(700px, 96vw); max-height: 88vh;
+  display: flex; flex-direction: column;
+  font-family: 'Courier New', monospace; color: #00ffcc;
+  border-radius: 3px; overflow: hidden;
+}
+.idx-modal-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid #00cc9933;
+  background: #030d09; flex-shrink: 0;
+}
+.idx-modal-header h2 { font-size: 12px; letter-spacing: 3px; color: #00cc99; flex: 1; }
+.idx-modal-close {
+  background: none; border: none; color: #00cc99; font-size: 16px; cursor: pointer;
+}
+.idx-modal-tabs {
+  display: flex; border-bottom: 1px solid #00cc9922; flex-shrink: 0; flex-wrap: wrap;
+}
+.idx-modal-tab {
+  background: none; border: none; border-right: 1px solid #00cc9922;
+  color: #224433; font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 2px; padding: 7px 14px; cursor: pointer; transition: all 0.15s;
+  text-transform: uppercase;
+}
+.idx-modal-tab:hover { color: #00cc99; background: #00cc9911; }
+.idx-modal-tab.active { color: #00cc99; background: #00cc9918; border-bottom: 2px solid #00cc99; }
+.idx-modal-body { flex: 1; overflow-y: auto; padding: 16px; }
+.idx-modal-section { display: none; }
+.idx-modal-section.active { display: block; }
+
 /* ── AUTH BLOCK (index) ──────────────────────────────────── */
 #auth-block {
   position: fixed;
@@ -766,6 +817,54 @@ canvas#bg {
   </div>
 </div>
 
+<!-- HOF Modal -->
+<div class="idx-modal-overlay" id="idx-hof-modal">
+  <div class="idx-modal-box" style="max-width:780px">
+    <div class="idx-modal-header">
+      <h2 id="idx-hof-modal-title">🏆 HALL OF FAME</h2>
+      <button class="idx-modal-close" id="idx-hof-modal-close">✕</button>
+    </div>
+    <div class="idx-modal-tabs" id="idx-hof-modal-tabs"></div>
+    <div class="idx-modal-body">
+      <div class="idx-modal-section active" id="idx-hof-modal-body">
+        <div style="color:#224433;font-size:11px;text-align:center;padding:20px">Chargement…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Achievements Modal -->
+<div class="idx-modal-overlay" id="idx-ach-modal">
+  <div class="idx-modal-box">
+    <div class="idx-modal-header">
+      <h2 id="idx-ach-modal-title">🏅 HAUTS-FAITS</h2>
+      <button class="idx-modal-close" id="idx-ach-modal-close">✕</button>
+    </div>
+    <div class="idx-modal-body" id="idx-ach-modal-body">
+      <div style="color:#224433;font-size:11px;text-align:center;padding:20px">Chargement…</div>
+    </div>
+  </div>
+</div>
+
+<!-- Shop Modal -->
+<div class="idx-modal-overlay" id="idx-shop-modal">
+  <div class="idx-modal-box">
+    <div class="idx-modal-header">
+      <h2 id="idx-shop-modal-title">⚡ BOUTIQUE VOLTBUCKS</h2>
+      <button class="idx-modal-close" id="idx-shop-modal-close">✕</button>
+    </div>
+    <div class="idx-modal-tabs" id="idx-shop-modal-tabs">
+      <button class="idx-modal-tab active" data-shop-tab="skins">🔵 <span data-i18n-idx="idx.shop_skins">Boule</span></button>
+      <button class="idx-modal-tab" data-shop-tab="emotes">😀 <span data-i18n-idx="idx.shop_emotes">Emote</span></button>
+      <button class="idx-modal-tab" data-shop-tab="bgs">🌌 <span data-i18n-idx="idx.shop_bgs">Fond</span></button>
+      <button class="idx-modal-tab" data-shop-tab="bonus">❤️ <span data-i18n-idx="idx.shop_bonus">Bonus</span></button>
+    </div>
+    <div class="idx-modal-body" id="idx-shop-modal-body">
+      <div style="color:#224433;font-size:11px;text-align:center;padding:20px">Chargement…</div>
+    </div>
+  </div>
+</div>
+
 <!-- Center -->
 <div id="center">
   <div id="content">
@@ -793,6 +892,12 @@ canvas#bg {
     </div>
 
     <button id="play-btn" onclick="startGame()">▶ &nbsp;Jouer</button>
+
+    <div id="secondary-btns">
+      <button class="sec-btn" id="idx-open-hof">🏆 <span data-i18n-idx="idx.btn_hof">Hall of Fame</span></button>
+      <button class="sec-btn" id="idx-open-ach">🏅 <span data-i18n-idx="idx.btn_ach">Hauts-faits</span></button>
+      <button class="sec-btn" id="idx-open-shop">⚡ <span data-i18n-idx="idx.btn_shop">Boutique</span></button>
+    </div>
 
     <a id="editor-link" href="editor.html">éditeur de niveaux →</a>
   </div>
@@ -878,7 +983,11 @@ const TRANSLATIONS_IDX = {
     'idx.google_signin': 'Se connecter avec Google',
     'idx.edit_pseudo': '✎ Modifier le pseudo',
     'idx.pseudo_placeholder': 'Nouveau pseudo…',
-    'idx.logout': 'Se déconnecter',
+    'idx.logout': 'Déconnexion',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Hauts-faits', 'idx.btn_shop': 'Boutique',
+    'idx.shop_skins': 'Boule', 'idx.shop_emotes': 'Emote', 'idx.shop_bgs': 'Fond', 'idx.shop_bonus': 'Bonus',
+    'idx.shop_preview': 'Aperçu — achats disponibles uniquement en jeu.',
+    'idx.shop_price': 'VB', 'idx.ach_modal_title': '🏅 HAUTS-FAITS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'idx.subtitle': 'un jeu de circuit électrique',
     'idx.key_left': 'Interrupteur gauche',
     'idx.key_right': 'Interrupteur droit',
@@ -933,6 +1042,10 @@ const TRANSLATIONS_IDX = {
     'idx.edit_pseudo': '✎ Edit username',
     'idx.pseudo_placeholder': 'New username…',
     'idx.logout': 'Sign out',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Achievements', 'idx.btn_shop': 'Shop',
+    'idx.shop_skins': 'Ball', 'idx.shop_emotes': 'Emote', 'idx.shop_bgs': 'Background', 'idx.shop_bonus': 'Bonus',
+    'idx.shop_preview': 'Preview — purchases only available in-game.',
+    'idx.shop_price': 'VB', 'idx.ach_modal_title': '🏅 ACHIEVEMENTS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'idx.subtitle': 'an electric circuit game',
     'idx.key_left': 'Left switch',
     'idx.key_right': 'Right switch',
@@ -1553,8 +1666,14 @@ async function renderHOF() {
     const path = perDiff
       ? `${FB_URL}/${hofCurrentVersion}/${diff}.json`
       : `${FB_URL}/${hofCurrentVersion}.json`;
-    const res = await fetch(path);
+    const [res, resAch] = await Promise.all([fetch(path), fetch(`${FB_ACH_RANKS}.json`)]);
     const data = res.ok ? await res.json() : null;
+    const achData = resAch.ok ? await resAch.json() : null;
+    // Map uid → emote
+    const emoteMap = {};
+    if (achData) Object.entries(achData).forEach(([uid, a]) => {
+      if (a?.emote) { const em = _PP_EMOTES[a.emote]; if (em) emoteMap[uid] = em; }
+    });
     const entries = data
       ? Object.values(data)
           .flatMap(e => e && typeof e === 'object' && !e.pseudo && !e.score ? Object.values(e) : [e])
@@ -1571,24 +1690,28 @@ async function renderHOF() {
     const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
     if (isSurvival) {
       el.innerHTML = entries.map((e, i) => {
+        const emote = emoteMap[e.uid] || '';
         const bonuses = Array.isArray(e.bonuses) && e.bonuses.length
           ? `<span title="${currentLang === 'en' ? 'Bonuses used' : 'Bonus utilisés'}" style="font-size:10px;opacity:0.7;margin-left:4px">${e.bonuses.map(b=>_bonusEmoji[b]||'').join('')}</span>`
           : '';
         return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
+          ${emote ? `<span style="font-size:14px;margin-right:3px">${emote}</span>` : ''}
           <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
           <span class="ihof-time" style="color:#ff8899">${e.score} ${t_idx('idx.levels_short')}${bonuses}</span>
         </div>`;
       }).join('');
     } else {
-      el.innerHTML = entries.map((e, i) =>
-        `<div class="ihof-row ${cls[i]||''}">
+      el.innerHTML = entries.map((e, i) => {
+        const emote = emoteMap[e.uid] || '';
+        return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
+          ${emote ? `<span style="font-size:14px;margin-right:3px">${emote}</span>` : ''}
           <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
           <span class="ihof-time">${fmtTime(e.time)}</span>
           <span class="ihof-deaths">${e.deaths}💀</span>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
     }
   } catch {
     el.innerHTML = `<div class="panel-empty">${t_idx('idx.hof_error')}</div>`;
@@ -1663,6 +1786,12 @@ async function renderVBRanks() {
 // ── LANG APPLY ─────────────────────────────────────────────
 function applyIdxLang() {
   document.documentElement.lang = currentLang;
+  // Generic data-i18n-idx handler
+  document.querySelectorAll('[data-i18n-idx]').forEach(el => {
+    const key = el.getAttribute('data-i18n-idx');
+    const val = t_idx(key);
+    if (val) el.textContent = val;
+  });
   const langBtn = document.getElementById('lang-toggle');
   if (langBtn) langBtn.innerHTML =
     `<span style="color:${currentLang==='fr'?'#00ffcc':'#2a5a40'}">FR</span><span style="color:#1a4535;margin:0 4px">·</span><span style="color:${currentLang==='en'?'#00ffcc':'#2a5a40'}">EN</span>`;
@@ -1893,6 +2022,202 @@ async function _ppLoadAch(uid) {
     if (!el.innerHTML) el.innerHTML = `<span class="pp-ach-none">${t_idx('idx.ach_none')}</span>`;
   } catch { el.innerHTML = `<span class="pp-ach-none">${t_idx('idx.pp_error')}</span>`; }
 }
+
+// ── IDX MODALS ─────────────────────────────────────────────
+const IDX_HOF_DIFFS = ['bebe','piquer','cauchemar','bebe_inv','piquer_inv','cauchemar_inv','survie'];
+const IDX_DIFF_META = {
+  bebe:{ label:'🍼 Bébés/Babies', color:'#44ff88' }, piquer:{ label:'⚡ Piquer', color:'#ffaa00' },
+  cauchemar:{ label:'💀 Cauchemar/Nightmare', color:'#ff4466' },
+  bebe_inv:{ label:'🔄 Bébés', color:'#44dd77' }, piquer_inv:{ label:'🔄 Piquer', color:'#dd9900' },
+  cauchemar_inv:{ label:'🔄 Cauchemar', color:'#dd3355' }, survie:{ label:'💀 Survie/Survival', color:'#ff8888' }
+};
+let _idxHofDiff = 'cauchemar';
+const _SHOP_ITEMS = {
+  skins: [
+    { id:'default', name:'Defaut / Default', price:0, emoji:'🔵' },
+    { id:'red', name:'Rouge / Red', price:200, emoji:'🔴' },
+    { id:'gold', name:'Or / Gold', price:500, emoji:'🌟' },
+    { id:'ghost', name:'Fantôme / Ghost', price:800, emoji:'👻' },
+    { id:'rainbow', name:'Arc-en-ciel / Rainbow', price:1500, emoji:'🌈' },
+    { id:'plasma', name:'Plasma', price:2000, emoji:'⚡' },
+  ],
+  emotes: [
+    { id:'none', name:'Aucune / None', price:0, emoji:'—' },
+    { id:'🔥', name:'Feu / Fire', price:300, emoji:'🔥' },
+    { id:'💀', name:'Skull', price:300, emoji:'💀' },
+    { id:'⚡', name:'Éclair / Lightning', price:300, emoji:'⚡' },
+    { id:'🐥', name:'Poussin / Chick', price:300, emoji:'🐥' },
+    { id:'🤖', name:'Robot', price:500, emoji:'🤖' },
+    { id:'👑', name:'Couronne / Crown', price:1000, emoji:'👑' },
+  ],
+  bgs: [
+    { id:'default', name:'Grille / Grid', price:0, emoji:'▦' },
+    { id:'electrons', name:'Électrons / Electrons', price:300, emoji:'⚡' },
+    { id:'stars', name:'Étoiles / Stars', price:300, emoji:'✦' },
+    { id:'matrix', name:'Code / Matrix', price:500, emoji:'⌨' },
+    { id:'aurora', name:'Aurore / Aurora', price:800, emoji:'〜' },
+    { id:'void', name:'Vide / Void', price:1000, emoji:'○' },
+  ],
+  bonus: [
+    { id:'heart', name:'Cœur / Heart — +1 vie en survie / +1 survival life', price:500, emoji:'❤️' },
+    { id:'fuse', name:'Fusible / Fuse — verrouille un interrupteur / lock a switch', price:300, emoji:'🔌' },
+    { id:'attenuator', name:'Atténuateur / Attenuator — ralentit la balle / slow the ball', price:400, emoji:'🐢' },
+  ]
+};
+
+function _closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function _openModal(id)  { document.getElementById(id).classList.add('open'); }
+
+// ── HOF MODAL ──
+document.getElementById('idx-open-hof').onclick = () => { _openModal('idx-hof-modal'); _idxRenderHofModal(); };
+document.getElementById('idx-hof-modal-close').onclick = () => _closeModal('idx-hof-modal');
+
+function _idxBuildHofModalTabs() {
+  const tabs = document.getElementById('idx-hof-modal-tabs');
+  tabs.innerHTML = '';
+  IDX_HOF_DIFFS.forEach(d => {
+    const meta = IDX_DIFF_META[d];
+    const btn = document.createElement('button');
+    btn.className = 'idx-modal-tab' + (d === _idxHofDiff ? ' active' : '');
+    btn.textContent = meta.label;
+    btn.style.color = d === _idxHofDiff ? meta.color : '';
+    btn.onclick = () => { _idxHofDiff = d; _idxBuildHofModalTabs(); _idxRenderHofModal(); };
+    tabs.appendChild(btn);
+  });
+}
+
+async function _idxRenderHofModal() {
+  _idxBuildHofModalTabs();
+  const body = document.getElementById('idx-hof-modal-body');
+  body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.loading')}</div>`;
+  const isSurv = _idxHofDiff === 'survie';
+  try {
+    const [res, resAch] = await Promise.all([
+      fetch(`${FB_URL}/${hofCurrentVersion}/${_idxHofDiff}.json`),
+      fetch(`${FB_ACH_RANKS}.json`)
+    ]);
+    const data = res.ok ? await res.json() : null;
+    const achData = resAch.ok ? await resAch.json() : null;
+    const emoteMap = {};
+    if (achData) Object.entries(achData).forEach(([uid, a]) => {
+      if (a?.emote) { const em = _PP_EMOTES[a.emote]; if (em) emoteMap[uid] = em; }
+    });
+    const entries = data
+      ? Object.values(data)
+          .flatMap(e => e && typeof e === 'object' && !e.pseudo && !e.score ? Object.values(e) : [e])
+          .filter(e => e && typeof e.pseudo === 'string' && (isSurv ? typeof e.score === 'number' : typeof e.time === 'number'))
+          .sort(isSurv ? (a, b) => b.score - a.score : (a, b) => a.time - b.time)
+          .slice(0, 50)
+      : [];
+    if (!entries.length) { body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_empty')}</div>`; return; }
+    const medals = ['🥇','🥈','🥉'];
+    const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
+    const emote = (e) => emoteMap[e.uid] ? `<span style="margin-right:3px">${emoteMap[e.uid]}</span>` : '';
+    if (isSurv) {
+      body.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace">
+        <thead><tr style="color:#446655;border-bottom:1px solid #00cc9933">
+          <th style="padding:4px 8px;text-align:left">#</th><th style="padding:4px 8px;text-align:left">Pseudo</th>
+          <th style="padding:4px 8px;text-align:right">Score</th><th style="padding:4px 8px;text-align:right">Date</th>
+        </tr></thead>
+        <tbody>${entries.map((e, i) => `<tr style="border-bottom:1px solid #00cc9911">
+          <td style="padding:5px 8px;color:${IDX_DIFF_META[_idxHofDiff].color}">${medals[i]||(i+1)}</td>
+          <td style="padding:5px 8px">${emote(e)}<span class="pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">${escHtml(e.pseudo)}</span>${Array.isArray(e.bonuses)&&e.bonuses.length?'<span style="margin-left:4px;opacity:0.6">'+e.bonuses.map(b=>_bonusEmoji[b]||'').join('')+'</span>':''}</td>
+          <td style="padding:5px 8px;text-align:right;color:#ff8899">${e.score}</td>
+          <td style="padding:5px 8px;text-align:right;color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    } else {
+      body.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace">
+        <thead><tr style="color:#446655;border-bottom:1px solid #00cc9933">
+          <th style="padding:4px 8px;text-align:left">#</th><th style="padding:4px 8px;text-align:left">Pseudo</th>
+          <th style="padding:4px 8px;text-align:right">Temps/Time</th><th style="padding:4px 8px;text-align:right">💀</th><th style="padding:4px 8px;text-align:right">Date</th>
+        </tr></thead>
+        <tbody>${entries.map((e, i) => `<tr style="border-bottom:1px solid #00cc9911">
+          <td style="padding:5px 8px;color:${IDX_DIFF_META[_idxHofDiff].color}">${medals[i]||(i+1)}</td>
+          <td style="padding:5px 8px">${emote(e)}<span class="pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">${escHtml(e.pseudo)}</span></td>
+          <td style="padding:5px 8px;text-align:right;color:#00ffcc">${fmtTime(e.time)}</td>
+          <td style="padding:5px 8px;text-align:right;color:#ff8899">${e.deaths}</td>
+          <td style="padding:5px 8px;text-align:right;color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+  } catch { body.innerHTML = `<div style="color:#ff4444;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_error')}</div>`; }
+}
+
+// ── ACH MODAL ──
+document.getElementById('idx-open-ach').onclick = () => { _openModal('idx-ach-modal'); _idxRenderAchModal(); };
+document.getElementById('idx-ach-modal-close').onclick = () => _closeModal('idx-ach-modal');
+
+async function _idxRenderAchModal() {
+  const body = document.getElementById('idx-ach-modal-body');
+  body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.loading')}</div>`;
+  try {
+    const res = await fetch(`${FB_ACH_RANKS}.json`);
+    const data = res.ok ? await res.json() : null;
+    if (!data) { body.innerHTML = `<div style="color:#224433;text-align:center;padding:20px;font-size:11px">${t_idx('idx.no_data')}</div>`; return; }
+    const entries = Object.entries(data)
+      .map(([uid, e]) => ({...e, uid}))
+      .filter(e => e.pseudo && e.count > 0)
+      .sort((a, b) => b.count - a.count || a.ts - b.ts)
+      .slice(0, 30);
+    const medals = ['🥇','🥈','🥉'];
+    const ACH_TOTAL_COUNT = 19;
+    body.innerHTML = `
+      <div style="font-size:10px;color:#446655;letter-spacing:1px;margin-bottom:12px">Classement des joueurs par hauts-faits débloqués / Ranking by unlocked achievements</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace">
+        <thead><tr style="color:#446655;border-bottom:1px solid #aa44ff33">
+          <th style="padding:4px 8px;text-align:left">#</th>
+          <th style="padding:4px 8px;text-align:left">Pseudo</th>
+          <th style="padding:4px 8px;text-align:right">Hauts-faits</th>
+        </tr></thead>
+        <tbody>${entries.map((e, i) => {
+          const pct = Math.round((e.count / ACH_TOTAL_COUNT) * 100);
+          return `<tr style="border-bottom:1px solid #aa44ff11">
+            <td style="padding:5px 8px;color:#aa44ff">${medals[i]||(i+1)}</td>
+            <td style="padding:5px 8px">
+              ${e.emote && _PP_EMOTES[e.emote] ? `<span style="margin-right:3px">${_PP_EMOTES[e.emote]}</span>` : ''}
+              <span class="pp-trigger" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">${escHtml(e.pseudo)}</span>
+            </td>
+            <td style="padding:5px 8px;text-align:right">
+              <span style="color:#aa44ff">${e.count}/${ACH_TOTAL_COUNT}</span>
+              <span style="color:#446655;font-size:10px;margin-left:6px">${pct}%</span>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+  } catch { body.innerHTML = `<div style="color:#ff4444;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_error')}</div>`; }
+}
+
+// ── SHOP MODAL ──
+document.getElementById('idx-open-shop').onclick = () => { _openModal('idx-shop-modal'); _idxRenderShopModal('skins'); };
+document.getElementById('idx-shop-modal-close').onclick = () => _closeModal('idx-shop-modal');
+document.querySelectorAll('#idx-shop-modal-tabs .idx-modal-tab').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#idx-shop-modal-tabs .idx-modal-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    _idxRenderShopModal(btn.dataset.shopTab);
+  };
+});
+
+function _idxRenderShopModal(tab) {
+  const body = document.getElementById('idx-shop-modal-body');
+  const items = _SHOP_ITEMS[tab] || [];
+  const note = `<div style="font-size:10px;color:#446655;letter-spacing:1px;margin-bottom:12px;border:1px solid #00cc9922;padding:8px 12px">${t_idx('idx.shop_preview')}</div>`;
+  body.innerHTML = note + `<div style="display:flex;flex-wrap:wrap;gap:10px">` +
+    items.map(item => `
+      <div style="border:1px solid #00cc9933;background:#030d09;padding:12px 16px;min-width:140px;flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
+        <span style="font-size:28px">${item.emoji}</span>
+        <span style="font-size:11px;letter-spacing:1px;text-align:center;color:#00cc99">${item.name}</span>
+        <span style="font-size:12px;color:${item.price===0?'#446655':'#ffaa00'}">${item.price===0?(currentLang==='fr'?'Gratuit':'Free'):'⚡ '+item.price+' VB'}</span>
+      </div>`).join('') + `</div>`;
+}
+
+// Fermer modals en cliquant le backdrop
+['idx-hof-modal','idx-ach-modal','idx-shop-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target.id === id) _closeModal(id);
+  });
+});
 </script>
 </body>
 </html>
