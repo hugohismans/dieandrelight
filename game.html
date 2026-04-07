@@ -56,7 +56,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #bg-vignette {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 15;
     pointer-events: none;
     background: radial-gradient(ellipse at center,
       transparent 40%,
@@ -68,7 +68,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #bg-scanlines {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 15;
     pointer-events: none;
     background: repeating-linear-gradient(
       to bottom,
@@ -105,6 +105,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 10;
   }
 
   canvas { display: block; max-width: 100%; height: auto; }
@@ -4542,8 +4544,8 @@ function _applyBackground() {
         const ratio = s.vy / Math.abs(s.vx);
         c.save();
         const g = c.createLinearGradient(s.x, s.y, s.x + s.len, s.y - s.len * ratio);
-        g.addColorStop(0, 'transparent');
-        g.addColorStop(1, s.color);
+        g.addColorStop(0, s.color);
+        g.addColorStop(1, 'transparent');
         c.globalAlpha = s.alpha;
         c.strokeStyle = g; c.lineWidth = 1.5;
         c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + s.len, s.y - s.len * ratio); c.stroke();
