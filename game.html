@@ -2152,7 +2152,6 @@ const TOP_Y    = WIRE_Y - 65; // 85
 const BOT_Y    = WIRE_Y + 65; // 215
 const BEVEL    = 35;          // horizontal extent of the angled connector
 
-const BEVEL_HALF = BEVEL; // alias, already defined
 
 // ── CAMERA (custom levels only) ────────────────────────────
 let camTX = 0, camTY = 0, camScale = 1; // applied via ctx.setTransform
@@ -2736,7 +2735,6 @@ const TRANSLATIONS = {
 
 let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
 let allMuted = localStorage.getItem('elecgame_mute_all') === '1';
-let humMuted  = localStorage.getItem('elecgame_mute_hum') === '1';
 
 function t(key) {
   return (TRANSLATIONS[currentLang] || TRANSLATIONS.fr)[key] || TRANSLATIONS.fr[key] || key;
@@ -5950,7 +5948,7 @@ document.getElementById('shop-close').onclick  = () => document.getElementById('
 document.getElementById('shop-open-btn').onclick = () => { closeMenu(); openShop(); };
 
 // ── BACKGROUND ENGINE ───────────────────────────────────────
-let _bgAnimId = null;
+window._bgAnimId = null;
 let _bgParticles = [];
 
 function _applyBackground() {
@@ -6429,7 +6427,7 @@ document.addEventListener('keyup', e => {
 
 // ── AUDIO ──────────────────────────────────────────────────
 let AC = null, masterGain = null;
-let humOsc = null, humGain = null;
+let humOsc = null;
 let noiseBuffer = null;
 
 function resumeAudio() {
@@ -6449,9 +6447,7 @@ function resumeAudio() {
 
 function applyAudioMuteUI() {
   const btnAll = document.getElementById('btn-mute-all');
-  const btnHum = document.getElementById('btn-mute-hum');
   if (btnAll) { btnAll.textContent = allMuted ? '🔇' : '🔊'; btnAll.classList.toggle('muted', allMuted); }
-  if (btnHum) { btnHum.textContent = humMuted ? '⚡̶' : '⚡'; btnHum.classList.toggle('muted', humMuted); }
 }
 
 function toggleMuteAll() {
@@ -6461,12 +6457,6 @@ function toggleMuteAll() {
   applyAudioMuteUI();
 }
 
-function toggleMuteHum() {
-  humMuted = !humMuted;
-  localStorage.setItem('elecgame_mute_hum', humMuted ? '1' : '0');
-  if (humGain) humGain.gain.setValueAtTime(humMuted ? 0.001 : 0.010, AC.currentTime);
-  applyAudioMuteUI();
-}
 
 function getNoise() {
   if (noiseBuffer) return noiseBuffer;
