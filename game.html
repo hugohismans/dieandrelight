@@ -73,21 +73,16 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     z-index: 16;
     pointer-events: none;
     font-family: 'Courier New', monospace;
-    font-size: clamp(30px, 5vw, 52px);
+    font-size: clamp(28px, 4.5vw, 50px);
     font-weight: bold;
-    letter-spacing: 10px;
-    color: #ffaa00;
+    letter-spacing: 8px;
     text-transform: uppercase;
-    text-shadow:
-      0 0 12px #ffaa00cc,
-      0 0 30px #ff880088,
-      0 0 60px #ffaa0033;
     opacity: 0;
     transition: opacity 0.6s ease;
     animation: tuto-float 3.2s ease-in-out infinite;
     white-space: nowrap;
   }
-  #tuto-q-hint.visible { opacity: 0.38; }
+  #tuto-q-hint.visible { opacity: 0.4; }
   @keyframes tuto-float {
     0%, 100% { transform: translateX(-50%) translateY(0px); }
     50%       { transform: translateX(-50%) translateY(-14px); }
@@ -1981,6 +1976,8 @@ const TRANSLATIONS = {
     'tuto1.name': 'Tutoriel 1',
     'tuto1.hint': 'Maintiens [Q] pour fermer l\'interrupteur — [R] pour recommencer',
     'tuto1.bg_hint': 'Maintiens Q',
+    'tuto2.bg_hint_verb': 'Maintiens',
+    'resistance.bg_hint': 'SPAM ESPACE !',
     'tuto2.name': 'Tutoriel 2',
     'tuto2.hint': 'Maintiens [Q] et [P] simultanément — [R] pour recommencer',
     'tuto3.name': 'Tutoriel 3',
@@ -2256,6 +2253,8 @@ const TRANSLATIONS = {
     'tuto1.name': 'Tutorial 1',
     'tuto1.hint': 'Hold [Q] to close the switch — [R] to restart',
     'tuto1.bg_hint': 'Hold Q',
+    'tuto2.bg_hint_verb': 'Hold',
+    'resistance.bg_hint': 'SPAM SPACE !',
     'tuto2.name': 'Tutorial 2',
     'tuto2.hint': 'Hold [Q] and [P] simultaneously — [R] to restart',
     'tuto3.name': 'Tutorial 3',
@@ -2558,9 +2557,8 @@ function applyLang() {
     // Update level button labels after lang change
     LEVELS.forEach(lv => { (lv._btns || []).forEach(b => { b.textContent = lv.name; }); });
   }
-  // Tuto 1 bg hint text
-  const _tqhLang = document.getElementById('tuto-q-hint');
-  if (_tqhLang) _tqhLang.textContent = t('tuto1.bg_hint');
+  // Rebuild tuto/hint bg text for current level
+  _buildTutoHint(currentLevel);
   // Update replay load button
   const _blr = document.getElementById('btn-load-replay');
   if (_blr) { _blr.textContent = t('btn.load_replay'); _blr.title = t('replay.title'); }
@@ -2812,7 +2810,7 @@ const CAMPAIGNS = {
     color: '#44ff88', desc: '',
     levels: [
       { idx: 0 }, { idx: 1 }, { idx: 2 },
-      { file: 'levels/TUTO4_resistance_eclair.json', name: 'Résistance Éclair' },
+      { file: 'levels/TUTO4_resistance_eclair.json', name: 'Résistance Éclair', bgHint: 'resistance' },
       { file: 'levels/tuto5_microprocesseur.json',   name: 'Microprocesseur' },
       { file: 'levels/67.json',                      name: '67' },
       { file: "levels/Le Pistolet.json",             name: 'Le Pistolet' },
@@ -2902,6 +2900,27 @@ let invertControls = false;
 // Swape Q↔P quand le mode miroir est actif
 function _ikey(k) { return invertControls ? (k === 'Q' ? 'P' : k === 'P' ? 'Q' : k) : k; }
 
+function _buildTutoHint(idx) {
+  const el = document.getElementById('tuto-q-hint');
+  if (!el) return;
+  const O = 'color:#ffaa00;text-shadow:0 0 18px #ffaa00,0 0 40px #ff8800';
+  const P = 'color:#cc44ff;text-shadow:0 0 18px #cc44ff,0 0 40px #aa00ff';
+  const Y = 'color:#ffee00;text-shadow:0 0 18px #ffee00,0 0 40px #ffaa00';
+  if (idx === 0) {
+    el.innerHTML = `<span style="${O}">${t('tuto1.bg_hint')}</span>`;
+    el.classList.add('visible');
+  } else if (idx === 1) {
+    const verb = t('tuto2.bg_hint_verb');
+    el.innerHTML = `<span style="color:#7799aa">${verb} </span><span style="${O}">Q</span><span style="color:#334455"> + </span><span style="${P}">P</span>`;
+    el.classList.add('visible');
+  } else if (LEVELS[idx]?.bgHint === 'resistance') {
+    el.innerHTML = `<span style="${Y}">${t('resistance.bg_hint')}</span>`;
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
 function selectLevel(idx) {
   resumeAudio();
   replayMode = false;
@@ -2956,12 +2975,7 @@ function selectLevel(idx) {
     camTX = 0; camTY = 0; camScale = 1;
   }
   document.getElementById('hint').textContent = LEVELS[idx].hint || '';
-  // Tuto 1 background hint
-  const _tqh = document.getElementById('tuto-q-hint');
-  if (_tqh) {
-    _tqh.textContent = t('tuto1.bg_hint');
-    _tqh.classList.toggle('visible', idx === 0);
-  }
+  _buildTutoHint(idx);
   // Update sidebar title
   const sidebarTitle = document.getElementById('sidebar-title');
   if (sidebarTitle) sidebarTitle.textContent = LEVELS[idx].name || t('levels');
