@@ -1694,7 +1694,7 @@ function renderSpecials() {
   el.innerHTML = SPECIAL_THANKS.map(s =>
     `<div class="sp-entry">
       <div class="sp-pseudo">${escHtml(s.pseudo)}</div>
-      <div class="sp-level" style="color:${specialThanksColor(s.level)}">${escHtml(s.level || '')}</div>
+      <div class="sp-level" style="color:${specialThanksColor(s)}">${escHtml(currentLang === 'en' ? (s.en || s.fr) : (s.fr || s.en) || '')}</div>
     </div>`
   ).join('');
 }
@@ -2197,7 +2197,7 @@ function _mhofBuildSpecials() {
   el.innerHTML = SPECIAL_THANKS.map(s =>
     `<div class="special-entry">
       <span class="special-pseudo">${escHtml(s.pseudo)}</span>
-      <span class="special-level" style="color:${specialThanksColor(s.level)}">${escHtml(s.level||'')}</span>
+      <span class="special-level" style="color:${specialThanksColor(s)}">${escHtml(currentLang === 'en' ? (s.en || s.fr) : (s.fr || s.en) || '')}</span>
     </div>`
   ).join('');
 }
