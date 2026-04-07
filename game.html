@@ -3001,11 +3001,23 @@ async function _apSaveVB(newVb) {
   } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
 }
 
-document.getElementById('ap-vb-apply').onclick = () => {
+document.getElementById('ap-vb-apply').onclick = async () => {
   const delta = parseInt(document.getElementById('ap-vb-amount').value);
-  if (isNaN(delta)) { document.getElementById('ap-vb-save-status').textContent = 'Montant invalide.'; return; }
-  const cur = parseInt(document.getElementById('ap-vb-uid').dataset.vb) || 0;
-  _apSaveVB(Math.max(0, cur + delta));
+  const st = document.getElementById('ap-vb-save-status');
+  if (isNaN(delta)) { st.textContent = 'Montant invalide.'; return; }
+  const uid = document.getElementById('ap-vb-uid').dataset.uid;
+  if (!uid) { st.textContent = 'Cherche un joueur d\'abord.'; return; }
+  st.style.color = '#886622'; st.textContent = 'Lecture du solde actuel…';
+  try {
+    const token = await _apAdminToken();
+    const r = await fetch(`${_FB_BASE}/users/${uid}/voltbucks.json?auth=${token}`);
+    const vb = await r.json();
+    const cur = typeof vb === 'number' ? vb : 0;
+    const newVb = Math.max(0, cur + delta);
+    document.getElementById('ap-vb-uid').dataset.vb = cur;
+    document.getElementById('ap-vb-current').textContent = '⚡ ' + cur + ' VB (actuel)';
+    await _apSaveVB(newVb);
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
 };
 document.getElementById('ap-vb-setbtn').onclick = () => {
   const val = parseInt(document.getElementById('ap-vb-set').value);
