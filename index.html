@@ -846,24 +846,6 @@ canvas#bg {
   </div>
 </div>
 
-<!-- Shop Modal -->
-<div class="idx-modal-overlay" id="idx-shop-modal">
-  <div class="idx-modal-box">
-    <div class="idx-modal-header">
-      <h2 id="idx-shop-modal-title">⚡ BOUTIQUE VOLTBUCKS</h2>
-      <button class="idx-modal-close" id="idx-shop-modal-close">✕</button>
-    </div>
-    <div class="idx-modal-tabs" id="idx-shop-modal-tabs">
-      <button class="idx-modal-tab active" data-shop-tab="skins">🔵 <span data-i18n-idx="idx.shop_skins">Boule</span></button>
-      <button class="idx-modal-tab" data-shop-tab="emotes">😀 <span data-i18n-idx="idx.shop_emotes">Emote</span></button>
-      <button class="idx-modal-tab" data-shop-tab="bgs">🌌 <span data-i18n-idx="idx.shop_bgs">Fond</span></button>
-      <button class="idx-modal-tab" data-shop-tab="bonus">❤️ <span data-i18n-idx="idx.shop_bonus">Bonus</span></button>
-    </div>
-    <div class="idx-modal-body" id="idx-shop-modal-body">
-      <div style="color:#224433;font-size:11px;text-align:center;padding:20px">Chargement…</div>
-    </div>
-  </div>
-</div>
 
 <!-- Center -->
 <div id="center">
@@ -896,7 +878,6 @@ canvas#bg {
     <div id="secondary-btns">
       <button class="sec-btn" id="idx-open-hof">🏆 <span data-i18n-idx="idx.btn_hof">Hall of Fame</span></button>
       <button class="sec-btn" id="idx-open-ach">🏅 <span data-i18n-idx="idx.btn_ach">Hauts-faits</span></button>
-      <button class="sec-btn" id="idx-open-shop">⚡ <span data-i18n-idx="idx.btn_shop">Boutique</span></button>
     </div>
 
     <a id="editor-link" href="editor.html">éditeur de niveaux →</a>
@@ -984,10 +965,8 @@ const TRANSLATIONS_IDX = {
     'idx.edit_pseudo': '✎ Modifier le pseudo',
     'idx.pseudo_placeholder': 'Nouveau pseudo…',
     'idx.logout': 'Déconnexion',
-    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Hauts-faits', 'idx.btn_shop': 'Boutique',
-    'idx.shop_skins': 'Boule', 'idx.shop_emotes': 'Emote', 'idx.shop_bgs': 'Fond', 'idx.shop_bonus': 'Bonus',
-    'idx.shop_preview': 'Aperçu — achats disponibles uniquement en jeu.',
-    'idx.shop_price': 'VB', 'idx.ach_modal_title': '🏅 HAUTS-FAITS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Hauts-faits',
+    'idx.ach_modal_title': '🏅 HAUTS-FAITS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'idx.subtitle': 'un jeu de circuit électrique',
     'idx.key_left': 'Interrupteur gauche',
     'idx.key_right': 'Interrupteur droit',
@@ -1042,10 +1021,8 @@ const TRANSLATIONS_IDX = {
     'idx.edit_pseudo': '✎ Edit username',
     'idx.pseudo_placeholder': 'New username…',
     'idx.logout': 'Sign out',
-    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Achievements', 'idx.btn_shop': 'Shop',
-    'idx.shop_skins': 'Ball', 'idx.shop_emotes': 'Emote', 'idx.shop_bgs': 'Background', 'idx.shop_bonus': 'Bonus',
-    'idx.shop_preview': 'Preview — purchases only available in-game.',
-    'idx.shop_price': 'VB', 'idx.ach_modal_title': '🏅 ACHIEVEMENTS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Achievements',
+    'idx.ach_modal_title': '🏅 ACHIEVEMENTS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'idx.subtitle': 'an electric circuit game',
     'idx.key_left': 'Left switch',
     'idx.key_right': 'Right switch',
@@ -2032,38 +2009,6 @@ const IDX_DIFF_META = {
   cauchemar_inv:{ label:'🔄 Cauchemar', color:'#dd3355' }, survie:{ label:'💀 Survie/Survival', color:'#ff8888' }
 };
 let _idxHofDiff = 'cauchemar';
-const _SHOP_ITEMS = {
-  skins: [
-    { id:'default', name:'Defaut / Default', price:0, emoji:'🔵' },
-    { id:'red', name:'Rouge / Red', price:200, emoji:'🔴' },
-    { id:'gold', name:'Or / Gold', price:500, emoji:'🌟' },
-    { id:'ghost', name:'Fantôme / Ghost', price:800, emoji:'👻' },
-    { id:'rainbow', name:'Arc-en-ciel / Rainbow', price:1500, emoji:'🌈' },
-    { id:'plasma', name:'Plasma', price:2000, emoji:'⚡' },
-  ],
-  emotes: [
-    { id:'none', name:'Aucune / None', price:0, emoji:'—' },
-    { id:'🔥', name:'Feu / Fire', price:300, emoji:'🔥' },
-    { id:'💀', name:'Skull', price:300, emoji:'💀' },
-    { id:'⚡', name:'Éclair / Lightning', price:300, emoji:'⚡' },
-    { id:'🐥', name:'Poussin / Chick', price:300, emoji:'🐥' },
-    { id:'🤖', name:'Robot', price:500, emoji:'🤖' },
-    { id:'👑', name:'Couronne / Crown', price:1000, emoji:'👑' },
-  ],
-  bgs: [
-    { id:'default', name:'Grille / Grid', price:0, emoji:'▦' },
-    { id:'electrons', name:'Électrons / Electrons', price:300, emoji:'⚡' },
-    { id:'stars', name:'Étoiles / Stars', price:300, emoji:'✦' },
-    { id:'matrix', name:'Code / Matrix', price:500, emoji:'⌨' },
-    { id:'aurora', name:'Aurore / Aurora', price:800, emoji:'〜' },
-    { id:'void', name:'Vide / Void', price:1000, emoji:'○' },
-  ],
-  bonus: [
-    { id:'heart', name:'Cœur / Heart — +1 vie en survie / +1 survival life', price:500, emoji:'❤️' },
-    { id:'fuse', name:'Fusible / Fuse — verrouille un interrupteur / lock a switch', price:300, emoji:'🔌' },
-    { id:'attenuator', name:'Atténuateur / Attenuator — ralentit la balle / slow the ball', price:400, emoji:'🐢' },
-  ]
-};
 
 function _closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function _openModal(id)  { document.getElementById(id).classList.add('open'); }
@@ -2188,32 +2133,8 @@ async function _idxRenderAchModal() {
   } catch { body.innerHTML = `<div style="color:#ff4444;text-align:center;padding:20px;font-size:11px">${t_idx('idx.hof_error')}</div>`; }
 }
 
-// ── SHOP MODAL ──
-document.getElementById('idx-open-shop').onclick = () => { _openModal('idx-shop-modal'); _idxRenderShopModal('skins'); };
-document.getElementById('idx-shop-modal-close').onclick = () => _closeModal('idx-shop-modal');
-document.querySelectorAll('#idx-shop-modal-tabs .idx-modal-tab').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('#idx-shop-modal-tabs .idx-modal-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    _idxRenderShopModal(btn.dataset.shopTab);
-  };
-});
-
-function _idxRenderShopModal(tab) {
-  const body = document.getElementById('idx-shop-modal-body');
-  const items = _SHOP_ITEMS[tab] || [];
-  const note = `<div style="font-size:10px;color:#446655;letter-spacing:1px;margin-bottom:12px;border:1px solid #00cc9922;padding:8px 12px">${t_idx('idx.shop_preview')}</div>`;
-  body.innerHTML = note + `<div style="display:flex;flex-wrap:wrap;gap:10px">` +
-    items.map(item => `
-      <div style="border:1px solid #00cc9933;background:#030d09;padding:12px 16px;min-width:140px;flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
-        <span style="font-size:28px">${item.emoji}</span>
-        <span style="font-size:11px;letter-spacing:1px;text-align:center;color:#00cc99">${item.name}</span>
-        <span style="font-size:12px;color:${item.price===0?'#446655':'#ffaa00'}">${item.price===0?(currentLang==='fr'?'Gratuit':'Free'):'⚡ '+item.price+' VB'}</span>
-      </div>`).join('') + `</div>`;
-}
-
 // Fermer modals en cliquant le backdrop
-['idx-hof-modal','idx-ach-modal','idx-shop-modal'].forEach(id => {
+['idx-hof-modal','idx-ach-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target.id === id) _closeModal(id);
   });
