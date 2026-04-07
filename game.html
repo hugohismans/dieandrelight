@@ -6375,7 +6375,7 @@ function enterMicroDigit(digit) {
   mc.entered.push(digit);
   const pos = mc.entered.length - 1;
   if (mc.code[pos] !== digit) {
-    state.dead = true; sfxDead();
+    if (!state.dead) { state.dead = true; sfxDead(); registerDeath(); }
   } else if (mc.entered.length === 3) {
     if (mc.ballRef) mc.ballRef.microSolved = true;
     sfxSwitchClose();
