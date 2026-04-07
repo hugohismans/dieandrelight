@@ -5476,7 +5476,7 @@ async function loadDoneFromFirebase() {
     if (resD.ok) { const d = await resD.json(); if (typeof d === 'number' && d > deathCount) {
       deathCount = d; writeSave({ deaths: deathCount }); updateDeathDisplay();
     }}
-    if (resVB.ok) { const d = await resVB.json(); if (typeof d === 'number' && d > voltbucks) {
+    if (resVB.ok) { const d = await resVB.json(); if (typeof d === 'number') {
       voltbucks = d; writeSave({ voltbucks }); _updateVBDisplay();
     }}
     if (resInv.ok) {
