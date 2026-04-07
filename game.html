@@ -4627,6 +4627,7 @@ function _shopItemClick(skinId) {
     document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
     return;
   }
+  if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
   if (voltbucks < skin.price) { return; }
   if (!confirm(`Acheter "${skin.name}" pour ⚡${skin.price} VB ?`)) return;
   voltbucks -= skin.price;
@@ -4665,6 +4666,7 @@ function _renderShopEmotes() {
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
+      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
       if (voltbucks < emote.price) return;
       if (!confirm(`Acheter "${emote.name}" pour ⚡${emote.price} VB ?`)) return;
       voltbucks -= emote.price; _ownedItems.add(key); _equippedEmote = emote.id;
@@ -4726,6 +4728,7 @@ function _renderShopBgs() {
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
+      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
       if (voltbucks < bg.price) return;
       if (!confirm(`Acheter "${bg.name}" pour ⚡${bg.price} VB ?`)) return;
       voltbucks -= bg.price; _ownedItems.add(key); _equippedBg = bg.id;
@@ -4896,6 +4899,7 @@ function _renderShopBonus() {
       const id = btn.dataset.consum;
       const item = CONSUMABLES.find(c => c.id === id);
       if (!item || _consumables[id]) return;
+      if (!currentUser) { alert('Connecte-toi pour effectuer des achats.'); return; }
       if (voltbucks < item.price) return;
       if (!confirm(`Acheter "${item.name}" pour ⚡${item.price} VB ?`)) return;
       voltbucks -= item.price;
