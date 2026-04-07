@@ -65,6 +65,34 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     );
   }
 
+  /* ── TUTO HINT ───────────────────────────────────────────── */
+  #tuto-q-hint {
+    position: fixed;
+    bottom: 28%;
+    left: 50%;
+    z-index: 16;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(30px, 5vw, 52px);
+    font-weight: bold;
+    letter-spacing: 10px;
+    color: #ffaa00;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 12px #ffaa00cc,
+      0 0 30px #ff880088,
+      0 0 60px #ffaa0033;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    animation: tuto-float 3.2s ease-in-out infinite;
+    white-space: nowrap;
+  }
+  #tuto-q-hint.visible { opacity: 0.38; }
+  @keyframes tuto-float {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50%       { transform: translateX(-50%) translateY(-14px); }
+  }
+
   #bg-scanlines {
     position: fixed;
     inset: 0;
@@ -1525,6 +1553,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <div id="bg-scanlines"></div>
 <canvas id="bg-electrons"></canvas>
 <div id="bg-flash"></div>
+<div id="tuto-q-hint"></div>
 
 <!-- Hamburger -->
 <button id="menu-btn">☰</button>
@@ -1951,6 +1980,7 @@ const TRANSLATIONS = {
     'group.levels': 'NIVEAUX',
     'tuto1.name': 'Tutoriel 1',
     'tuto1.hint': 'Maintiens [Q] pour fermer l\'interrupteur — [R] pour recommencer',
+    'tuto1.bg_hint': 'Maintiens Q',
     'tuto2.name': 'Tutoriel 2',
     'tuto2.hint': 'Maintiens [Q] et [P] simultanément — [R] pour recommencer',
     'tuto3.name': 'Tutoriel 3',
@@ -2225,6 +2255,7 @@ const TRANSLATIONS = {
     'group.levels': 'LEVELS',
     'tuto1.name': 'Tutorial 1',
     'tuto1.hint': 'Hold [Q] to close the switch — [R] to restart',
+    'tuto1.bg_hint': 'Hold Q',
     'tuto2.name': 'Tutorial 2',
     'tuto2.hint': 'Hold [Q] and [P] simultaneously — [R] to restart',
     'tuto3.name': 'Tutorial 3',
@@ -2527,6 +2558,9 @@ function applyLang() {
     // Update level button labels after lang change
     LEVELS.forEach(lv => { (lv._btns || []).forEach(b => { b.textContent = lv.name; }); });
   }
+  // Tuto 1 bg hint text
+  const _tqhLang = document.getElementById('tuto-q-hint');
+  if (_tqhLang) _tqhLang.textContent = t('tuto1.bg_hint');
   // Update replay load button
   const _blr = document.getElementById('btn-load-replay');
   if (_blr) { _blr.textContent = t('btn.load_replay'); _blr.title = t('replay.title'); }
@@ -2922,6 +2956,12 @@ function selectLevel(idx) {
     camTX = 0; camTY = 0; camScale = 1;
   }
   document.getElementById('hint').textContent = LEVELS[idx].hint || '';
+  // Tuto 1 background hint
+  const _tqh = document.getElementById('tuto-q-hint');
+  if (_tqh) {
+    _tqh.textContent = t('tuto1.bg_hint');
+    _tqh.classList.toggle('visible', idx === 0);
+  }
   // Update sidebar title
   const sidebarTitle = document.getElementById('sidebar-title');
   if (sidebarTitle) sidebarTitle.textContent = LEVELS[idx].name || t('levels');
