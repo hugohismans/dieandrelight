@@ -1681,7 +1681,6 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <!-- Audio controls -->
 <div id="audio-controls">
   <button class="audio-btn" id="btn-mute-all" title="Couper tout le son">🔊</button>
-  <button class="audio-btn" id="btn-mute-hum" title="Couper le bruit électrique">⚡</button>
 </div>
 
 <!-- Language toggle -->
@@ -6479,36 +6478,8 @@ function getNoise() {
   return buf;
 }
 
-function startHum() {
-  if (!AC || humOsc) return;
-  // 60 Hz sawtooth (sector hum) + 120 Hz harmonic
-  humOsc = AC.createOscillator();
-  humOsc.type = 'sawtooth';
-  humOsc.frequency.value = 60;
-  const h2 = AC.createOscillator();
-  h2.type = 'square';
-  h2.frequency.value = 120;
-  const g2 = AC.createGain();
-  g2.gain.value = 0.004;
-  humGain = AC.createGain();
-  humGain.gain.setValueAtTime(0.001, AC.currentTime);
-  if (!humMuted) humGain.gain.linearRampToValueAtTime(0.010, AC.currentTime + 0.6);
-  humOsc.connect(humGain);
-  h2.connect(g2); g2.connect(humGain);
-  humGain.connect(masterGain || AC.destination);
-  humOsc.start(); h2.start();
-  humOsc._h2 = h2; // keep ref for cleanup
-}
-
-function stopHum(fast) {
-  if (!humGain) return;
-  const t = fast ? 0.08 : 0.4;
-  humGain.gain.setValueAtTime(humGain.gain.value, AC.currentTime);
-  humGain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + t);
-  const h = humOsc;
-  setTimeout(() => { try { h.stop(); h._h2.stop(); } catch(e){} }, (t + 0.05) * 1000);
-  humOsc = null; humGain = null;
-}
+function startHum() { /* bruit de fond désactivé */ }
+function stopHum()  { /* bruit de fond désactivé */ }
 
 function noiseBurst(freq, q, vol, dur) {
   if (!AC) return;
