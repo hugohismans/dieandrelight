@@ -4486,13 +4486,14 @@ async function _openSurvivalGameOver() {
 // Wrapper Firebase write avec retry auto sur 401 (token propagation issue)
 async function _fbWrite(url, method, body, attempt = 0) {
   const token = await currentUser.getIdToken(true);
-  const res = await fetch(url, {
+  // Firebase Realtime Database REST API : les ID tokens doivent passer par ?auth= (pas Authorization: Bearer)
+  const authUrl = url.includes('?') ? `${url}&auth=${token}` : `${url}?auth=${token}`;
+  const res = await fetch(authUrl, {
     method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
   if (res.status === 401 && attempt < 2) {
-    // Petit délai puis retry — token parfois rejeté le temps que Firebase propage le refresh
     await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
     return _fbWrite(url, method, body, attempt + 1);
   }
