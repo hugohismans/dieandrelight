@@ -1666,6 +1666,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <canvas id="pp-ball" width="28" height="28" style="border-radius:50%;flex-shrink:0"></canvas>
       <h2 id="pp-pseudo-title"></h2>
       <span id="pp-bg-badge" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #1a4535;border-radius:2px;color:#336655;margin-left:4px;flex-shrink:0"></span>
+      <span id="pp-vb" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #443300;border-radius:2px;color:#aa7700;margin-left:4px;flex-shrink:0"></span>
       <button id="pp-close">✕</button>
     </div>
     <div id="pp-body">
@@ -3002,6 +3003,10 @@ function _syncVB() {
       method: 'PUT', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ pseudo: currentPseudo, vb: voltbucks, ts: Date.now() })
     }).catch(() => {});
+    fetch(`${FB_ACH_RANKS}/${currentUser.uid}/vb.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(voltbucks)
+    }).catch(() => {});
   }).catch(() => {});
 }
 
@@ -3959,6 +3964,7 @@ async function openPlayerProfile(uid, pseudo) {
   document.getElementById('pp-pseudo-title').textContent = pseudo;
   document.getElementById('pp-emote').textContent = '🐥';
   document.getElementById('pp-bg-badge').textContent = '';
+  document.getElementById('pp-vb').textContent = '';
   _ppDrawBallPreview(document.getElementById('pp-ball'), 'default');
   document.getElementById('pp-hof-content').innerHTML = '<span style="color:#224433;font-size:11px">Chargement…</span>';
   document.getElementById('pp-ach-list').innerHTML = '<span class="pp-ach-none">Chargement…</span>';
@@ -4032,6 +4038,8 @@ async function _ppLoadAchievements(uid) {
     const bgLabels = { default:'▦ Grille', electrons:'⚡ Électrons', stars:'✦ Étoiles', matrix:'⌨ Code', aurora:'〜 Aurore', void:'○ Vide' };
     const bgEl = document.getElementById('pp-bg-badge');
     if (bgEl) bgEl.textContent = bgLabels[bgId] || '';
+    const vbEl = document.getElementById('pp-vb');
+    if (vbEl) vbEl.textContent = typeof data?.vb === 'number' ? '⚡ ' + data.vb + ' VB' : '';
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
     if (!ids || !ids.length) {
@@ -4221,7 +4229,7 @@ function _saveCosmetics() {
   currentUser.getIdToken().then(token => {
     fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
       method: 'PATCH', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg })
+      body: JSON.stringify({ emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
     }).catch(() => {});
   }).catch(() => {});
 }
