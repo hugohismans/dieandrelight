@@ -815,8 +815,8 @@ canvas#bg {
       <span id="pp-emote" style="font-size:28px;line-height:1">🐥</span>
       <canvas id="pp-ball" width="28" height="28" style="border-radius:50%;flex-shrink:0"></canvas>
       <h2 id="pp-pseudo-title"></h2>
-      <span id="pp-bg-badge" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #1a4535;border-radius:2px;color:#336655;margin-left:4px;flex-shrink:0"></span>
-      <span id="pp-vb" style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #443300;border-radius:2px;color:#aa7700;margin-left:4px;flex-shrink:0"></span>
+      <span id="pp-bg-badge" style="display:none;font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #1a4535;border-radius:2px;color:#336655;margin-left:4px;flex-shrink:0"></span>
+      <span id="pp-vb" style="display:none;font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid #443300;border-radius:2px;color:#aa7700;margin-left:4px;flex-shrink:0"></span>
       <button id="pp-close">✕</button>
     </div>
     <div id="pp-body">
@@ -1607,9 +1607,9 @@ async function _ppLoadAch(uid) {
     if (emoteEl) emoteEl.textContent = _PP_EMOTES[emoteId] || '🐥';
     _ppDrawBall(document.getElementById('pp-ball'), skinId);
     const bgEl = document.getElementById('pp-bg-badge');
-    if (bgEl) bgEl.textContent = _PP_BG_LABELS[bgId] || '';
+    if (bgEl) { const t = _PP_BG_LABELS[bgId] || ''; bgEl.textContent = t; bgEl.style.display = t ? '' : 'none'; }
     const vbEl = document.getElementById('pp-vb');
-    if (vbEl) vbEl.textContent = typeof data?.vb === 'number' ? '⚡ ' + data.vb + ' VB' : '';
+    if (vbEl) { const t = typeof data?.vb === 'number' ? '⚡ ' + data.vb + ' VB' : ''; vbEl.textContent = t; vbEl.style.display = t ? '' : 'none'; }
     // Achievements
     let ids = data?.achievements;
     // Fallback : lire directement users/{uid}/achievements si le tableau n'est pas encore dans achievement_ranks
