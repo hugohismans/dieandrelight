@@ -5318,7 +5318,8 @@ _fbAuth.onAuthStateChanged(async user => {
   currentUser = user;
   if (user) {
     await loadPseudo(user.uid);
-    loadDoneFromFirebase(); // sync completion stars (no await — non-blocking)
+    updateAuthUI(); // affiche "connecté" immédiatement, sans attendre le sync
+    await loadDoneFromFirebase(); // sync bloquant : VB, HF, achievements, sync-ranks
   } else {
     currentPseudo = null;
   }
@@ -5465,8 +5466,9 @@ async function requireAuth(onDone) {
 function updateAuthUI() {
   const btn = document.getElementById('auth-sidebar-btn');
   if (!btn) return;
-  if (currentUser && currentPseudo) {
-    btn.textContent = '👤 ' + t('auth.signout_btn');
+  if (currentUser) {
+    const label = currentPseudo ? ('👤 ' + currentPseudo) : t('auth.signout_btn');
+    btn.textContent = label;
     btn.style.borderColor = '#00ffcc';
     btn.style.color = '#00ffcc';
     btn.onclick = () => {
