@@ -2387,6 +2387,7 @@ const TRANSLATIONS = {
     'resistance.label': 'résistance',
     'micro.title': '— MICROPROCESSEUR —',
     'micro.prompt': '▼  tape le code  ▼',
+    'micro.prompt.gp': '▼  croix directionnelle  ▼',
     'space.active': 'ESPACE  █',
     'space.active.ps': '✕  █',
     'space.active.xbox': 'A  █',
@@ -2765,6 +2766,7 @@ const TRANSLATIONS = {
     'resistance.label': 'resistance',
     'micro.title': '— MICROPROCESSOR —',
     'micro.prompt': '▼  type the code  ▼',
+    'micro.prompt.gp': '▼  d-pad sequence  ▼',
     'space.active': 'SPACE  █',
     'space.active.ps': '✕  █',
     'space.active.xbox': 'A  █',
@@ -7288,8 +7290,25 @@ const microNumpad = document.getElementById('micro-numpad');
   microNumpad.appendChild(btn);
 });
 
+const _MICRO_DIRS = ['↑', '↓', '←', '→'];
+function _generateMicroCode() {
+  if (_gamepadMode) return [0,1,2].map(() => _MICRO_DIRS[Math.floor(Math.random()*4)]);
+  return [0,1,2].map(() => Math.floor(Math.random()*10));
+}
+
+function _resolveMicroQueue() {
+  const queue = state.microQueue;
+  if (queue && queue.length > 0) {
+    const next = queue.shift();
+    state.microChallenge = { edgeId: next.edgeId, code: _generateMicroCode(), entered: [], timeLeft: next.timeLeft, maxTime: next.maxTime, ballRef: next.ball };
+  } else {
+    state.microChallenge = null;
+  }
+}
+
 function enterMicroDigit(digit) {
   if (!state || !state.microChallenge || state.dead || state.won) return;
+  if (_gamepadMode) return; // en mode manette, utiliser le D-pad
   resumeAudio();
   const mc = state.microChallenge;
   mc.entered.push(digit);
@@ -7299,15 +7318,25 @@ function enterMicroDigit(digit) {
   } else if (mc.entered.length === 3) {
     if (mc.ballRef) mc.ballRef.microSolved = true;
     sfxSwitchClose();
-    recordKey('micro_solve', 'MICRO'); // recorded for replay auto-solve
-    const queue = state.microQueue;
-    if (queue && queue.length > 0) {
-      const next = queue.shift();
-      const code = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
-      state.microChallenge = { edgeId: next.edgeId, code, entered: [], timeLeft: next.timeLeft, maxTime: next.maxTime, ballRef: next.ball };
-    } else {
-      state.microChallenge = null;
-    }
+    recordKey('micro_solve', 'MICRO');
+    _resolveMicroQueue();
+  }
+}
+
+function enterMicroDir(dir) {
+  if (!state || !state.microChallenge || state.dead || state.won) return;
+  if (!_gamepadMode) return;
+  resumeAudio();
+  const mc = state.microChallenge;
+  mc.entered.push(dir);
+  const pos = mc.entered.length - 1;
+  if (mc.code[pos] !== dir) {
+    if (!state.dead) { state.dead = true; sfxDead(); registerDeath(); }
+  } else if (mc.entered.length === 3) {
+    if (mc.ballRef) mc.ballRef.microSolved = true;
+    sfxSwitchClose();
+    recordKey('micro_solve', 'MICRO');
+    _resolveMicroQueue();
   }
 }
 
@@ -7398,6 +7427,9 @@ document.addEventListener('keyup', e => {
     keys[k.toUpperCase()] = false;
   }
 
+  // D-pad state for micro challenge (on-press only, not held)
+  const DPAD_STATE = { up: false, down: false, left: false, right: false };
+
   function _gpPoll() {
     const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of gamepads) {
@@ -7412,6 +7444,22 @@ document.addEventListener('keyup', e => {
       rt   ? _gpPressKey('P') : _gpReleaseKey('P');
       btnA ? _gpPressKey(' ') : _gpReleaseKey(' ');
       btnB ? _gpPressKey('R') : _gpReleaseKey('R');
+
+      // D-pad pour micro challenge (12=↑ 13=↓ 14=← 15=→)
+      if (_gamepadMode && state && state.microChallenge && !state.dead && !state.won) {
+        const dpUp    = gp.buttons[12]?.pressed;
+        const dpDown  = gp.buttons[13]?.pressed;
+        const dpLeft  = gp.buttons[14]?.pressed;
+        const dpRight = gp.buttons[15]?.pressed;
+        if (dpUp    && !DPAD_STATE.up)    { DPAD_STATE.up    = true;  enterMicroDir('↑'); }
+        if (dpDown  && !DPAD_STATE.down)  { DPAD_STATE.down  = true;  enterMicroDir('↓'); }
+        if (dpLeft  && !DPAD_STATE.left)  { DPAD_STATE.left  = true;  enterMicroDir('←'); }
+        if (dpRight && !DPAD_STATE.right) { DPAD_STATE.right = true;  enterMicroDir('→'); }
+        if (!dpUp)    DPAD_STATE.up    = false;
+        if (!dpDown)  DPAD_STATE.down  = false;
+        if (!dpLeft)  DPAD_STATE.left  = false;
+        if (!dpRight) DPAD_STATE.right = false;
+      }
     }
     requestAnimationFrame(_gpPoll);
   }
@@ -8296,8 +8344,7 @@ function updateCustom(dt) {
       if (!mc && !ball.microSolved && ball.t >= 0.5) {
         ball.t = 0.5;
         const dur = microDurationMap.get(edge.id) ?? 5;
-        const code = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
-        st.microChallenge = { edgeId: edge.id, code, entered: [], timeLeft: dur, maxTime: dur, ballRef: ball };
+        st.microChallenge = { edgeId: edge.id, code: _generateMicroCode(), entered: [], timeLeft: dur, maxTime: dur, ballRef: ball };
         sfxSwitchOpen();
       } else if (mc && mc.edgeId !== edge.id && !ball.microSolved && ball.t >= 0.5) {
         // Another challenge is active — queue this ball
@@ -8689,7 +8736,8 @@ function drawMicroOverlay(mc) {
   ctx.fillText(t('micro.title'), cx, by + 6);
   ctx.restore();
 
-  // Code à taper (chiffres en boîtes)
+  // Code à taper (chiffres ou flèches selon le mode)
+  const isGpMicro = typeof mc.code[0] === 'string';
   const startX = cx - totalCodeW/2;
   const codeY  = by + 22;
   for (let i = 0; i < 3; i++) {
@@ -8698,7 +8746,8 @@ function drawMicroOverlay(mc) {
     ctx.fillStyle = '#001830'; ctx.strokeStyle = '#0077dd'; ctx.lineWidth = 1.5;
     ctx.fillRect(dx, codeY, dW, 34);
     ctx.strokeRect(dx, codeY, dW, 34);
-    ctx.font = 'bold 22px Courier New'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = isGpMicro ? 'bold 20px Arial' : 'bold 22px Courier New';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = '#00ccff'; ctx.shadowBlur = 8; ctx.shadowColor = '#00aaff';
     ctx.fillText(mc.code[i], dx + dW/2, codeY + 17);
     ctx.restore();
@@ -8708,7 +8757,7 @@ function drawMicroOverlay(mc) {
   ctx.save();
   ctx.font = '11px Courier New'; ctx.textAlign = 'center';
   ctx.fillStyle = '#224466';
-  ctx.fillText(t('micro.prompt'), cx, codeY + 44);
+  ctx.fillText(isGpMicro ? t('micro.prompt.gp') : t('micro.prompt'), cx, codeY + 44);
   ctx.restore();
 
   // Cases de saisie
@@ -8724,7 +8773,8 @@ function drawMicroOverlay(mc) {
     ctx.fillRect(dx, entY, dW, 34);
     ctx.strokeRect(dx, entY, dW, 34);
     if (filled) {
-      ctx.font = 'bold 22px Courier New'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = isGpMicro ? 'bold 20px Arial' : 'bold 22px Courier New';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillStyle = '#00ff88'; ctx.shadowBlur = 8; ctx.shadowColor = '#00ff88';
       ctx.fillText(d, dx + dW/2, entY + 17);
     }
