@@ -9294,7 +9294,8 @@ function loop(timestamp) {
     if ((cp >= 0 && !survivalRunning) || (isTestMode && currentLevel === testLevelIdx)) nlWrap.style.display = 'block';
   }
   // Show/hide micro numpad
-  const showNumpad = state.type === 'custom' && !!state.microChallenge && !state.dead && !state.won;
+  const isTouchDev = document.body.classList.contains('touch-device');
+  const showNumpad = isTouchDev && state.type === 'custom' && !!state.microChallenge && !state.dead && !state.won;
   microNumpad.classList.toggle('visible', showNumpad);
 
   campTickDisplay();
