@@ -3431,7 +3431,7 @@ document.getElementById('ap-pl-save').onclick = async () => {
   st.style.color = '#886622'; st.textContent = 'Sauvegarde…';
   try {
     const token = await _apAdminToken();
-    const r = await fetch(`${WORKER_BASE}/admin/set-emote`, {
+    const r = await fetch(`${WORKER_URL}/admin/set-emote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ targetUid: uid, emoteId: _apPlSelectedEmote }),
