@@ -9183,7 +9183,7 @@ function loop(timestamp) {
     nlBtn.style.display = (cp >= 0 && !survivalRunning) ? '' : 'none';
     if (cp >= 0 && !survivalRunning) {
       if (cp + 1 < CAMPAIGN.length) {
-        nlBtn.innerHTML = t('btn.next_level') + '<br><span style="font-size:11px;letter-spacing:2px;opacity:0.5">' + (currentLang === 'fr' ? '[ ESPACE ]' : '[ SPACE ]') + '</span>';
+        nlBtn.innerHTML = t('btn.next_level') + '<br><span style="font-size:11px;letter-spacing:2px;opacity:0.5">[ ' + _gpKey(' ').replace(' ', currentLang === 'fr' ? 'ESPACE' : 'SPACE') + ' ]</span>';
         nlBtn.onclick = () => { nlWrap.style.display = 'none'; _freshKeyPressed = true; goNextCampaign(cp + 1); };
       } else {
         // Last campaign level — campaign complete only if run started from TUTO1
