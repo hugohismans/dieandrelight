@@ -7180,6 +7180,66 @@ document.addEventListener('keyup', e => {
   else if (k !== 'R') recordKey('keyup', k);
 });
 
+// ── GAMEPAD ────────────────────────────────────────────────
+// Mapping : D-pad/stick gauche → Q/P, A/Croix → Espace, B/Rond → R
+(function() {
+  const GP_STATE = { Q: false, P: false, ' ': false, R: false };
+
+  function _gpPressKey(k) {
+    if (GP_STATE[k]) return;
+    GP_STATE[k] = true;
+    if (k === 'R') { selectLevel(currentLevel); return; }
+    if (k === ' ') {
+      // Espace : next level si gagné, sinon jouer
+      if (state && state.won) {
+        const nlBtn = document.getElementById('next-level-btn');
+        const nlWrap = document.getElementById('next-level-wrap');
+        if (nlWrap && nlWrap.style.display !== 'none' && nlBtn && nlBtn.style.display !== 'none') { nlBtn.click(); return; }
+      }
+      spacePressCount++;
+      recordKey('keydown', ' ');
+    } else {
+      _freshKeyPressed = true;
+      recordKey('keydown', k);
+    }
+    keys[k.toUpperCase()] = true;
+    resumeAudio();
+    if (!humOsc) startHum();
+  }
+
+  function _gpReleaseKey(k) {
+    if (!GP_STATE[k]) return;
+    GP_STATE[k] = false;
+    if (k === 'R') return;
+    if (k === ' ') recordKey('keyup', ' ');
+    else recordKey('keyup', k);
+    keys[k.toUpperCase()] = false;
+  }
+
+  function _gpPoll() {
+    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const gp of gamepads) {
+      if (!gp) continue;
+      // Boutons : 0=A/Croix, 1=B/Rond, 12=D-pad haut, 13=D-pad bas, 14=D-pad gauche, 15=D-pad droite
+      const btnA     = gp.buttons[0]?.pressed;
+      const btnB     = gp.buttons[1]?.pressed;
+      const dLeft    = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+      const dRight   = gp.buttons[15]?.pressed || gp.axes[0] >  0.5;
+
+      dLeft  ? _gpPressKey('Q') : _gpReleaseKey('Q');
+      dRight ? _gpPressKey('P') : _gpReleaseKey('P');
+      btnA   ? _gpPressKey(' ') : _gpReleaseKey(' ');
+      btnB   ? _gpPressKey('R') : _gpReleaseKey('R');
+    }
+    requestAnimationFrame(_gpPoll);
+  }
+
+  window.addEventListener('gamepadconnected', e => {
+    console.log('Manette connectée :', e.gamepad.id);
+    _gpPoll();
+  });
+})();
+
 // ── AUDIO ──────────────────────────────────────────────────
 let AC = null, masterGain = null;
 let humOsc = null;
