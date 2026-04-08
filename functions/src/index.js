@@ -334,21 +334,30 @@ async function handleVbBalance(request, env, cors) {
 
 // ── ENDPOINT : /admin/set-emote ──────────────────────────────
 // Réservé admin — change l'emote d'un joueur (y compris adminOnly).
-// Le client envoie : { targetUid, emoteId }
+// Le client envoie : { targetUid, pseudo, emoteId }
 async function handleAdminSetEmote(request, env, cors) {
   const user = await authenticate(request, env);
   if (user.uid !== env.ADMIN_UID) return err('Interdit', 403, cors);
 
-  const { targetUid, emoteId } = await request.json();
+  const { targetUid, pseudo, emoteId } = await request.json();
   if (!targetUid || !emoteId) return err('Paramètres manquants', 400, cors);
 
   const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
 
-  // Écrire l'emote dans inventory + achievement_ranks
-  await Promise.all([
+  // Lire l'entrée achievement_ranks existante et merger l'emote
+  // (la règle .validate exige pseudo/count/ts, donc on écrit le nœud complet)
+  const existing = await fbRead(`achievement_ranks/${targetUid}`, saToken);
+  const rankEntry = existing
+    ? { ...existing, emote: emoteId }
+    : { pseudo: pseudo || 'unknown', count: 0, ts: Date.now(), emote: emoteId };
+
+  // Écrire dans inventory + achievement_ranks en parallèle
+  const [invOk, rankOk] = await Promise.all([
     fbWrite(`users/${targetUid}/inventory/emote`, emoteId, saToken),
-    fbWrite(`achievement_ranks/${targetUid}/emote`, emoteId, saToken),
+    fbWrite(`achievement_ranks/${targetUid}`, rankEntry, saToken),
   ]);
+
+  if (!invOk || !rankOk) return err('Échec écriture Firebase', 500, cors);
 
   // Ajouter dans owned si pas déjà présent
   const inventory = await getInventory(targetUid, saToken);

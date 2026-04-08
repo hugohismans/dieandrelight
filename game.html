@@ -3434,7 +3434,7 @@ document.getElementById('ap-pl-save').onclick = async () => {
     const r = await fetch(`${WORKER_URL}/admin/set-emote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ targetUid: uid, emoteId: _apPlSelectedEmote }),
+      body: JSON.stringify({ targetUid: uid, pseudo: uidEl.dataset.pseudo, emoteId: _apPlSelectedEmote }),
     });
     if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.status); }
     const emoteObj = EMOTES.find(e => e.id === _apPlSelectedEmote);
