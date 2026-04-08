@@ -82,6 +82,9 @@ export default {
       if (path === '/vb-balance' && request.method === 'GET')
         return await handleVbBalance(request, env, cors);
 
+      if (path === '/admin/set-emote' && request.method === 'POST')
+        return await handleAdminSetEmote(request, env, cors);
+
       return err('Not found', 404, cors);
 
     } catch (e) {
@@ -327,4 +330,34 @@ async function handleVbBalance(request, env, cors) {
   const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
   const vb      = await getVb(user.uid, saToken);
   return json({ ok: true, vb }, 200, cors);
+}
+
+// ── ENDPOINT : /admin/set-emote ──────────────────────────────
+// Réservé admin — change l'emote d'un joueur (y compris adminOnly).
+// Le client envoie : { targetUid, emoteId }
+async function handleAdminSetEmote(request, env, cors) {
+  const user = await authenticate(request, env);
+  if (user.uid !== env.ADMIN_UID) return err('Interdit', 403, cors);
+
+  const { targetUid, emoteId } = await request.json();
+  if (!targetUid || !emoteId) return err('Paramètres manquants', 400, cors);
+
+  const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
+
+  // Écrire l'emote dans inventory + achievement_ranks
+  await Promise.all([
+    fbWrite(`users/${targetUid}/inventory/emote`, emoteId, saToken),
+    fbWrite(`achievement_ranks/${targetUid}/emote`, emoteId, saToken),
+  ]);
+
+  // Ajouter dans owned si pas déjà présent
+  const inventory = await getInventory(targetUid, saToken);
+  const owned = Array.isArray(inventory.owned) ? [...inventory.owned] : [];
+  const key = emoteId.startsWith('emote_') ? emoteId : 'emote_' + emoteId;
+  if (!owned.includes(key)) {
+    owned.push(key);
+    await fbWrite(`users/${targetUid}/inventory/owned`, owned, saToken);
+  }
+
+  return json({ ok: true }, 200, cors);
 }

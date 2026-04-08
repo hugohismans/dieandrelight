@@ -3388,7 +3388,7 @@ document.getElementById('ap-pl-search').onclick = async () => {
     if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
 
     // Lire l'inventaire pour l'emote actuelle
-    const inv = await fetch(`${_FB_BASE}/users/${uid}/inventory.json?access_token=${token}`).then(r => r.json()).catch(() => null);
+    const inv = await fetch(`${_FB_BASE}/users/${uid}/inventory.json?auth=${token}`).then(r => r.json()).catch(() => null);
     const currentEmote = inv?.emote || 'none';
 
     document.getElementById('ap-pl-uid').textContent = uid;
@@ -3426,35 +3426,17 @@ document.getElementById('ap-pl-search').onclick = async () => {
 document.getElementById('ap-pl-save').onclick = async () => {
   const uidEl = document.getElementById('ap-pl-uid');
   const uid    = uidEl.dataset.uid;
-  const pseudo = uidEl.dataset.pseudo;
   const st     = document.getElementById('ap-pl-save-status');
   if (!uid || !_apPlSelectedEmote) return;
   st.style.color = '#886622'; st.textContent = 'Sauvegarde…';
   try {
     const token = await _apAdminToken();
-    // Mettre à jour l'emote dans inventory + achievement_ranks
-    await Promise.all([
-      fetch(`${_FB_BASE}/users/${uid}/inventory/emote.json?access_token=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(_apPlSelectedEmote)
-      }),
-      fetch(`${_FB_BASE}/achievement_ranks/${uid}/emote.json?access_token=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(_apPlSelectedEmote)
-      }),
-      // Ajouter l'emote dans owned si adminOnly
-      (async () => {
-        const emoteObj = EMOTES.find(e => e.id === _apPlSelectedEmote);
-        if (!emoteObj?.adminOnly && !emoteObj?.unlockAt) return;
-        const inv = await fetch(`${_FB_BASE}/users/${uid}/inventory.json?access_token=${token}`).then(r => r.json()).catch(() => ({}));
-        const owned = Array.isArray(inv?.owned) ? inv.owned : [];
-        const key = 'emote_' + _apPlSelectedEmote;
-        if (!owned.includes(key)) {
-          owned.push(key);
-          await fetch(`${_FB_BASE}/users/${uid}/inventory/owned.json?access_token=${token}`, {
-            method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(owned)
-          });
-        }
-      })(),
-    ]);
+    const r = await fetch(`${WORKER_BASE}/admin/set-emote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ targetUid: uid, emoteId: _apPlSelectedEmote }),
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.status); }
     const emoteObj = EMOTES.find(e => e.id === _apPlSelectedEmote);
     st.style.color = '#00cc66'; st.textContent = `✓ Emote mise à jour : ${emoteObj?.emoji || ''} ${emoteObj?.name || _apPlSelectedEmote}`;
     document.getElementById('ap-pl-emote-current').textContent = emoteObj ? `${emoteObj.emoji} ${emoteObj.name}` : _apPlSelectedEmote;
