@@ -672,6 +672,34 @@ canvas#bg {
 #modal-ach-body::-webkit-scrollbar { width: 4px; }
 #modal-ach-body::-webkit-scrollbar-thumb { background: #1a5a3a; border-radius: 2px; }
 
+/* ── PATCH NOTES MODAL ───────────────────────────────────── */
+#modal-patch-box {
+  background: #05090a; border: 1px solid #00ffcc44;
+  box-shadow: 0 0 60px #00ffcc22;
+  width: min(600px, 95vw); max-height: 82vh;
+  display: flex; flex-direction: column;
+  font-family: 'Courier New', monospace; overflow: hidden; border-radius: 2px;
+}
+#modal-patch-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px; border-bottom: 1px solid #1a5a3a; flex-shrink: 0;
+}
+#modal-patch-header h2 { font-size: 13px; letter-spacing: 4px; color: #00ffcc; margin: 0; flex: 1; }
+#modal-patch-close { background: none; border: none; color: #446655; font-size: 18px; cursor: pointer; }
+#modal-patch-close:hover { color: #00ffcc; }
+#modal-patch-body { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 18px; }
+#modal-patch-body::-webkit-scrollbar { width: 4px; }
+#modal-patch-body::-webkit-scrollbar-thumb { background: #1a5a3a; border-radius: 2px; }
+
+.pn-version { border: 1px solid #0d2a1a; border-radius: 2px; padding: 14px 16px; }
+.pn-version.latest { border-color: #00ffcc44; background: #00ffcc08; }
+.pn-tag { font-size: 9px; letter-spacing: 3px; color: #00ffcc; margin-bottom: 4px; }
+.pn-ver { font-size: 15px; font-weight: bold; color: #00ffcc; letter-spacing: 2px; margin-bottom: 2px; }
+.pn-subtitle { font-size: 10px; letter-spacing: 2px; color: #446655; margin-bottom: 10px; }
+.pn-version ul { margin: 0; padding-left: 14px; display: flex; flex-direction: column; gap: 5px; }
+.pn-version li { font-size: 11px; color: #99ccbb; letter-spacing: 0.5px; line-height: 1.6; }
+.pn-version li strong { color: #ccffee; }
+
 /* ── AUTH BLOCK (index) ──────────────────────────────────── */
 #auth-block {
   position: fixed;
@@ -941,6 +969,173 @@ canvas#bg {
 </div>
 
 
+<!-- Patch Notes Modal -->
+<div class="idx-modal-overlay" id="idx-patch-modal">
+  <div id="modal-patch-box">
+    <div id="modal-patch-header">
+      <h2>📋 PATCH NOTES</h2>
+      <button id="modal-patch-close">✕</button>
+    </div>
+    <div id="modal-patch-body">
+
+      <div class="pn-version latest">
+        <div class="pn-tag">VERSION ACTUELLE</div>
+        <div class="pn-ver">v0.1.0</div>
+        <div class="pn-subtitle">Économie &amp; Sécurité</div>
+        <ul>
+          <li>⚡ <strong>VoltBucks sécurisés</strong> — tous les gains et achats sont désormais vérifiés côté serveur. Impossible de tricher.</li>
+          <li>🏅 <strong>Hauts-faits sécurisés</strong> — les déblocages et récompenses VB passent par le serveur.</li>
+          <li>🎒 <strong>Consommables sécurisés</strong> — l'utilisation de chaque consommable est validée côté serveur.</li>
+          <li>📱 <strong>Fix mobile</strong> — les boutons Q et P démarraient pas le niveau sur téléphone.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.13</div>
+        <div class="pn-subtitle">Contenu &amp; Classements</div>
+        <ul>
+          <li>🏆 <strong>Classement VoltBucks</strong> — un nouveau leaderboard pour les joueurs les plus riches.</li>
+          <li>😊 <strong>Emotes dans les classements</strong> — ton emote s'affiche à côté de ton pseudo partout.</li>
+          <li>🏅 <strong>Hauts-faits sur la page d'accueil</strong> — ton tableau de hauts-faits personnel visible sans lancer le jeu.</li>
+          <li>🐥 <strong>Emote poussin par défaut</strong> — les joueurs sans emote ont désormais le poussin 🐥.</li>
+          <li>👤 <strong>Pseudo unique</strong> — deux joueurs ne peuvent plus avoir le même pseudo.</li>
+          <li>🌐 <strong>Traduction complète FR/EN</strong> — tout le jeu est disponible en français et en anglais.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.12</div>
+        <div class="pn-subtitle">Yeux Bandés &amp; Modificateurs avancés</div>
+        <ul>
+          <li>👁️ <strong>Mode Yeux Bandés</strong> — joue sans voir le niveau. Pour les masochistes.</li>
+          <li>🔀 <strong>Combinaisons de modificateurs</strong> — Miroir + Yeux Bandés en même temps, pour les héros.</li>
+          <li>⚡ <strong>VoltBucks par modificateur</strong> — plus le défi est difficile, plus tu gagnes.</li>
+          <li>🔍 <strong>Consommable Indice</strong> — révèle la description cachée d'un haut-fait verrouillé.</li>
+          <li>🏆 <strong>HOF profil joueur amélioré</strong> — sélecteur de campagne et modificateurs façon HOF global.</li>
+          <li>🏅 <strong>6 nouveaux hauts-faits</strong> Yeux Bandés et combinés.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.11</div>
+        <div class="pn-subtitle">Consommables</div>
+        <ul>
+          <li>❤️ <strong>Cœur</strong> — donne une vie supplémentaire en mode Survie (utilisé automatiquement à 0 vie).</li>
+          <li>🔌 <strong>Fusible</strong> — verrouille un interrupteur dans sa position pour tout le niveau.</li>
+          <li>🐢 <strong>Atténuateur</strong> — réduit la vitesse de la balle à 75% pour tout le niveau.</li>
+          <li>🛒 Ces 3 consommables sont achetables à la boutique avec des VoltBucks.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.10</div>
+        <div class="pn-subtitle">Emotes &amp; Fonds d'écran</div>
+        <ul>
+          <li>😊 <strong>Emotes de profil</strong> — choisis une emote qui s'affiche dans le Hall of Fame et sur ton profil.</li>
+          <li>🖼️ <strong>5 fonds d'écran</strong> — Électrons, Étoiles filantes, Pluie de code, Aurore boréale, Vide cosmique. Achetables en boutique.</li>
+          <li>👤 <strong>Profil joueur</strong> — clique sur n'importe quel pseudo dans le HOF pour voir son profil complet.</li>
+          <li>🛒 Aperçu 5 secondes avant achat d'un fond d'écran.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.9</div>
+        <div class="pn-subtitle">Boutique &amp; Skins</div>
+        <ul>
+          <li>🛒 <strong>Boutique VoltBucks</strong> — dépense tes VB pour personnaliser ta balle.</li>
+          <li>🎨 <strong>8 skins de balle</strong> — Plasma, Soleil, Venin, Braise, Spectre, Néant, Arc-en-ciel… et le classique Électron gratuit.</li>
+          <li>🤑 <strong>Emote "I'm rich"</strong> — débloquée automatiquement à 50 000 VoltBucks. Bon courage.</li>
+          <li>💰 Panneau admin pour gérer les VoltBucks des joueurs.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.8</div>
+        <div class="pn-subtitle">VoltBucks &amp; Hauts-faits</div>
+        <ul>
+          <li>⚡ <strong>VoltBucks</strong> — la monnaie du jeu. Gagne-en en complétant des campagnes et des hauts-faits.</li>
+          <li>🏅 <strong>31 hauts-faits</strong> — des objectifs cachés qui récompensent les exploits et la persévérance.</li>
+          <li>🏆 <strong>Classement Hauts-faits</strong> — qui en a débloqué le plus ?</li>
+          <li>📊 VoltBucks synchronisés avec ton compte — retrouve ton solde sur tous tes appareils.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.7</div>
+        <div class="pn-subtitle">Mode Survie &amp; HOF Survie</div>
+        <ul>
+          <li>💀 <strong>Mode Survie</strong> — des niveaux s'enchaînent à l'infini avec 3 vies. Jusqu'où iras-tu ?</li>
+          <li>🏆 <strong>HOF Survie</strong> — classement par nombre de niveaux atteints.</li>
+          <li>🔄 <strong>Mode Miroir (inversé)</strong> — tous les niveaux retournés horizontalement. Q et P échangent leurs rôles.</li>
+          <li>🏆 HOF séparé pour chaque mode (normal, miroir, survie, survie miroir).</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.6</div>
+        <div class="pn-subtitle">Hall of Fame &amp; Comptes</div>
+        <ul>
+          <li>🏆 <strong>Hall of Fame</strong> — les meilleurs temps de chaque campagne, sauvegardés en ligne.</li>
+          <li>👤 <strong>Connexion Google</strong> — crée un compte pour sauvegarder ta progression et apparaître dans le HOF.</li>
+          <li>📝 <strong>Pseudo personnalisé</strong> — choisis le nom qui s'affichera dans les classements.</li>
+          <li>☁️ Progression synchronisée dans le cloud — change d'appareil sans perdre ta sauvegarde.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.5 — Campagne Cauchemar</div>
+        <div class="pn-subtitle">La campagne ultime</div>
+        <ul>
+          <li>💀 <strong>Campagne "Cauchemar"</strong> — 10 niveaux pour les joueurs qui pensaient avoir tout vu.</li>
+          <li>⚡ Nouveaux mécanismes : résistances, arcs électriques, pièges multiples.</li>
+          <li>🏁 Compléter Cauchemar sans mourir : le défi ultime du jeu.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.4 — Campagne Piquer</div>
+        <div class="pn-subtitle">Ça commence à piquer</div>
+        <ul>
+          <li>⚡ <strong>Campagne "Piquer"</strong> — 10 niveaux de difficulté intermédiaire.</li>
+          <li>🔀 Introduction des niveaux à multiples interrupteurs simultanés.</li>
+          <li>⏱️ Chronomètre et compteur de morts visibles pendant la partie.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.3 — Éditeur de niveaux</div>
+        <div class="pn-subtitle">Crée tes propres défis</div>
+        <ul>
+          <li>🛠️ <strong>Éditeur de niveaux</strong> — crée et soumets tes propres niveaux pour qu'ils soient intégrés au jeu.</li>
+          <li>📤 Soumission directe à l'admin depuis l'éditeur.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.2 — Campagne Pour les Bébés</div>
+        <div class="pn-subtitle">Les premiers pas</div>
+        <ul>
+          <li>👶 <strong>Campagne "Pour les Bébés"</strong> — 10 niveaux pour apprendre les bases.</li>
+          <li>🎯 Tutoriels intégrés pour découvrir les mécaniques du jeu.</li>
+          <li>🔊 Effets sonores et musique d'ambiance électrique.</li>
+        </ul>
+      </div>
+
+      <div class="pn-version">
+        <div class="pn-ver">v0.0.1 — Le jeu de base</div>
+        <div class="pn-subtitle">Le début de tout</div>
+        <ul>
+          <li>⚡ <strong>Die and Relight</strong> — guide une balle électrique de l'entrée à la sortie en activant des interrupteurs.</li>
+          <li>⌨️ Deux touches : <strong>Q</strong> (interrupteur gauche) et <strong>P</strong> (interrupteur droit). C'est tout.</li>
+          <li>💀 La balle meurt au contact des zones non alimentées. Recommence.</li>
+          <li>📱 Compatible mobile avec des boutons tactiles.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- Center -->
 <div id="center">
   <div id="content">
@@ -972,6 +1167,7 @@ canvas#bg {
     <div id="secondary-btns">
       <button class="sec-btn" id="idx-open-hof">🏆 <span data-i18n-idx="idx.btn_hof">Hall of Fame</span></button>
       <button class="sec-btn" id="idx-open-ach">🏅 <span data-i18n-idx="idx.btn_ach">Hauts-faits</span></button>
+      <button class="sec-btn" id="idx-open-patch">📋 <span data-i18n-idx="idx.btn_patch">Patch Notes</span></button>
     </div>
 
     <a id="editor-link" href="editor.html">éditeur de niveaux →</a>
@@ -1062,7 +1258,7 @@ const TRANSLATIONS_IDX = {
     'idx.edit_pseudo': '✎ Modifier le pseudo',
     'idx.pseudo_placeholder': 'Nouveau pseudo…',
     'idx.logout': 'Déconnexion',
-    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Hauts-faits',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Hauts-faits', 'idx.btn_patch': 'Patch Notes',
     'idx.ach_modal_title': '🏅 HAUTS-FAITS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'hof.loading': 'Chargement…', 'hof.no_entry': 'Pas encore d\'entrée — sois le premier !',
     'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
@@ -1135,7 +1331,7 @@ const TRANSLATIONS_IDX = {
     'idx.edit_pseudo': '✎ Edit username',
     'idx.pseudo_placeholder': 'New username…',
     'idx.logout': 'Sign out',
-    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Achievements',
+    'idx.btn_hof': 'Hall of Fame', 'idx.btn_ach': 'Achievements', 'idx.btn_patch': 'Patch Notes',
     'idx.ach_modal_title': '🏅 ACHIEVEMENTS', 'idx.hof_modal_title': '🏆 HALL OF FAME',
     'hof.loading': 'Loading…', 'hof.no_entry': 'No entry yet — be the first!',
     'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
@@ -2336,6 +2532,8 @@ async function openMhof(version, diff) {
 
 document.getElementById('idx-open-hof').onclick = () => openMhof();
 document.getElementById('modal-hof-close').onclick = () => _closeModal('idx-hof-modal');
+document.getElementById('idx-open-patch').onclick = () => _openModal('idx-patch-modal');
+document.getElementById('modal-patch-close').onclick = () => _closeModal('idx-patch-modal');
 document.getElementById('modal-hof-body').addEventListener('click', e => {
   const td = e.target.closest('.pp-trigger');
   if (td) openPlayerProfile(td.dataset.uid, td.dataset.pseudo);
