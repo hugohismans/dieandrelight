@@ -16,23 +16,47 @@
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2')",
         "achievements": {
-          ".read": true
+          ".read": true,
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "voltbucks": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'"
+        },
+        "vb_paid_hof": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'"
+        },
+        "vb_ach_paid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'"
+        },
+        "inventory": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'"
+        },
+        "revealed_ach": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2')"
+        },
+        "$other": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2')"
         }
       }
     },
     "achievement_ranks": {
       ".read": true,
       "$uid": {
-        ".write": "auth != null && (auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || auth.uid === $uid)",
+        ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'",
         ".validate": "newData.hasChildren(['pseudo', 'count', 'ts']) && newData.child('pseudo').isString() && newData.child('pseudo').val().length <= 20 && newData.child('count').isNumber() && newData.child('count').val() >= 0 && newData.child('count').val() <= 37"
       }
     },
     "voltbucks_ranks": {
       ".read": true,
       "$uid": {
-        ".write": "auth != null && (auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || auth.uid === $uid)",
+        ".write": "auth != null && auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2'",
         ".validate": "newData.hasChildren(['pseudo', 'vb', 'ts']) && newData.child('pseudo').isString() && newData.child('pseudo').val().length <= 20 && newData.child('vb').isNumber() && newData.child('vb').val() >= 0 && newData.child('ts').isNumber()"
       }
     },

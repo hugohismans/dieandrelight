@@ -4395,6 +4395,55 @@ let _achDone  = new Set(JSON.parse(localStorage.getItem(_ACH_LS) || '[]'));
 const FB_VB_RANKS = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
 let voltbucks = loadSave().voltbucks || 0;
 
+// ── WORKER (backend sécurisé) ───────────────────────────────
+// Remplacer PLACEHOLDER par l'URL réelle après wrangler deploy
+const WORKER_URL = 'https://dieandrelight-worker.hugo-hismans.workers.dev';
+
+async function _workerCall(endpoint, method, body) {
+  if (!currentUser) return null;
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(WORKER_URL + endpoint, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+// Affiche le toast VB avec un message et met à jour voltbucks si un nouveau solde est fourni
+function _vbToast(msg, newVb) {
+  if (typeof newVb === 'number') { voltbucks = newVb; writeSave({ voltbucks }); _updateVBDisplay(); }
+  const el = document.getElementById('vb-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// Gère la réponse d'un appel Worker (earn-vb, earn-vb-survival, earn-vb-ach)
+function _handleVbResponse(data, fallbackAmount) {
+  if (data?.ok && typeof data.vb === 'number') {
+    _vbToast('+' + data.earned + ' ⚡VB', data.vb);
+    if (data.richUnlocked) {
+      _ownedItems.add('emote_rich');
+      localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+      setTimeout(() => _vbToast('🤑 Emote "I\'m rich" débloquée !'), 2600);
+    }
+  } else if (fallbackAmount > 0) {
+    // Worker indisponible : mise à jour locale uniquement (classements non mis à jour)
+    voltbucks += fallbackAmount;
+    writeSave({ voltbucks });
+    _updateVBDisplay();
+    _vbToast('+' + fallbackAmount + ' ⚡VB');
+  }
+}
+
 // Gain par haut-fait (plus c'est dur, plus ça rapporte)
 const ACH_VB = {
   first_death:               50,
@@ -4437,54 +4486,19 @@ const ACH_VB = {
 };
 
 function _syncVB() {
+  // Mise à jour locale uniquement — les classements sont gérés par le Worker
   writeSave({ voltbucks });
   _updateVBDisplay();
-  if (!currentUser || !currentPseudo) return;
-  currentUser.getIdToken().then(token => {
-    fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(voltbucks)
-    }).catch(() => {});
-    fetch(`${FB_VB_RANKS}/${currentUser.uid}.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ pseudo: currentPseudo, vb: voltbucks, ts: Date.now() })
-    }).catch(() => {});
-    fetch(`${FB_ACH_RANKS}/${currentUser.uid}/vb.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(voltbucks)
-    }).catch(() => {});
-  }).catch(() => {});
 }
 
 function earnVoltbucks(amount, reason) {
+  // Appelé uniquement pour les hauts-faits (reason === 'achievement')
+  // Les VB campagne/survie passent directement par le Worker
   if (!amount || amount <= 0) return;
+  // Mise à jour locale immédiate pour l'affichage
   voltbucks += amount;
   _syncVB();
-  // Toast VoltBucks
-  const el = document.getElementById('vb-toast');
-  if (el) {
-    el.textContent = '+' + amount + ' ⚡VB';
-    el.classList.remove('show');
-    void el.offsetWidth; // reflow pour relancer l'animation
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 2500);
-  }
-  // Emote "I'm rich" — débloquée à 50 000 VB
-  if (voltbucks >= 50000 && !_ownedItems.has('emote_rich')) {
-    _ownedItems.add('emote_rich');
-    _saveInventory();
-    setTimeout(() => {
-      const t2 = document.getElementById('vb-toast');
-      if (t2) {
-        t2.textContent = '🤑 Emote "I\'m rich" débloquée !';
-        t2.classList.remove('show');
-        void t2.offsetWidth;
-        t2.classList.add('show');
-        clearTimeout(t2._t);
-        t2._t = setTimeout(() => t2.classList.remove('show'), 3500);
-      }
-    }, 2600);
-  }
+  _vbToast('+' + amount + ' ⚡VB');
 }
 
 function _updateVBDisplay() {
@@ -4524,33 +4538,33 @@ function unlockAchievement(id) {
   localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
   const ach = ACHIEVEMENTS.find(a => a.id === id);
   if (ach) _showToast(ach);
-  if (ACH_VB[id]) earnVoltbucks(ACH_VB[id], 'achievement');
-  if (currentUser) currentUser.getIdToken().then(token => {
-    // Marquer comme payé en VB pour éviter le double paiement rétroactif
+
+  if (currentUser && currentPseudo) {
+    // VB achievement via Worker (anti-replay server-side)
     if (ACH_VB[id]) {
-      fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`)
-        .then(r => r.json()).then(arr => {
-          const paid = Array.isArray(arr) ? arr : [];
-          if (!paid.includes(id)) {
-            paid.push(id);
-            fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`, {
-              method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(paid)
-            }).catch(() => {});
-          }
-        }).catch(() => {});
+      _workerCall('/earn-vb-ach', 'POST', { id, pseudo: currentPseudo })
+        .then(data => _handleVbResponse(data, ACH_VB[id]))
+        .catch(() => { voltbucks += ACH_VB[id]; _syncVB(); _vbToast('+' + ACH_VB[id] + ' ⚡VB'); });
     }
-    // Sauvegarde l'achievement individuel
-    fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
+    // Sync classements via Worker
+    _workerCall('/sync-ranks', 'POST', {
+      pseudo: currentPseudo,
+      achCount: _achDone.size,
+      emote: _equippedEmote,
+      skin: _equippedSkin,
+      bg: _equippedBg,
     }).catch(() => {});
-    // Met à jour le classement public (pseudo + count)
-    if (currentPseudo) {
-      fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
+    // Sauvegarde achievement individuel Firebase (toujours autorisé pour l'uid)
+    currentUser.getIdToken().then(token => {
+      fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
       }).catch(() => {});
-    }
-  }).catch(() => {});
+    }).catch(() => {});
+  } else if (ACH_VB[id]) {
+    // Pas connecté : mise à jour locale uniquement
+    earnVoltbucks(ACH_VB[id], 'achievement');
+  }
+
   // Vérifier le platine (tous les autres hauts-faits complétés)
   if (id !== 'platine') {
     const baseAchs = ACHIEVEMENTS.filter(a => a.id !== 'platine');
@@ -5918,25 +5932,27 @@ async function loadDoneFromFirebase() {
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
     localStorage.setItem(_ACH_LS,      JSON.stringify([..._achDone]));
     _applyDoneUI();
-    // Paiement rétroactif VB pour hauts-faits déjà débloqués
+    // Paiement rétroactif VB pour hauts-faits déjà débloqués (via Worker — vb_ach_paid est admin-only)
     const paidSet = new Set(resPaid.ok ? (await resPaid.json() || []) : []);
     const unpaidAch = [..._achDone].filter(id => ACH_VB[id] && !paidSet.has(id));
     if (unpaidAch.length > 0) {
-      const retro = unpaidAch.reduce((s, id) => s + ACH_VB[id], 0);
-      voltbucks += retro;
-      writeSave({ voltbucks });
-      _updateVBDisplay();
-      const newPaid = [...paidSet, ...unpaidAch];
-      fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(newPaid)
-      }).catch(() => {});
-      fetch(`${FB_USERS}/${currentUser.uid}/voltbucks.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(voltbucks)
-      }).catch(() => {});
-      setTimeout(() => {
-        const el = document.getElementById('vb-toast');
-        if (el) { el.textContent = t('misc.vb_retro').replace('{vb}', retro); el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 3000); }
-      }, 1500);
+      // Appel séquentiel pour éviter les race conditions sur le solde VB
+      let retroTotal = 0;
+      for (const achId of unpaidAch) {
+        const data = await _workerCall('/earn-vb-ach', 'POST', { id: achId, pseudo: currentPseudo || 'Joueur' }).catch(() => null);
+        if (data?.ok && !data.alreadyPaid) retroTotal += data.earned || 0;
+        if (data?.vb != null) { voltbucks = data.vb; writeSave({ voltbucks }); _updateVBDisplay(); }
+        if (data?.richUnlocked) {
+          _ownedItems.add('emote_rich');
+          localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+        }
+      }
+      if (retroTotal > 0) {
+        setTimeout(() => {
+          const el = document.getElementById('vb-toast');
+          if (el) { el.textContent = t('misc.vb_retro').replace('{vb}', retroTotal); el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 3000); }
+        }, 1500);
+      }
     }
     // Push vers Firebase les hauts-faits locaux absents de Firebase
     const missing = [..._achDone].filter(id => !fbAchKeys.has(_b64(id)));
@@ -5945,11 +5961,11 @@ async function loadDoneFromFirebase() {
         method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
       }).catch(() => {});
     });
-    // Sync le classement public hauts-faits (au login, pour les hauts-faits déjà débloqués)
+    // Sync le classement public hauts-faits (au login, via Worker — achievement_ranks est admin-only)
     if (currentPseudo && _achDone.size > 0) {
-      fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ pseudo: currentPseudo, count: _achDone.size, ts: Date.now(), achievements: [..._achDone], emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
+      _workerCall('/sync-ranks', 'POST', {
+        pseudo: currentPseudo, achCount: _achDone.size,
+        emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg
       }).catch(() => {});
     }
     // Sync les scores HOF depuis Firebase vers localStorage (pour openProfile sur nouveau device)
@@ -6094,13 +6110,11 @@ function _useAttenuator() {
 function _saveCosmetics() {
   localStorage.setItem(_EMOTE_LS, _equippedEmote);
   localStorage.setItem(_BG_LS,    _equippedBg);
-  // Sync emote publiquement dans achievement_ranks
+  // Sync cosmétiques publiquement via Worker (achievement_ranks est admin-only)
   if (!currentUser || !currentPseudo) return;
-  currentUser.getIdToken().then(token => {
-    fetch(`${FB_ACH_RANKS}/${currentUser.uid}.json?auth=${token}`, {
-      method: 'PATCH', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg, vb: voltbucks })
-    }).catch(() => {});
+  _workerCall('/sync-ranks', 'POST', {
+    pseudo: currentPseudo, achCount: _achDone.size,
+    emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg
   }).catch(() => {});
 }
 
@@ -6164,13 +6178,7 @@ let _equippedSkin = localStorage.getItem(_EQUIPPED_LS) || 'default';
 function _saveInventory() {
   localStorage.setItem(_OWNED_LS,    JSON.stringify([..._ownedItems]));
   localStorage.setItem(_EQUIPPED_LS, _equippedSkin);
-  if (!currentUser) return;
-  currentUser.getIdToken().then(token => {
-    fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ owned: [..._ownedItems], skin: _equippedSkin, emote: _equippedEmote, bg: _equippedBg })
-    }).catch(() => {});
-  }).catch(() => {});
+  // inventory.json est géré exclusivement par le Worker (admin-only en écriture)
 }
 
 let _shopTab = 'skins';
@@ -6268,15 +6276,22 @@ function _shopItemClick(skinId) {
     return;
   }
   if (!currentUser) { alert(t('shop.login_required')); return; }
-  if (voltbucks < skin.price) { return; }
+  if (voltbucks < skin.price) return;
   if (!confirm(t('shop.buy_confirm').replace('{name}', iname(skin)).replace('{price}', skin.price))) return;
-  voltbucks -= skin.price;
-  _ownedItems.add(skinId);
-  _equippedSkin = skinId;
-  _saveInventory();
-  _syncVB();
-  _renderShopSkins();
-  document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+  _workerCall('/buy-item', 'POST', { itemId: 'skin_' + skinId, pseudo: currentPseudo })
+    .then(data => {
+      if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
+      voltbucks = data.vb;
+      _ownedItems.add(skinId);
+      _equippedSkin = skinId;
+      if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+      localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+      _saveInventory();
+      _syncVB();
+      _renderShopSkins();
+      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+    })
+    .catch(() => alert(t('shop.buy_error') || 'Erreur réseau'));
 }
 
 function _renderShopEmotes() {
@@ -6313,9 +6328,17 @@ function _renderShopEmotes() {
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < emote.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(emote)).replace('{price}', emote.price))) return;
-      voltbucks -= emote.price; _ownedItems.add(key); _equippedEmote = emote.id;
-      _saveInventory(); _saveCosmetics(); _syncVB(); _renderShopEmotes();
-      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+      _workerCall('/buy-item', 'POST', { itemId: key, pseudo: currentPseudo })
+        .then(data => {
+          if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
+          voltbucks = data.vb;
+          _ownedItems.add(key); _equippedEmote = emote.id;
+          if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+          localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+          _saveInventory(); _saveCosmetics(); _syncVB(); _renderShopEmotes();
+          document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+        })
+        .catch(() => alert(t('shop.buy_error') || 'Erreur réseau'));
     });
   });
 }
@@ -6375,9 +6398,17 @@ function _renderShopBgs() {
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < bg.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(bg)).replace('{price}', bg.price))) return;
-      voltbucks -= bg.price; _ownedItems.add(key); _equippedBg = bg.id;
-      _saveInventory(); _saveCosmetics(); _syncVB(); _applyBackground(); _renderShopBgs();
-      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+      _workerCall('/buy-item', 'POST', { itemId: key, pseudo: currentPseudo })
+        .then(data => {
+          if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
+          voltbucks = data.vb;
+          _ownedItems.add(key); _equippedBg = bg.id;
+          if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+          localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
+          _saveInventory(); _saveCosmetics(); _syncVB(); _applyBackground(); _renderShopBgs();
+          document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+        })
+        .catch(() => alert(t('shop.buy_error') || 'Erreur réseau'));
     });
   });
 }
@@ -6550,12 +6581,21 @@ function _renderShopBonus() {
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < item.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(item)).replace('{price}', item.price))) return;
-      voltbucks -= item.price;
-      if (item.stackable) _consumables[id] = (Number(_consumables[id]) || 0) + 1;
-      else _consumables[id] = true;
-      _saveConsumables(); _syncVB(); _renderShopBonus();
-      _updateConsumHUD();
-      document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+      _workerCall('/buy-item', 'POST', { itemId: 'consum_' + id, pseudo: currentPseudo })
+        .then(data => {
+          if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
+          voltbucks = data.vb;
+          if (data.inventory?.consumables) {
+            Object.assign(_consumables, data.inventory.consumables);
+          } else {
+            if (item.stackable) _consumables[id] = (Number(_consumables[id]) || 0) + 1;
+            else _consumables[id] = true;
+          }
+          _saveConsumables(); _syncVB(); _renderShopBonus();
+          _updateConsumHUD();
+          document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
+        })
+        .catch(() => alert(t('shop.buy_error') || 'Erreur réseau'));
     });
   });
 }
@@ -6575,8 +6615,7 @@ async function openFinish(timeMs, deaths) {
   // Enregistre le résultat pour checkAchievements
   _lastCamp = { campId: currentCampaignId, deaths, time: timeMs, inv: invertControls, yb: ybMode };
   checkAchievements('camp');
-  // Gain VoltBucks pour complétion de campagne (modificateurs inclus)
-  if (!adminMode) earnVoltbucks(_calcVb(_baseCampId(diffId)), 'campaign');
+  // Les VB campagne sont crédités par le Worker après soumission HOF
 
   // Reset overlay state
   pseudoIn.style.display = 'none';
@@ -6693,6 +6732,23 @@ async function openFinish(timeMs, deaths) {
       setCampScore(diffId, timeMs, deaths, key);
       statusEl.style.color = '#00ffcc';
       statusEl.textContent = t('finish.saved');
+
+      // Créditer les VB via le Worker maintenant que l'entrée HOF existe
+      if (!adminMode) {
+        _workerCall('/earn-vb', 'POST', {
+          diff: diffId,
+          hofKey: key,
+          timeMs,
+          deaths,
+          pseudo: currentPseudo,
+        }).then(data => _handleVbResponse(data, _calcVb(currentCampaignId))).catch(() => {
+          // Fallback : créditer localement si Worker indisponible
+          voltbucks += _calcVb(currentCampaignId);
+          _syncVB();
+          _vbToast('+' + _calcVb(currentCampaignId) + ' ⚡VB');
+        });
+      }
+
       setTimeout(() => { overlay.classList.remove('open'); openHOF(); }, 900);
     } catch(err) {
       _showHofFallback(statusEl, submitBtn, { pseudo: currentPseudo, diff: diffId, time: timeMs, deaths, uid: currentUser?.uid });
@@ -8612,7 +8668,17 @@ function loop(timestamp) {
     if (survivalRunning) {
       survivalScore++;
       survivalStreak++;
-      if (!adminMode) earnVoltbucks(_calcVb('survie'), 'survival');
+      if (!adminMode) {
+        const _survVb = _calcVb('survie');
+        _workerCall('/earn-vb-survival', 'POST', {
+          levels: 1,
+          inv: invertControls,
+          yb: ybMode,
+          pseudo: currentPseudo,
+        }).then(data => _handleVbResponse(data, _survVb)).catch(() => {
+          voltbucks += _survVb; _syncVB(); _vbToast('+' + _survVb + ' ⚡VB');
+        });
+      }
       if (!adminMode && survivalStreak >= 3) {
         if      (ybMode && invertControls)  { /* pas d'ach streak spécifique yb+inv pour l'instant */ }
         else if (ybMode)                    unlockAchievement('survie_yb_deathless');
@@ -8789,7 +8855,11 @@ function setupTouchBtn(id, keyName, opts = {}) {
       spacePressCount++;
       if (!replayMode) recordKey('keydown', ' ');
     } else {
-      if (!replayMode) { keys[keyName] = true; recordKey('keydown', keyName); }
+      if (!replayMode) {
+        keys[keyName] = true;
+        _freshKeyPressed = true;
+        recordKey('keydown', keyName);
+      }
     }
     if (!humOsc) startHum();
   }
