@@ -7190,12 +7190,13 @@ document.addEventListener('keyup', e => {
     GP_STATE[k] = true;
     if (k === 'R') { selectLevel(currentLevel); return; }
     if (k === ' ') {
-      // Espace : next level si gagné, sinon jouer
+      // Si niveau gagné → cliquer le bouton suivant
       if (state && state.won) {
         const nlBtn = document.getElementById('next-level-btn');
-        const nlWrap = document.getElementById('next-level-wrap');
-        if (nlWrap && nlWrap.style.display !== 'none' && nlBtn && nlBtn.style.display !== 'none') { nlBtn.click(); return; }
+        if (nlBtn && nlBtn.offsetParent !== null) { nlBtn.click(); return; }
       }
+      // Sinon : démarrer le niveau (comme une touche Q/P)
+      _freshKeyPressed = true;
       spacePressCount++;
       recordKey('keydown', ' ');
     } else {
