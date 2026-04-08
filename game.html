@@ -2429,7 +2429,11 @@ const TRANSLATIONS = {
     'shop.equipped': 'ÉQUIPÉ',
     'shop.owned': 'POSSÉDÉ',
     'shop.reward': '🔐 RÉCOMPENSE',
-    'shop.reward_desc': 'Décerné aux hackers qui aident à sécuriser le site. Non achetable.',
+    'shop.reward_desc': 'Récompense spéciale. Non achetable.',
+    'emote.white_hat.reward_desc': 'Décerné aux hackers qui aident à sécuriser le site.',
+    'emote.mvp.reward_desc': 'Décerné par l\'admin aux joueurs ayant accompli des faits d\'armes exceptionnels.',
+    'emote.mvp.name': 'MVP',
+    'emote.white_hat.name': 'White Hat',
     'shop.in_stock': 'EN STOCK',
     'shop.in_stock_btn': '✓ En stock',
     'shop.preview': 'Aperçu',
@@ -2757,7 +2761,11 @@ const TRANSLATIONS = {
     'shop.equipped': 'EQUIPPED',
     'shop.owned': 'OWNED',
     'shop.reward': '🔐 REWARD',
-    'shop.reward_desc': 'Awarded to hackers who help secure the site. Not purchasable.',
+    'shop.reward_desc': 'Special reward. Not purchasable.',
+    'emote.white_hat.reward_desc': 'Awarded to hackers who help secure the site.',
+    'emote.mvp.reward_desc': 'Awarded by the admin to players who accomplished exceptional feats.',
+    'emote.mvp.name': 'MVP',
+    'emote.white_hat.name': 'White Hat',
     'shop.in_stock': 'IN STOCK',
     'shop.in_stock_btn': '✓ In stock',
     'shop.preview': 'Preview',
@@ -6109,7 +6117,8 @@ const EMOTES = [
   { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800,  _nameKey: 'emote.comet.name' },
   { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500, _nameKey: 'emote.godmode.name' },
   { id: 'rich',      emoji: '🤑', name: 'I\'m rich',    price: 0, _nameKey: 'emote.rich.name', unlockAt: 50000, _unlockKey: 'emote.rich.unlock' },
-  { id: 'white_hat', emoji: '🤍🎩', name: 'White Hat',  price: 0, _nameKey: 'emote.white_hat.name', adminOnly: true },
+  { id: 'white_hat', emoji: '🤍🎩', name: 'White Hat',  price: 0, _nameKey: 'emote.white_hat.name', adminOnly: true, _rewardDescKey: 'emote.white_hat.reward_desc' },
+  { id: 'mvp',       emoji: '🏆',   name: 'MVP',        price: 0, _nameKey: 'emote.mvp.name',       adminOnly: true, _rewardDescKey: 'emote.mvp.reward_desc' },
 ];
 
 const BACKGROUNDS = [
@@ -6460,7 +6469,7 @@ function _renderShopEmotes() {
         ${badge}
         <div style="font-size:32px;line-height:1.2;padding:4px 0">${e.emoji}</div>
         <div class="shop-item-name" style="color:#aaaaaa">${iname(e)}</div>
-        <div class="shop-item-price" style="color:#888;font-size:9px;text-align:center;margin-top:2px">${t('shop.reward_desc')}</div>
+        <div class="shop-item-price" style="color:#888;font-size:9px;text-align:center;margin-top:2px">${t(e._rewardDescKey || 'shop.reward_desc')}</div>
       </div>`;
     }
     const owned     = _ownedItems.has('emote_' + e.id) || (e.price === 0 && !e.unlockAt);
