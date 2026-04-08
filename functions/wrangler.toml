@@ -7,6 +7,6 @@ FIREBASE_PROJECT_ID = "dieandretry-af391"
 FIREBASE_DB_URL = "https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app"
 FIREBASE_API_KEY = "AIzaSyANpHcNJeMKN46TZmPUE4Omvw0GNSMD8uI"
 ADMIN_UID = "K6f4G1RxZqfC8iB4VFYC5ICBX1z2"
-ALLOWED_ORIGIN = "https://dieandrelight.com"
+ALLOWED_ORIGIN = "https://dieandrelight.be"
 
 # Secret à ajouter via : wrangler secret put FIREBASE_SERVICE_ACCOUNT
