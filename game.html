@@ -4370,24 +4370,7 @@ function registerDeath() {
     survivalLives--;
     updateSurvivalHUD();
     if (survivalLives <= 0) {
-      // Cœur en inventaire → l'utiliser automatiquement via Worker
-      if (_consumables.heart) {
-        _workerCall('/use-consumable', 'POST', { id: 'heart' }).then(data => {
-          if (!data?.ok) return; // Worker refuse (plus de cœur) → pas de résurrection
-          _consumables.heart = data.remaining > 0 ? data.remaining : false;
-          _saveConsumables();
-        }).catch(() => {
-          _consumables.heart = false; _saveConsumables(); // fallback offline
-        });
-        survivalLives = 1;
-        updateSurvivalHUD();
-        _runUsedConsumables.add('heart');
-        _updateConsumHUD();
-        const el = document.getElementById('vb-toast');
-        if (el) { el.textContent = t('consum.heart.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
-      } else {
-        setTimeout(() => { if (survivalRunning) endSurvival(); }, 900);
-      }
+      setTimeout(() => { if (survivalRunning) endSurvival(); }, 900);
     }
   }
   if (!adminMode) checkAchievements('death');
