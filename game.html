@@ -1600,8 +1600,25 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   }
   .audio-btn:hover { border-color: #00ffcc; color: #00ffcc; }
   .audio-btn.muted { border-color: #442222; color: #663333; }
+  .touch-device #btn-gp-pc,
   .touch-device #btn-gp-ps,
   .touch-device #btn-gp-xbox { display: none; }
+
+  /* ── CTRL PICKER (camp screen) ───────────────────────────── */
+  #ctrl-picker {
+    display: flex; gap: 8px; justify-content: center;
+    margin-top: 4px;
+  }
+  .touch-device #ctrl-picker { display: none; }
+  .ctrl-pick-btn {
+    font-family: 'Courier New', monospace;
+    font-size: 10px; letter-spacing: 1px;
+    padding: 5px 14px; border-radius: 3px;
+    background: transparent; border: 1px solid #1a5a3a;
+    color: #336655; cursor: pointer; transition: all .15s;
+  }
+  .ctrl-pick-btn:hover { border-color: #00ffcc88; color: #00ffcc88; }
+  .ctrl-pick-btn.active { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 8px #00ffcc44; }
 
   /* ── LANG TOGGLE ─────────────────────────────────────────── */
   #lang-toggle {
@@ -1759,8 +1776,9 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <!-- Audio controls -->
 <div id="audio-controls">
   <button class="audio-btn" id="btn-mute-all" title="Couper tout le son">🔊</button>
-  <button class="audio-btn" id="btn-gp-ps"  title="Mode manette PlayStation" style="font-size:11px;letter-spacing:0">PS</button>
-  <button class="audio-btn" id="btn-gp-xbox" title="Mode manette Xbox"        style="font-size:11px;letter-spacing:0">XB</button>
+  <button class="audio-btn" id="btn-gp-pc"   title="Mode clavier"              style="font-size:11px;letter-spacing:0">PC</button>
+  <button class="audio-btn" id="btn-gp-ps"   title="Mode manette PlayStation"  style="font-size:11px;letter-spacing:0">PS</button>
+  <button class="audio-btn" id="btn-gp-xbox" title="Mode manette Xbox"         style="font-size:11px;letter-spacing:0">XB</button>
 </div>
 
 <!-- Language toggle -->
@@ -1794,6 +1812,11 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <div style="font-size:9px;letter-spacing:1px;opacity:0.7;margin-top:2px" id="camp-vb-survie"></div>
     </div>
   </button>
+  <div id="ctrl-picker">
+    <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ PC</button>
+    <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
+    <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+  </div>
   <div id="mode-camp-wrap">
     <div id="mode-camp-tiles">
       <button class="mode-tile" id="invert-btn-camp">
@@ -3686,15 +3709,33 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 document.getElementById('btn-mute-all').addEventListener('click', toggleMuteAll);
 applyAudioMuteUI();
 
-// ── GAMEPAD MODE TOGGLE ─────────────────────────────────────
+// ── GAMEPAD MODE (3-way exclusive: null=pc, 'ps', 'xbox') ───
+function _setGamepadMode(mode) {
+  _gamepadMode = mode;
+  localStorage.setItem('elecgame_gp_mode', mode || '');
+  localStorage.setItem('elecgame_ctrl_modal_seen', '1');
+  _applyGamepadMode();
+}
+
 function _applyGamepadMode() {
+  // Audio-controls buttons
+  const btnPc   = document.getElementById('btn-gp-pc');
   const btnPs   = document.getElementById('btn-gp-ps');
   const btnXbox = document.getElementById('btn-gp-xbox');
-  const btnQ    = document.getElementById('btn-q');
-  const btnP    = document.getElementById('btn-p');
-  const btnSp   = document.getElementById('btn-space');
-  if (btnPs)   btnPs.style.opacity   = _gamepadMode === 'ps'   ? '1' : '0.35';
-  if (btnXbox) btnXbox.style.opacity = _gamepadMode === 'xbox' ? '1' : '0.35';
+  if (btnPc)   btnPc.style.opacity   = _gamepadMode === null    ? '1' : '0.35';
+  if (btnPs)   btnPs.style.opacity   = _gamepadMode === 'ps'    ? '1' : '0.35';
+  if (btnXbox) btnXbox.style.opacity = _gamepadMode === 'xbox'  ? '1' : '0.35';
+  // Camp-screen picker buttons
+  const cpPc   = document.getElementById('cp-btn-pc');
+  const cpPs   = document.getElementById('cp-btn-ps');
+  const cpXbox = document.getElementById('cp-btn-xbox');
+  if (cpPc)   cpPc.classList.toggle('active',   _gamepadMode === null);
+  if (cpPs)   cpPs.classList.toggle('active',   _gamepadMode === 'ps');
+  if (cpXbox) cpXbox.classList.toggle('active', _gamepadMode === 'xbox');
+  // Touch control labels
+  const btnQ  = document.getElementById('btn-q');
+  const btnP  = document.getElementById('btn-p');
+  const btnSp = document.getElementById('btn-space');
   if (_gamepadMode === 'ps') {
     if (btnQ)  btnQ.textContent  = 'L2';
     if (btnP)  btnP.textContent  = 'R2';
@@ -3710,16 +3751,9 @@ function _applyGamepadMode() {
   }
 }
 
-document.getElementById('btn-gp-ps').addEventListener('click', () => {
-  _gamepadMode = _gamepadMode === 'ps' ? null : 'ps';
-  localStorage.setItem('elecgame_gp_mode', _gamepadMode || '');
-  _applyGamepadMode();
-});
-document.getElementById('btn-gp-xbox').addEventListener('click', () => {
-  _gamepadMode = _gamepadMode === 'xbox' ? null : 'xbox';
-  localStorage.setItem('elecgame_gp_mode', _gamepadMode || '');
-  _applyGamepadMode();
-});
+document.getElementById('btn-gp-pc').addEventListener('click',   () => _setGamepadMode(null));
+document.getElementById('btn-gp-ps').addEventListener('click',   () => _setGamepadMode('ps'));
+document.getElementById('btn-gp-xbox').addEventListener('click', () => _setGamepadMode('xbox'));
 _applyGamepadMode();
 
 // ── CONTROLLER SELECTION MODAL ──────────────────────────────
@@ -3737,12 +3771,7 @@ _applyGamepadMode();
 
     function closeModal(mode) {
       overlay.classList.remove('open');
-      localStorage.setItem('elecgame_ctrl_modal_seen', '1');
-      if (mode) {
-        _gamepadMode = mode;
-        localStorage.setItem('elecgame_gp_mode', mode);
-        _applyGamepadMode();
-      }
+      _setGamepadMode(mode);
     }
 
     document.getElementById('ctrl-btn-xbox').addEventListener('click', () => closeModal('xbox'));
@@ -7349,6 +7378,9 @@ document.addEventListener('keydown', e => {
     return;
   }
 
+  // En mode manette : bloquer Q, P, Espace (game keys) — garder R (restart universel)
+  if (_gamepadMode && (k === 'Q' || k === 'P' || e.key === ' ')) return;
+
   // Capture chiffres pour défi microprocesseur
   if (state.type === 'custom' && state.microChallenge && !state.dead && !state.won) {
     if (e.key >= '0' && e.key <= '9') {
@@ -7397,6 +7429,8 @@ document.addEventListener('keyup', e => {
 
   function _gpPressKey(k) {
     if (GP_STATE[k]) return;
+    // En mode clavier (null) : bloquer tous les inputs manette sauf restart
+    if (!_gamepadMode && k !== 'R') return;
     GP_STATE[k] = true;
     if (k === 'R') { selectLevel(currentLevel); return; }
     if (k === ' ') {
@@ -7422,6 +7456,7 @@ document.addEventListener('keyup', e => {
     if (!GP_STATE[k]) return;
     GP_STATE[k] = false;
     if (k === 'R') return;
+    if (!_gamepadMode) { keys[k.toUpperCase()] = false; return; }
     if (k === ' ') recordKey('keyup', ' ');
     else recordKey('keyup', k);
     keys[k.toUpperCase()] = false;
