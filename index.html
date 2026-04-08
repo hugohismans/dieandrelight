@@ -1930,6 +1930,8 @@ async function renderHOF() {
     const medals = ['🥇','🥈','🥉'];
     const cls    = ['ihof-1st','ihof-2nd','ihof-3rd'];
     const _bonusEmoji = { heart:'❤️', fuse:'🔌', attenuator:'🐢' };
+    const _ctrlBadge = (e) => (e.ctrl && e.device !== 'mobile' && e.device !== 'tablet')
+      ? `<span style="font-size:10px;opacity:0.55;margin-left:2px" title="${e.ctrl}">${e.ctrl === 'gamepad' ? '🎮' : '⌨️'}</span>` : '';
     if (isSurvival) {
       el.innerHTML = entries.map((e, i) => {
         const emote = emoteMap[e.uid] || '🐥';
@@ -1939,7 +1941,7 @@ async function renderHOF() {
         return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
           ${emote ? `<span style="font-size:14px;margin-right:3px">${emote}</span>` : ''}
-          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
+          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>${_ctrlBadge(e)}
           <span class="ihof-time" style="color:#ff8899">${e.score} ${t_idx('idx.levels_short')}${bonuses}</span>
         </div>`;
       }).join('');
@@ -1949,7 +1951,7 @@ async function renderHOF() {
         return `<div class="ihof-row ${cls[i]||''}">
           <span class="ihof-rank">${medals[i]||(i+1)}</span>
           ${emote ? `<span style="font-size:14px;margin-right:3px">${emote}</span>` : ''}
-          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>
+          <span class="ihof-pseudo pp-trigger" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" data-uid="${e.uid||''}" data-pseudo="${escHtml(e.pseudo)}">${escHtml(e.pseudo)}</span>${_ctrlBadge(e)}
           <span class="ihof-time">${fmtTime(e.time)}</span>
           <span class="ihof-deaths">${e.deaths}💀</span>
         </div>`;

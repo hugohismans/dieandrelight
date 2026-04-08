@@ -1813,9 +1813,12 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     </div>
   </button>
   <div id="ctrl-picker">
-    <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ PC</button>
-    <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
-    <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+    <p id="ctrl-picker-label" data-i18n="ctrl.picker.label" style="width:100%;text-align:center;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#00ffcc55;text-transform:uppercase;margin:0 0 6px">Choisissez votre contrôleur</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ PC</button>
+      <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
+      <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+    </div>
   </div>
   <div id="mode-camp-wrap">
     <div id="mode-camp-tiles">
@@ -2419,10 +2422,11 @@ const TRANSLATIONS = {
     'space.inactive.xbox': 'A  ░',
     'overlay.restart.ps': '[○] pour recommencer',
     'overlay.restart.xbox': '[B] pour recommencer',
-    // Controller modal
+    // Controller modal / picker
     'ctrl.modal.title': 'Contrôles',
     'ctrl.modal.sub': 'Choisissez votre méthode de contrôle',
     'ctrl.modal.kb': 'CLAVIER',
+    'ctrl.picker.label': 'Choisissez votre contrôleur',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Connecte-toi pour soumettre ton score.<br>Seul un pseudo de ton choix sera visible — jamais ton nom réel.',
@@ -2795,10 +2799,11 @@ const TRANSLATIONS = {
     'space.active.xbox': 'A  █',
     'space.inactive.ps': '✕  ░',
     'space.inactive.xbox': 'A  ░',
-    // Controller modal
+    // Controller modal / picker
     'ctrl.modal.title': 'Controls',
     'ctrl.modal.sub': 'Choose your control method',
     'ctrl.modal.kb': 'KEYBOARD',
+    'ctrl.picker.label': 'Choose your controller',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Sign in to submit your score.<br>Only a username of your choice will be visible — never your real name.',
@@ -5227,7 +5232,7 @@ async function _submitSurvivalScore(prevKey = null) {
   submitEl.disabled = true;
   try {
     const _survDiff2 = _composeDiff('survie', ybMode, invertControls);
-    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now() - 2000, device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
+    const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now() - 2000, device: detectDevice(), ctrl: _gamepadMode ? 'gamepad' : 'keyboard', bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
     const url = prevKey
       ? `${FB_URL}/${HOF_VERSION}/${_survDiff2}/${prevKey}.json`
       : `${FB_URL}/${HOF_VERSION}/${_survDiff2}.json`;
@@ -5839,6 +5844,11 @@ function detectDevice() {
   return 'pc';
 }
 const DEVICE_ICON = { pc: '🖥️', mobile: '📱', tablet: '📟' };
+const CTRL_ICON   = { keyboard: '⌨️', gamepad: '🎮' };
+function _ctrlIcon(e) {
+  if (!e.ctrl || e.device === 'mobile' || e.device === 'tablet') return '';
+  return `<span style="font-size:12px;opacity:0.7;margin-left:2px" title="${e.ctrl}">${CTRL_ICON[e.ctrl] || ''}</span>`;
+}
 
 // ── HOF fetch & display ────────────────────────────────────
 async function hofFetch(version, diff) {
@@ -5889,7 +5899,7 @@ function hofRenderBody(entries, isSurvival = false) {
         <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${emote(e)}${escHtml(e.pseudo)}</td>
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
-        <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
+        <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}${_ctrlIcon(e)}</td>
         ${delBtn(e)}
       </tr>`).join('')}</tbody>
     </table>`;
@@ -7171,7 +7181,7 @@ async function openFinish(timeMs, deaths) {
     statusEl.textContent = t('finish.sending');
     try {
       const pseudo = currentPseudo;
-      const entry  = { pseudo, uid: currentUser.uid, time: timeMs, deaths, ts: Date.now() - 2000, version: HOF_VERSION, diff: diffId, device: detectDevice() };
+      const entry  = { pseudo, uid: currentUser.uid, time: timeMs, deaths, ts: Date.now() - 2000, version: HOF_VERSION, diff: diffId, device: detectDevice(), ctrl: _gamepadMode ? 'gamepad' : 'keyboard' };
       const fbBase = `${FB_URL}/${HOF_VERSION}/${diffId}`;
       let key = prevKey;
 
