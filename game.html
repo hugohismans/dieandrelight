@@ -6139,9 +6139,9 @@ async function loadDoneFromFirebase() {
         }, 1500);
       }
     }
-    // Sync le classement public hauts-faits après le retro-sync (VB à jour)
+    // Sync le classement public hauts-faits après le retro-sync (VB à jour) — bloquant
     if (currentPseudo) {
-      _workerCall('/sync-ranks', 'POST', {
+      await _workerCall('/sync-ranks', 'POST', {
         pseudo: currentPseudo, achCount: _achDone.size,
         emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg
       }).catch(() => {});
