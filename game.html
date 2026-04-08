@@ -4883,7 +4883,7 @@ async function _openSurvivalGameOver() {
     overlay.classList.add('open');
     document.getElementById('sg-google-btn').onclick = async () => {
       try {
-        await _fbAuth.signInWithPopup(_googleProvider);
+        await _signInWithGoogle();
         _afterLoginCb = () => {
           overlay.classList.remove('open');
           if (!currentPseudo) {
@@ -5295,6 +5295,21 @@ let currentPseudo = null;  // chosen pseudo (from /users/{uid}/pseudo)
 const FB_USERS_URL   = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
 const FB_PSEUDOS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/pseudos';
 
+// Sur mobile/tablette les popups sont bloquées — utiliser redirect à la place
+const _isMobileOrTablet = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
+  || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
+
+async function _signInWithGoogle() {
+  if (_isMobileOrTablet) {
+    await _fbAuth.signInWithRedirect(_googleProvider);
+  } else {
+    await _fbAuth.signInWithPopup(_googleProvider);
+  }
+}
+
+// Gérer le retour après signInWithRedirect (mobile/tablette)
+_fbAuth.getRedirectResult().catch(() => {});
+
 // Auth state changes (login / logout)
 let _authReadyResolve = null;
 const authReady = new Promise(r => { _authReadyResolve = r; });
@@ -5348,11 +5363,13 @@ async function savePseudo(uid, pseudo) {
   const available = await _isPseudoAvailable(pseudo, uid);
   if (!available) throw new Error('taken');
   const token = await currentUser.getIdToken();
-  await fetch(`${FB_USERS_URL}/${uid}.json?auth=${token}`, {
+  // PATCH sur le sous-nœud pseudo uniquement — ne touche pas aux autres champs (voltbucks, achievements…)
+  const res = await fetch(`${FB_USERS_URL}/${uid}/pseudo.json?auth=${token}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pseudo })
+    body: JSON.stringify(pseudo)
   });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   await _registerPseudo(pseudo, uid, token, currentPseudo);
   currentPseudo = pseudo;
 }
@@ -5381,7 +5398,7 @@ function openAuthOverlay(mode, onDone) {
     googleBtn.onclick = async () => {
       statusEl.textContent = '';
       try {
-        await _fbAuth.signInWithPopup(_googleProvider);
+        await _signInWithGoogle();
         // Wait for onAuthStateChanged + loadPseudo to finish
         _afterLoginCb = () => {
           if (!currentPseudo) {
@@ -6064,7 +6081,8 @@ async function loadDoneFromFirebase() {
       deathCount = d; writeSave({ deaths: deathCount }); updateDeathDisplay();
     }}
     if (resVB.ok) { const d = await resVB.json(); if (typeof d === 'number') {
-      voltbucks = d; writeSave({ voltbucks }); _updateVBDisplay();
+      // Ne pas écraser les VB locaux avec 0 (nouveau compte) — le retro-sync /unlock-ach va les re-créditer
+      if (d > 0 || voltbucks === 0) { voltbucks = d; writeSave({ voltbucks }); _updateVBDisplay(); }
     }}
     if (resInv.ok) {
       const inv = await resInv.json();
@@ -6119,8 +6137,8 @@ async function loadDoneFromFirebase() {
         }, 1500);
       }
     }
-    // Sync le classement public hauts-faits (au login, via Worker — achievement_ranks est admin-only)
-    if (currentPseudo && _achDone.size > 0) {
+    // Sync le classement public hauts-faits après le retro-sync (VB à jour)
+    if (currentPseudo) {
       _workerCall('/sync-ranks', 'POST', {
         pseudo: currentPseudo, achCount: _achDone.size,
         emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg
@@ -6868,7 +6886,7 @@ async function openFinish(timeMs, deaths) {
     skipBtn.onclick = () => { overlay.classList.remove('open'); };
     document.getElementById('finish-google-btn').onclick = async () => {
       try {
-        await _fbAuth.signInWithPopup(_googleProvider);
+        await _signInWithGoogle();
         _afterLoginCb = () => {
           overlay.classList.remove('open');
           if (!currentPseudo) {

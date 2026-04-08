@@ -1409,9 +1409,9 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
       }
     }
     const token = await _idxUser.getIdToken();
-    const res = await fetch(`${FB_USERS_URL}/${_idxUser.uid}.json?auth=${token}`, {
+    const res = await fetch(`${FB_USERS_URL}/${_idxUser.uid}/pseudo.json?auth=${token}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pseudo: val })
+      body: JSON.stringify(val)
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     // Enregistrer dans l'index pseudos
@@ -1431,9 +1431,16 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
   } catch(e) { statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_error') + e.message; }
 };
 
+const _idxIsMobile = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
+  || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
+
+_fbAuth.getRedirectResult().catch(() => {});
+
 document.getElementById('idx-google-btn').onclick = async () => {
-  try { await _fbAuth.signInWithPopup(_googleProvider); }
-  catch(e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
+  try {
+    if (_idxIsMobile) { await _fbAuth.signInWithRedirect(_googleProvider); }
+    else { await _fbAuth.signInWithPopup(_googleProvider); }
+  } catch(e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
 };
 document.getElementById('auth-logout-btn').onclick = () => _fbAuth.signOut();
 </script>
