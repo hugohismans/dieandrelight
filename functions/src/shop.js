@@ -14,17 +14,31 @@ export const SHOP_ITEMS = {
 
   // Emotes
   emote_bolt:    { type: 'emote', price: 150  },
+  emote_moon:    { type: 'emote', price: 150  },
   emote_skull:   { type: 'emote', price: 200  },
-  emote_crown:   { type: 'emote', price: 500  },
+  emote_party:   { type: 'emote', price: 200  },
+  emote_sakura:  { type: 'emote', price: 250  },
+  emote_vortex:  { type: 'emote', price: 250  },
   emote_ghost:   { type: 'emote', price: 300  },
   emote_fire:    { type: 'emote', price: 300  },
+  emote_fox:     { type: 'emote', price: 300  },
+  emote_rocket:  { type: 'emote', price: 350  },
   emote_robot:   { type: 'emote', price: 400  },
   emote_alien:   { type: 'emote', price: 400  },
+  emote_mask:    { type: 'emote', price: 400  },
+  emote_magnet:  { type: 'emote', price: 450  },
+  emote_crown:   { type: 'emote', price: 500  },
+  emote_brain:   { type: 'emote', price: 500  },
+  emote_crystal: { type: 'emote', price: 600  },
   emote_diamond: { type: 'emote', price: 600  },
   emote_devil:   { type: 'emote', price: 600  },
   emote_comet:   { type: 'emote', price: 800  },
+  emote_eclipse: { type: 'emote', price: 900  },
+  emote_chemist: { type: 'emote', price: 1000 },
+  emote_eagle:   { type: 'emote', price: 1200 },
   emote_godmode: { type: 'emote', price: 1500 },
   // emote_rich : non achetable, débloquée automatiquement à 50 000 VB
+  // emote_white_hat, emote_mvp, emote_dev : admin-only
 
   // Backgrounds
   bg_electrons:  { type: 'bg',    price: 300  },
