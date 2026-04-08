@@ -10,7 +10,7 @@
 //   GET  /vb-balance       — lire le solde VB authoritative
 
 import { verifyIdToken, getServiceAccountToken } from './auth.js';
-import { fbRead, fbWrite, getVb, setVb, getInventory, setInventory, syncVbRank, syncAchRank, getHofEntry } from './firebase.js';
+import { fbRead, fbWrite, fbPatch, getVb, setVb, getInventory, setInventory, syncVbRank, syncAchRank, getHofEntry } from './firebase.js';
 import { calcVb, decomposeDiff, validateCampResult, validateSurvivalResult, shouldUnlockRich, HOF_VERSION, ACH_VB } from './vb.js';
 import { validatePurchase, applyPurchase } from './shop.js';
 
@@ -237,9 +237,16 @@ async function handleSyncRanks(request, env, cors) {
   const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
   const vb      = await getVb(user.uid, saToken);
 
+  // Persiste les cosmetiques équipés dans inventory (emote/skin/bg uniquement, pas owned)
+  const cosmeticsUpdate = {};
+  if (emote) cosmeticsUpdate.emote = emote;
+  if (skin)  cosmeticsUpdate.skin  = skin;
+  if (bg)    cosmeticsUpdate.bg    = bg;
+
   await Promise.all([
     syncVbRank(user.uid, pseudo, vb, saToken),
     syncAchRank(user.uid, pseudo, achCount, emote || 'none', skin || 'default', bg || 'default', vb, saToken),
+    Object.keys(cosmeticsUpdate).length ? fbPatch(`users/${user.uid}/inventory`, cosmeticsUpdate, saToken) : Promise.resolve(),
   ]);
 
   return json({ ok: true, vb }, 200, cors);
