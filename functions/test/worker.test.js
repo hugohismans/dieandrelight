@@ -257,47 +257,109 @@ describe('POST /earn-vb-survival', () => {
   });
 });
 
-// ── POST /earn-vb-ach ─────────────────────────────────────────
-describe('POST /earn-vb-ach', () => {
-  it('crédite le bon montant pour first_death', async () => {
+// ── POST /unlock-ach ──────────────────────────────────────────
+describe('POST /unlock-ach', () => {
+  it('écrit le haut-fait et crédite first_death', async () => {
     fbRead.mockResolvedValue([]); // vb_ach_paid vide
     getVb.mockResolvedValue(0);
-    const res = await callWorker('POST', '/earn-vb-ach', { id: 'first_death', pseudo: 'Toto' });
+    const res = await callWorker('POST', '/unlock-ach', { id: 'first_death', pseudo: 'Toto' });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.ok).toBe(true);
     expect(data.earned).toBe(50);
     expect(data.vb).toBe(50);
+    expect(fbWrite).toHaveBeenCalledWith(
+      expect.stringContaining('achievements/'),
+      true, 'sa-token'
+    );
   });
 
-  it('anti-replay — retourne alreadyPaid si déjà crédité', async () => {
-    fbRead.mockResolvedValue(['first_death']); // déjà dans la liste
+  it('anti-replay — retourne alreadyPaid si VB déjà crédité', async () => {
+    fbRead.mockResolvedValue(['first_death']);
     getVb.mockResolvedValue(50);
-    const res = await callWorker('POST', '/earn-vb-ach', { id: 'first_death', pseudo: 'Toto' });
+    const res = await callWorker('POST', '/unlock-ach', { id: 'first_death', pseudo: 'Toto' });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.alreadyPaid).toBe(true);
     expect(setVb).not.toHaveBeenCalled();
   });
 
-  it('haut-fait inconnu → 400', async () => {
-    const res = await callWorker('POST', '/earn-vb-ach', { id: 'inexistant', pseudo: 'Toto' });
-    expect(res.status).toBe(400);
+  it('haut-fait sans VB — écrit quand même et retourne earned: 0', async () => {
+    // Simule un haut-fait qui n'est pas dans ACH_VB
+    fbRead.mockResolvedValue([]);
+    getVb.mockResolvedValue(100);
+    const res = await callWorker('POST', '/unlock-ach', { id: 'inexistant_no_vb', pseudo: 'Toto' });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.earned).toBe(0);
+    expect(setVb).not.toHaveBeenCalled();
   });
 
   it('pseudo manquant → 400', async () => {
-    const res = await callWorker('POST', '/earn-vb-ach', { id: 'first_death' });
+    const res = await callWorker('POST', '/unlock-ach', { id: 'first_death' });
     expect(res.status).toBe(400);
   });
 
   it('platine crédite 5000 VB', async () => {
     fbRead.mockResolvedValue([]);
     getVb.mockResolvedValue(10000);
-    const res = await callWorker('POST', '/earn-vb-ach', { id: 'platine', pseudo: 'Toto' });
+    const res = await callWorker('POST', '/unlock-ach', { id: 'platine', pseudo: 'Toto' });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.earned).toBe(5000);
     expect(data.vb).toBe(15000);
+  });
+});
+
+// ── POST /use-consumable ──────────────────────────────────────
+describe('POST /use-consumable', () => {
+  it('décrémente heart disponible', async () => {
+    fbRead.mockResolvedValue({ heart: 1, fuse: 2 });
+    const res = await callWorker('POST', '/use-consumable', { id: 'heart' });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    expect(data.remaining).toBe(0);
+    expect(fbWrite).toHaveBeenCalledWith(
+      expect.stringContaining('consumables/heart'), 0, 'sa-token'
+    );
+  });
+
+  it('décrémente hint depuis count > 1', async () => {
+    fbRead.mockResolvedValue({ hint: 3 });
+    const res = await callWorker('POST', '/use-consumable', { id: 'hint' });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.remaining).toBe(2);
+  });
+
+  it('aucun consommable disponible → 400', async () => {
+    fbRead.mockResolvedValue({ heart: 0 });
+    const res = await callWorker('POST', '/use-consumable', { id: 'heart' });
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toMatch(/aucun/i);
+  });
+
+  it('consommable absent → 400', async () => {
+    fbRead.mockResolvedValue({});
+    const res = await callWorker('POST', '/use-consumable', { id: 'fuse' });
+    expect(res.status).toBe(400);
+  });
+
+  it('type invalide → 400', async () => {
+    const res = await callWorker('POST', '/use-consumable', { id: 'gold' });
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toMatch(/invalide/i);
+  });
+
+  it('gère le format booléen legacy (heart: true → 1)', async () => {
+    fbRead.mockResolvedValue({ heart: true });
+    const res = await callWorker('POST', '/use-consumable', { id: 'heart' });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.remaining).toBe(0);
   });
 });
 

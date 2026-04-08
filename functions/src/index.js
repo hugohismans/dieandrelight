@@ -1,11 +1,13 @@
 // ── index.js ─────────────────────────────────────────────────
 // Cloudflare Worker — backend sécurisé Die and Relight
 // Endpoints :
-//   POST /earn-vb         — créditer VB après campagne validée
+//   POST /earn-vb          — créditer VB après campagne validée
 //   POST /earn-vb-survival — créditer VB après niveau survie
-//   POST /buy-item        — acheter un item boutique
-//   POST /sync-ranks      — mettre à jour les classements
-//   GET  /vb-balance      — lire le solde VB authoritative
+//   POST /unlock-ach       — débloquer un haut-fait + créditer VB (écriture admin)
+//   POST /use-consumable   — décrémenter un consommable (écriture admin)
+//   POST /buy-item         — acheter un item boutique
+//   POST /sync-ranks       — mettre à jour les classements
+//   GET  /vb-balance       — lire le solde VB authoritative
 
 import { verifyIdToken, getServiceAccountToken } from './auth.js';
 import { fbRead, fbWrite, getVb, setVb, getInventory, setInventory, syncVbRank, syncAchRank, getHofEntry } from './firebase.js';
@@ -65,8 +67,11 @@ export default {
       if (path === '/earn-vb-survival' && request.method === 'POST')
         return await handleEarnVbSurvival(request, env, cors);
 
-      if (path === '/earn-vb-ach' && request.method === 'POST')
-        return await handleEarnVbAch(request, env, cors);
+      if (path === '/unlock-ach' && request.method === 'POST')
+        return await handleUnlockAch(request, env, cors);
+
+      if (path === '/use-consumable' && request.method === 'POST')
+        return await handleUseConsumable(request, env, cors);
 
       if (path === '/buy-item' && request.method === 'POST')
         return await handleBuyItem(request, env, cors);
@@ -237,32 +242,39 @@ async function handleSyncRanks(request, env, cors) {
   return json({ ok: true, vb }, 200, cors);
 }
 
-// ── ENDPOINT : /earn-vb-ach ──────────────────────────────────
-// Crédite les VB d'un haut-fait. Anti-replay via vb_ach_paid.
+// ── ENDPOINT : /unlock-ach ───────────────────────────────────
+// Débloque un haut-fait (écriture admin sur achievements) + crédite les VB.
+// Remplace /earn-vb-ach — atomique et sécurisé.
 // Le client envoie : { id, pseudo }
-async function handleEarnVbAch(request, env, cors) {
+async function handleUnlockAch(request, env, cors) {
   const user = await authenticate(request, env);
   const { id, pseudo } = await request.json();
 
   if (!id || !pseudo) return err('Paramètres manquants', 400, cors);
 
-  const reward = ACH_VB[id];
-  if (!reward) return err('Haut-fait inconnu ou sans récompense', 400, cors);
-
   const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
 
-  // Vérifier anti-replay
+  // Écriture du haut-fait dans Firebase (admin-only)
+  const achKey = btoa(id);
+  await fbWrite(`users/${user.uid}/achievements/${achKey}`, true, saToken);
+
+  const reward = ACH_VB[id];
+  const vbCurrent = await getVb(user.uid, saToken);
+
+  // Pas de récompense VB pour ce haut-fait
+  if (!reward) {
+    return json({ ok: true, earned: 0, vb: vbCurrent }, 200, cors);
+  }
+
+  // Anti-replay VB
   const paidArr = await fbRead(`users/${user.uid}/vb_ach_paid`, saToken);
   const paid = Array.isArray(paidArr) ? paidArr : [];
   if (paid.includes(id)) {
-    // Déjà payé — retourner le solde actuel sans erreur
-    const vb = await getVb(user.uid, saToken);
-    return json({ ok: true, alreadyPaid: true, vb }, 200, cors);
+    return json({ ok: true, alreadyPaid: true, vb: vbCurrent }, 200, cors);
   }
 
-  // Créditer
-  const current = await getVb(user.uid, saToken);
-  const newVb   = current + reward;
+  // Créditer VB
+  const newVb   = vbCurrent + reward;
   const newPaid = [...paid, id];
 
   await Promise.all([
@@ -279,10 +291,33 @@ async function handleEarnVbAch(request, env, cors) {
     richUnlocked = true;
   }
 
-  // Sync classements
   await syncVbRank(user.uid, pseudo, newVb, saToken);
 
   return json({ ok: true, earned: reward, vb: newVb, richUnlocked }, 200, cors);
+}
+
+// ── ENDPOINT : /use-consumable ───────────────────────────────
+// Décrémente un consommable côté serveur (admin-only en écriture).
+// Le client envoie : { id } — ex: 'heart', 'fuse', 'hint', 'attenuator'
+async function handleUseConsumable(request, env, cors) {
+  const user = await authenticate(request, env);
+  const { id } = await request.json();
+
+  const VALID = ['heart', 'fuse', 'hint', 'attenuator'];
+  if (!VALID.includes(id)) return err('Consommable invalide', 400, cors);
+
+  const saToken = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
+
+  const consumables = await fbRead(`users/${user.uid}/consumables`, saToken) || {};
+  const current = typeof consumables[id] === 'number' ? consumables[id]
+                : (consumables[id] ? 1 : 0);
+
+  if (current <= 0) return err('Aucun consommable disponible', 400, cors);
+
+  const newCount = current - 1;
+  await fbWrite(`users/${user.uid}/consumables/${id}`, newCount, saToken);
+
+  return json({ ok: true, remaining: newCount }, 200, cors);
 }
 
 // ── ENDPOINT : /vb-balance ───────────────────────────────────

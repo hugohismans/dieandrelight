@@ -4021,9 +4021,15 @@ function registerDeath() {
     survivalLives--;
     updateSurvivalHUD();
     if (survivalLives <= 0) {
-      // Cœur en inventaire → l'utiliser automatiquement
+      // Cœur en inventaire → l'utiliser automatiquement via Worker
       if (_consumables.heart) {
-        _consumables.heart = false; _saveConsumables();
+        _workerCall('/use-consumable', 'POST', { id: 'heart' }).then(data => {
+          if (!data?.ok) return; // Worker refuse (plus de cœur) → pas de résurrection
+          _consumables.heart = data.remaining > 0 ? data.remaining : false;
+          _saveConsumables();
+        }).catch(() => {
+          _consumables.heart = false; _saveConsumables(); // fallback offline
+        });
         survivalLives = 1;
         updateSurvivalHUD();
         _runUsedConsumables.add('heart');
@@ -4540,26 +4546,20 @@ function unlockAchievement(id) {
   if (ach) _showToast(ach);
 
   if (currentUser && currentPseudo) {
-    // VB achievement via Worker (anti-replay server-side)
-    if (ACH_VB[id]) {
-      _workerCall('/earn-vb-ach', 'POST', { id, pseudo: currentPseudo })
-        .then(data => _handleVbResponse(data, ACH_VB[id]))
-        .catch(() => { voltbucks += ACH_VB[id]; _syncVB(); _vbToast('+' + ACH_VB[id] + ' ⚡VB'); });
-    }
-    // Sync classements via Worker
-    _workerCall('/sync-ranks', 'POST', {
-      pseudo: currentPseudo,
-      achCount: _achDone.size,
-      emote: _equippedEmote,
-      skin: _equippedSkin,
-      bg: _equippedBg,
-    }).catch(() => {});
-    // Sauvegarde achievement individuel Firebase (toujours autorisé pour l'uid)
-    currentUser.getIdToken().then(token => {
-      fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
-      }).catch(() => {});
-    }).catch(() => {});
+    // /unlock-ach : écrit le haut-fait (admin) + paie les VB atomiquement
+    _workerCall('/unlock-ach', 'POST', { id, pseudo: currentPseudo })
+      .then(data => {
+        if (data?.ok) _handleVbResponse(data, ACH_VB[id] || 0);
+        // Sync classements
+        _workerCall('/sync-ranks', 'POST', {
+          pseudo: currentPseudo, achCount: _achDone.size,
+          emote: _equippedEmote, skin: _equippedSkin, bg: _equippedBg,
+        }).catch(() => {});
+      })
+      .catch(() => {
+        // Fallback offline : VB local uniquement
+        if (ACH_VB[id]) { voltbucks += ACH_VB[id]; _syncVB(); _vbToast('+' + ACH_VB[id] + ' ⚡VB'); }
+      });
   } else if (ACH_VB[id]) {
     // Pas connecté : mise à jour locale uniquement
     earnVoltbucks(ACH_VB[id], 'achievement');
@@ -4922,11 +4922,21 @@ function openAchievements() {
     btn.addEventListener('click', () => {
       const id = btn.dataset.ach;
       if ((Number(_consumables.hint) || 0) <= 0) return;
-      _consumables.hint = (Number(_consumables.hint) || 0) - 1;
-      _saveConsumables();
-      _revealedAchs.add(id);
-      _saveRevealedAchs();
-      openAchievements(); // refresh
+      _workerCall('/use-consumable', 'POST', { id: 'hint' }).then(data => {
+        if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur consommable'); return; }
+        _consumables.hint = data.remaining;
+        _saveConsumables();
+        _revealedAchs.add(id);
+        _saveRevealedAchs();
+        openAchievements();
+      }).catch(() => {
+        // Fallback offline
+        _consumables.hint = Math.max(0, (Number(_consumables.hint) || 0) - 1);
+        _saveConsumables();
+        _revealedAchs.add(id);
+        _saveRevealedAchs();
+        openAchievements();
+      });
     });
   });
   document.getElementById('ach-overlay').classList.add('open');
@@ -5932,15 +5942,17 @@ async function loadDoneFromFirebase() {
     localStorage.setItem(_DONE_INV_LS, JSON.stringify([..._doneInvLevels]));
     localStorage.setItem(_ACH_LS,      JSON.stringify([..._achDone]));
     _applyDoneUI();
-    // Paiement rétroactif VB pour hauts-faits déjà débloqués (via Worker — vb_ach_paid est admin-only)
+    // Sync hauts-faits locaux manquants + paiement rétroactif VB via /unlock-ach
+    // (achievements est admin-only write — le Worker écrit ET paie atomiquement)
     const paidSet = new Set(resPaid.ok ? (await resPaid.json() || []) : []);
-    const unpaidAch = [..._achDone].filter(id => ACH_VB[id] && !paidSet.has(id));
-    if (unpaidAch.length > 0) {
-      // Appel séquentiel pour éviter les race conditions sur le solde VB
+    const toSync = [..._achDone].filter(id =>
+      !fbAchKeys.has(_b64(id)) || (ACH_VB[id] && !paidSet.has(id))
+    );
+    if (toSync.length > 0 && currentPseudo) {
       let retroTotal = 0;
-      for (const achId of unpaidAch) {
-        const data = await _workerCall('/earn-vb-ach', 'POST', { id: achId, pseudo: currentPseudo || 'Joueur' }).catch(() => null);
-        if (data?.ok && !data.alreadyPaid) retroTotal += data.earned || 0;
+      for (const achId of toSync) {
+        const data = await _workerCall('/unlock-ach', 'POST', { id: achId, pseudo: currentPseudo }).catch(() => null);
+        if (data?.ok && !data.alreadyPaid && data.earned) retroTotal += data.earned;
         if (data?.vb != null) { voltbucks = data.vb; writeSave({ voltbucks }); _updateVBDisplay(); }
         if (data?.richUnlocked) {
           _ownedItems.add('emote_rich');
@@ -5954,13 +5966,6 @@ async function loadDoneFromFirebase() {
         }, 1500);
       }
     }
-    // Push vers Firebase les hauts-faits locaux absents de Firebase
-    const missing = [..._achDone].filter(id => !fbAchKeys.has(_b64(id)));
-    missing.forEach(id => {
-      fetch(`${FB_USERS}/${currentUser.uid}/achievements/${_b64(id)}.json?auth=${token}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'}, body: 'true'
-      }).catch(() => {});
-    });
     // Sync le classement public hauts-faits (au login, via Worker — achievement_ranks est admin-only)
     if (currentPseudo && _achDone.size > 0) {
       _workerCall('/sync-ranks', 'POST', {
@@ -6064,22 +6069,45 @@ function _updateConsumHUD() {
 function _useHeart() {
   if (!_consumables.heart || !survivalRunning) return;
   if (!confirm(t('consum.heart.confirm'))) return;
-  _consumables.heart = false; _saveConsumables();
-  survivalLives = Math.min(survivalLives + 1, 6);
-  updateSurvivalHUD();
-  _runUsedConsumables.add('heart');
-  _updateConsumHUD();
-  const el = document.getElementById('vb-toast');
-  if (el) { el.textContent = t('consum.heart.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  _workerCall('/use-consumable', 'POST', { id: 'heart' }).then(data => {
+    if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur consommable'); return; }
+    _consumables.heart = data.remaining > 0 ? data.remaining : false;
+    _saveConsumables();
+    survivalLives = Math.min(survivalLives + 1, 6);
+    updateSurvivalHUD();
+    _runUsedConsumables.add('heart');
+    _updateConsumHUD();
+    const el = document.getElementById('vb-toast');
+    if (el) { el.textContent = t('consum.heart.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  }).catch(() => {
+    // Fallback offline : utilisation locale
+    _consumables.heart = false; _saveConsumables();
+    survivalLives = Math.min(survivalLives + 1, 6);
+    updateSurvivalHUD();
+    _runUsedConsumables.add('heart');
+    _updateConsumHUD();
+  });
 }
 
 function _useFuse() {
   if (!_consumables.fuse || survivalRunning) return;
   if (!confirm(t('consum.fuse.confirm'))) return;
-  _fuseMode = true;
-  _updateConsumHUD();
-  const el = document.getElementById('fuse-hint');
-  if (el) el.style.display = '';
+  _workerCall('/use-consumable', 'POST', { id: 'fuse' }).then(data => {
+    if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur consommable'); return; }
+    _consumables.fuse = data.remaining > 0 ? data.remaining : false;
+    _saveConsumables();
+    _fuseMode = true;
+    _updateConsumHUD();
+    const el = document.getElementById('fuse-hint');
+    if (el) el.style.display = '';
+  }).catch(() => {
+    // Fallback offline
+    _consumables.fuse = false; _saveConsumables();
+    _fuseMode = true;
+    _updateConsumHUD();
+    const el = document.getElementById('fuse-hint');
+    if (el) el.style.display = '';
+  });
 }
 
 function _applyFuseToSwitch(eid, swRef) {
@@ -6088,7 +6116,6 @@ function _applyFuseToSwitch(eid, swRef) {
   _lockedSwitchRef = swRef;
   _lockedSwitchKey = swRef ? _ikey(swRef.key) : null;
   if (swRef) swRef.open = false;
-  _consumables.fuse = false; _saveConsumables();
   _runUsedConsumables.add('fuse');
   _updateConsumHUD();
   document.getElementById('fuse-hint').style.display = 'none';
@@ -6099,12 +6126,22 @@ function _applyFuseToSwitch(eid, swRef) {
 function _useAttenuator() {
   if (!_consumables.attenuator || _attenuatorActive || survivalRunning) return;
   if (!confirm(t('consum.attenuator.confirm'))) return;
-  _consumables.attenuator = false; _saveConsumables();
-  _attenuatorActive = true;
-  _runUsedConsumables.add('attenuator');
-  _updateConsumHUD();
-  const el = document.getElementById('vb-toast');
-  if (el) { el.textContent = t('consum.attenuator.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  _workerCall('/use-consumable', 'POST', { id: 'attenuator' }).then(data => {
+    if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur consommable'); return; }
+    _consumables.attenuator = data.remaining > 0 ? data.remaining : false;
+    _saveConsumables();
+    _attenuatorActive = true;
+    _runUsedConsumables.add('attenuator');
+    _updateConsumHUD();
+    const el = document.getElementById('vb-toast');
+    if (el) { el.textContent = t('consum.attenuator.toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2500); }
+  }).catch(() => {
+    // Fallback offline
+    _consumables.attenuator = false; _saveConsumables();
+    _attenuatorActive = true;
+    _runUsedConsumables.add('attenuator');
+    _updateConsumHUD();
+  });
 }
 
 function _saveCosmetics() {
