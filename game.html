@@ -1929,6 +1929,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div id="admin-panel-tabs">
       <button class="ap-tab active" data-ap="vb">⚡ VoltBucks</button>
       <button class="ap-tab" data-ap="hof">🏆 HOF</button>
+      <button class="ap-tab" data-ap="players">👤 Joueurs</button>
       <button class="ap-tab" data-ap="tools">🛠 Outils</button>
     </div>
     <div id="admin-panel-body">
@@ -1999,6 +2000,40 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
           <button class="ap-btn success" id="ap-hof-add-btn">➕ Ajouter au HOF</button>
         </div>
         <div class="ap-status" id="ap-hof-add-status"></div>
+      </div>
+
+      <!-- TAB JOUEURS -->
+      <div class="ap-section" id="ap-players">
+        <div class="ap-info">Personnalise l'emote d'un joueur (emotes spéciales non achetables incluses).</div>
+        <div class="ap-row">
+          <span class="ap-label">Pseudo</span>
+          <input class="ap-input" id="ap-pl-pseudo" placeholder="pseudo exact…" maxlength="24">
+          <button class="ap-btn" id="ap-pl-search">Chercher</button>
+        </div>
+        <div class="ap-status" id="ap-pl-status"></div>
+        <div id="ap-pl-result" style="display:none">
+          <div class="ap-row">
+            <span class="ap-label">UID</span>
+            <span id="ap-pl-uid" style="font-size:10px;color:#664422;word-break:break-all"></span>
+          </div>
+          <div class="ap-row">
+            <span class="ap-label">Emote actuelle</span>
+            <span id="ap-pl-emote-current" style="color:#ffcc44;font-size:16px"></span>
+          </div>
+          <hr class="ap-divider">
+          <div class="ap-row" style="flex-wrap:wrap;gap:6px">
+            <span class="ap-label" style="width:100%;margin-bottom:4px">Choisir une emote</span>
+            <div id="ap-pl-emote-picker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+          <div class="ap-row">
+            <span class="ap-label">Emote sélectionnée</span>
+            <span id="ap-pl-emote-selected" style="color:#ffcc44;font-size:16px;min-width:40px"></span>
+          </div>
+          <div class="ap-row">
+            <button class="ap-btn success" id="ap-pl-save">💾 Sauvegarder</button>
+          </div>
+          <div class="ap-status" id="ap-pl-save-status"></div>
+        </div>
       </div>
 
       <!-- TAB OUTILS -->
@@ -3335,6 +3370,94 @@ document.getElementById('ap-uid-lookup-btn').onclick = async () => {
     const uid = await _apFindUidByPseudo(pseudo, token);
     if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable dans pseudos/ ni dans le HOF.'; return; }
     st.style.color = '#ffcc44'; st.textContent = `UID : ${uid}`;
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+// ── PLAYERS TAB ──────────────────────────────────────────────
+let _apPlSelectedEmote = null;
+
+document.getElementById('ap-pl-search').onclick = async () => {
+  const pseudo = document.getElementById('ap-pl-pseudo').value.trim().toLowerCase();
+  const st  = document.getElementById('ap-pl-status');
+  const res = document.getElementById('ap-pl-result');
+  if (!pseudo) return;
+  st.style.color = '#886622'; st.textContent = 'Recherche…'; res.style.display = 'none';
+  try {
+    const token = await _apAdminToken();
+    const uid   = await _apFindUidByPseudo(pseudo, token);
+    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+
+    // Lire l'inventaire pour l'emote actuelle
+    const inv = await fetch(`${_FB_BASE}/users/${uid}/inventory.json?access_token=${token}`).then(r => r.json()).catch(() => null);
+    const currentEmote = inv?.emote || 'none';
+
+    document.getElementById('ap-pl-uid').textContent = uid;
+    document.getElementById('ap-pl-uid').dataset.uid = uid;
+    document.getElementById('ap-pl-uid').dataset.pseudo = pseudo;
+
+    const emoteObj = EMOTES.find(e => e.id === currentEmote);
+    document.getElementById('ap-pl-emote-current').textContent = emoteObj ? `${emoteObj.emoji} ${emoteObj.name}` : currentEmote;
+
+    // Construire le picker — toutes les emotes y compris adminOnly
+    _apPlSelectedEmote = currentEmote;
+    const picker = document.getElementById('ap-pl-emote-picker');
+    picker.innerHTML = '';
+    EMOTES.forEach(e => {
+      const btn = document.createElement('button');
+      btn.className = 'ap-mini-btn';
+      btn.title = e.name + (e.adminOnly ? ' ★ admin' : '');
+      btn.style.cssText = 'font-size:18px;padding:4px 8px;' + (e.adminOnly ? 'border-color:#ffaa00;color:#ffcc44;' : '');
+      btn.textContent = e.emoji;
+      if (e.id === currentEmote) btn.style.outline = '2px solid #ffaa00';
+      btn.onclick = () => {
+        _apPlSelectedEmote = e.id;
+        picker.querySelectorAll('button').forEach(b => b.style.outline = '');
+        btn.style.outline = '2px solid #ffaa00';
+        document.getElementById('ap-pl-emote-selected').textContent = `${e.emoji} ${e.name}`;
+      };
+      picker.appendChild(btn);
+    });
+    document.getElementById('ap-pl-emote-selected').textContent = emoteObj ? `${emoteObj.emoji} ${emoteObj.name}` : currentEmote;
+
+    st.textContent = ''; res.style.display = '';
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
+};
+
+document.getElementById('ap-pl-save').onclick = async () => {
+  const uidEl = document.getElementById('ap-pl-uid');
+  const uid    = uidEl.dataset.uid;
+  const pseudo = uidEl.dataset.pseudo;
+  const st     = document.getElementById('ap-pl-save-status');
+  if (!uid || !_apPlSelectedEmote) return;
+  st.style.color = '#886622'; st.textContent = 'Sauvegarde…';
+  try {
+    const token = await _apAdminToken();
+    // Mettre à jour l'emote dans inventory + achievement_ranks
+    await Promise.all([
+      fetch(`${_FB_BASE}/users/${uid}/inventory/emote.json?access_token=${token}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(_apPlSelectedEmote)
+      }),
+      fetch(`${_FB_BASE}/achievement_ranks/${uid}/emote.json?access_token=${token}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(_apPlSelectedEmote)
+      }),
+      // Ajouter l'emote dans owned si adminOnly
+      (async () => {
+        const emoteObj = EMOTES.find(e => e.id === _apPlSelectedEmote);
+        if (!emoteObj?.adminOnly && !emoteObj?.unlockAt) return;
+        const inv = await fetch(`${_FB_BASE}/users/${uid}/inventory.json?access_token=${token}`).then(r => r.json()).catch(() => ({}));
+        const owned = Array.isArray(inv?.owned) ? inv.owned : [];
+        const key = 'emote_' + _apPlSelectedEmote;
+        if (!owned.includes(key)) {
+          owned.push(key);
+          await fetch(`${_FB_BASE}/users/${uid}/inventory/owned.json?access_token=${token}`, {
+            method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(owned)
+          });
+        }
+      })(),
+    ]);
+    const emoteObj = EMOTES.find(e => e.id === _apPlSelectedEmote);
+    st.style.color = '#00cc66'; st.textContent = `✓ Emote mise à jour : ${emoteObj?.emoji || ''} ${emoteObj?.name || _apPlSelectedEmote}`;
+    document.getElementById('ap-pl-emote-current').textContent = emoteObj ? `${emoteObj.emoji} ${emoteObj.name}` : _apPlSelectedEmote;
   } catch(e) { st.style.color = '#ff4444'; st.textContent = '✗ ' + e.message; }
 };
 
@@ -5999,7 +6122,8 @@ const EMOTES = [
   { id: 'devil',   emoji: '😈', name: 'Diable',          price: 600,  _nameKey: 'emote.devil.name' },
   { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800,  _nameKey: 'emote.comet.name' },
   { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500, _nameKey: 'emote.godmode.name' },
-  { id: 'rich',    emoji: '🤑', name: 'I\'m rich',       price: 0,    _nameKey: 'emote.rich.name', unlockAt: 50000, _unlockKey: 'emote.rich.unlock' },
+  { id: 'rich',      emoji: '🤑', name: 'I\'m rich',    price: 0, _nameKey: 'emote.rich.name', unlockAt: 50000, _unlockKey: 'emote.rich.unlock' },
+  { id: 'white_hat', emoji: '🤍🎩', name: 'White Hat',  price: 0, _nameKey: 'emote.white_hat.name', adminOnly: true },
 ];
 
 const BACKGROUNDS = [
@@ -6363,7 +6487,7 @@ function _renderShopEmotes() {
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
-      if (emote.unlockAt) return; // débloquée automatiquement uniquement, pas achetable
+      if (emote.unlockAt || emote.adminOnly) return; // non achetable
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < emote.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(emote)).replace('{price}', emote.price))) return;
