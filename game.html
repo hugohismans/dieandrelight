@@ -2428,6 +2428,8 @@ const TRANSLATIONS = {
     'shop.free': 'Gratuit',
     'shop.equipped': 'ÉQUIPÉ',
     'shop.owned': 'POSSÉDÉ',
+    'shop.reward': '🔐 RÉCOMPENSE',
+    'shop.reward_desc': 'Décerné aux hackers qui aident à sécuriser le site. Non achetable.',
     'shop.in_stock': 'EN STOCK',
     'shop.in_stock_btn': '✓ En stock',
     'shop.preview': 'Aperçu',
@@ -2754,6 +2756,8 @@ const TRANSLATIONS = {
     'shop.free': 'Free',
     'shop.equipped': 'EQUIPPED',
     'shop.owned': 'OWNED',
+    'shop.reward': '🔐 REWARD',
+    'shop.reward_desc': 'Awarded to hackers who help secure the site. Not purchasable.',
     'shop.in_stock': 'IN STOCK',
     'shop.in_stock_btn': '✓ In stock',
     'shop.preview': 'Preview',
@@ -6443,7 +6447,22 @@ function _renderShopEmotes() {
   const body = document.getElementById('shop-body');
   body.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
   body.innerHTML = EMOTES.map(e => {
-    const unlocked  = !e.unlockAt || _ownedItems.has('emote_' + e.id);
+    if (e.adminOnly) {
+      const owned   = _ownedItems.has('emote_' + e.id);
+      const equipped = _equippedEmote === e.id;
+      const badge = equipped
+        ? `<span class="shop-item-badge" style="background:#ffffff22;color:#fff;border-color:#ffffff66">${t('shop.equipped')}</span>`
+        : owned
+          ? `<span class="shop-item-badge" style="background:#ffffff22;color:#fff;border-color:#ffffff66">${t('shop.owned')}</span>`
+          : `<span class="shop-item-badge" style="background:#ffffff11;color:#aaa;border-color:#ffffff33">${t('shop.reward')}</span>`;
+      return `<div class="shop-item${equipped ? ' equipped' : owned ? ' owned' : ''}" data-emote="${e.id}"
+        style="border-color:#ffffff44;opacity:${owned ? '1' : '0.7'};cursor:${owned ? 'pointer' : 'default'}">
+        ${badge}
+        <div style="font-size:32px;line-height:1.2;padding:4px 0">${e.emoji}</div>
+        <div class="shop-item-name" style="color:#aaaaaa">${iname(e)}</div>
+        <div class="shop-item-price" style="color:#888;font-size:9px;text-align:center;margin-top:2px">${t('shop.reward_desc')}</div>
+      </div>`;
+    }
     const owned     = _ownedItems.has('emote_' + e.id) || (e.price === 0 && !e.unlockAt);
     const equipped  = _equippedEmote === e.id;
     const canAfford = e.unlockAt ? false : voltbucks >= e.price;
@@ -6464,7 +6483,8 @@ function _renderShopEmotes() {
       const emote = EMOTES.find(e => e.id === el.dataset.emote);
       if (!emote) return;
       const key = 'emote_' + emote.id;
-      if (_ownedItems.has(key) || (emote.price === 0 && !emote.unlockAt)) {
+      if (emote.adminOnly && !_ownedItems.has(key)) return; // récompense non possédée
+      if (_ownedItems.has(key) || (emote.price === 0 && !emote.unlockAt && !emote.adminOnly)) {
         _equippedEmote = emote.id; _saveCosmetics(); _renderShopEmotes();
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
