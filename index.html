@@ -232,6 +232,7 @@ body {
   .side-panel {
     width: 100%;
     flex-shrink: 0;
+    overflow: visible;
     border-left: none !important;
     border-right: none !important;
     border-top: 1px solid #1a4535 !important;
@@ -241,8 +242,9 @@ body {
   #panel-left  { order: 3; }
   #center      { order: 1; }
   #panel-right { order: 2; }
-  .panel-half { max-height: 260px; min-height: unset; }
+  .panel-half { max-height: none; min-height: unset; overflow: visible; }
   .panel-half:first-child { padding-top: 16px; }
+  .panel-body { flex: none; max-height: 220px; overflow-y: auto; }
   #auth-block { max-width: 90vw; }
 }
 
@@ -333,12 +335,13 @@ canvas#bg {
 }
 
 #title {
-  font-size: clamp(28px, 8vw, 62px);
+  font-size: clamp(16px, 5.5vw, 62px);
   font-weight: bold;
-  letter-spacing: clamp(3px, 1.2vw, 10px);
+  letter-spacing: clamp(1px, 0.8vw, 10px);
   text-transform: uppercase;
   color: #00ffcc;
   position: relative;
+  white-space: nowrap;
   animation: neon-flicker 6s ease-in-out infinite;
 }
 @keyframes neon-flicker {
@@ -623,6 +626,10 @@ canvas#bg {
 }
 .mhof-diff-tab:hover { background: #0a1a14; }
 .mhof-diff-tab.active { background: #0d2218; border-bottom: 2px solid; }
+#modal-hof-mode-row { display: flex; gap: 6px; padding: 6px 10px; flex-shrink: 0; border-bottom: 1px solid #1a5a3a; }
+#modal-hof-mode-row.hidden { display: none; }
+.mhof-mode-btn { background: none; border: 1px solid #1a5a3a; color: #446655; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 1px; padding: 3px 10px; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
+.mhof-mode-btn.active { background: #0d2218; border-color: #00ffcc88; color: #00ffcc; }
 #modal-hof-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
 #modal-hof-body::-webkit-scrollbar { width: 4px; }
 #modal-hof-body::-webkit-scrollbar-thumb { background: #1a5a3a; border-radius: 2px; }
@@ -823,16 +830,27 @@ canvas#bg {
 #pp-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 #pp-hof-section { padding: 14px 18px; border-bottom: 1px solid #1a5a3a; }
 #pp-ach-section { padding: 14px 18px; }
-#pp-hof-title, #pp-ach-title { font-size: 10px; letter-spacing: 3px; color: #224433; text-transform: uppercase; margin-bottom: 10px; }
-#pp-diff-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+#pp-hof-title { font-size: 10px; letter-spacing: 3px; color: #224433; text-transform: uppercase; margin-bottom: 6px; }
+#pp-ach-title  { font-size: 10px; letter-spacing: 3px; color: #224433; text-transform: uppercase; margin-bottom: 10px; }
+#pp-diff-tabs { display: flex; flex-direction: column; margin-bottom: 10px; border: 1px solid #1a5a3a; }
+#pp-camp-row { display: flex; flex-wrap: wrap; border-bottom: 1px solid #1a5a3a; }
+#pp-mod-row  { display: flex; gap: 6px; padding: 5px 8px; background: #020e09; }
 .pp-diff-btn {
-  background: none; border: 1px solid #1a5a3a; color: #446655;
+  background: none; border: none; border-right: 1px solid #1a5a3a; color: #446655;
   font-family: 'Courier New', monospace; font-size: 10px;
-  letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.12s;
+  letter-spacing: 1px; padding: 7px 11px; cursor: pointer; transition: all 0.12s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
 }
-.pp-diff-btn:hover { border-color: #446655; color: #00ffcc; }
-.pp-diff-btn.active { border-color: #00ffcc; color: #00ffcc; background: #0d2218; }
-#pp-hof-content { font-size: 12px; color: #446655; min-height: 28px; }
+.pp-diff-btn:hover { color: #00ffcc; background: #0a1a14; }
+.pp-diff-btn.active { color: #00ffcc; background: #0d2218; border-bottom-color: #00ffcc; }
+.pp-mod-btn {
+  background: none; border: 1px solid #1a4535; color: #446655;
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 1px; padding: 2px 9px; cursor: pointer; border-radius: 2px; transition: all 0.12s;
+}
+.pp-mod-btn:hover { border-color: #446655; color: #aaffcc; }
+.pp-mod-btn.active { border-color: #ff880088; color: #ff8800; background: rgba(255,136,0,0.08); }
+#pp-hof-content { font-size: 12px; color: #446655; min-height: 28px; padding: 10px 2px 2px; }
 .pp-hof-entry { display: flex; gap: 16px; align-items: baseline; }
 .pp-hof-rank { color: #ffdd44; font-size: 16px; }
 .pp-hof-time { color: #00ffcc; font-variant-numeric: tabular-nums; }
@@ -901,6 +919,7 @@ canvas#bg {
     </div>
     <div id="modal-hof-tabs"></div>
     <div id="modal-hof-diff-row"></div>
+    <div id="modal-hof-mode-row"></div>
     <div id="modal-hof-body"></div>
     <div id="modal-hof-specials">
       <h3>✦ Special Thanks &amp; Content Creators</h3>
@@ -1018,7 +1037,10 @@ canvas#bg {
     <div id="pp-body">
       <div id="pp-hof-section">
         <div id="pp-hof-title">🏆 Scores HOF v0.1.0</div>
-        <div id="pp-diff-tabs"></div>
+        <div id="pp-diff-tabs">
+          <div id="pp-camp-row"></div>
+          <div id="pp-mod-row"></div>
+        </div>
         <div id="pp-hof-content"></div>
       </div>
       <div id="pp-ach-section">
@@ -1045,7 +1067,10 @@ const TRANSLATIONS_IDX = {
     'hof.loading': 'Chargement…', 'hof.no_entry': 'Pas encore d\'entrée — sois le premier !',
     'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
     'pp.diff.bebe_inv': '🔄 Bébés', 'pp.diff.piquer_inv': '🔄 Piquer', 'pp.diff.cauchemar_inv': '🔄 Cauchemar',
-    'pp.diff.survie': '💀 Survie',
+    'pp.diff.bebe_yb': '🙈 Bébés', 'pp.diff.piquer_yb': '🙈 Piquer', 'pp.diff.cauchemar_yb': '🙈 Cauchemar',
+    'pp.diff.bebe_yb_inv': '🙈🔄 Bébés', 'pp.diff.piquer_yb_inv': '🙈🔄 Piquer', 'pp.diff.cauchemar_yb_inv': '🙈🔄 Cauchemar',
+    'pp.diff.survie': '💀 Survie', 'pp.diff.survie_inv': '🔄 Survie', 'pp.diff.survie_yb': '🙈 Survie', 'pp.diff.survie_yb_inv': '🙈🔄 Survie',
+    'mhof.mirror': 'Miroir', 'mhof.blindfold': 'Yeux bandés',
     'idx.subtitle': 'un jeu de circuit électrique',
     'idx.key_left': 'Interrupteur gauche',
     'idx.key_right': 'Interrupteur droit',
@@ -1080,7 +1105,10 @@ const TRANSLATIONS_IDX = {
     'idx.pseudo_error': '✗ Erreur : ',
     'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
     'pp.diff.bebe_inv': '🔄 Bébés', 'pp.diff.piquer_inv': '🔄 Piquer', 'pp.diff.cauchemar_inv': '🔄 Cauchemar',
-    'pp.diff.survie': '💀 Survie',
+    'pp.diff.bebe_yb': '🙈 Bébés', 'pp.diff.piquer_yb': '🙈 Piquer', 'pp.diff.cauchemar_yb': '🙈 Cauchemar',
+    'pp.diff.bebe_yb_inv': '🙈🔄 Bébés', 'pp.diff.piquer_yb_inv': '🙈🔄 Piquer', 'pp.diff.cauchemar_yb_inv': '🙈🔄 Cauchemar',
+    'pp.diff.survie': '💀 Survie', 'pp.diff.survie_inv': '🔄 Survie', 'pp.diff.survie_yb': '🙈 Survie', 'pp.diff.survie_yb_inv': '🙈🔄 Survie',
+    'mhof.mirror': 'Miroir', 'mhof.blindfold': 'Yeux bandés',
     'bg.default': '▦ Grille', 'bg.electrons': '⚡ Électrons', 'bg.stars': '✦ Étoiles',
     'bg.matrix': '⌨ Code', 'bg.aurora': '〜 Aurore', 'bg.void': '○ Vide',
     'ach.first_death': 'Premier choc', 'ach.centurion': 'Paratonnerre',
@@ -1093,6 +1121,13 @@ const TRANSLATIONS_IDX = {
     'ach.survie_10': 'Résistant', 'ach.survie_20': 'Indestructible',
     'ach.survie_50': 'Légende vivante', 'ach.survie_deathless': 'Médecin urgentiste',
     'ach.survie_comeback': 'Dernier souffle',
+    'ach.yb_bebe': 'Traversée à l\'aveugle', 'ach.yb_piquer': 'Touch no see',
+    'ach.yb_cauchemar': 'Le toucher du bout des fils', 'ach.yb_deathless': 'Sens proprioceptif',
+    'ach.yb_cauchemar_deathless': 'Électricien les yeux fermés',
+    'ach.survie_inv_5': 'À l\'envers et debout', 'ach.survie_inv_10': 'Câblage inversé',
+    'ach.survie_inv_20': 'Maître du contre-sens', 'ach.survie_inv_deathless': 'Cerveau bilatéral',
+    'ach.survie_inv_comeback': 'Retour à l\'expéditeur',
+    'ach.platine': 'Yo je vise l\'or le platine',
   },
   en: {
     'idx.warning': '⚠ Without signing in, the Hall of Fame is not accessible.<br><strong>Your score will be lost.</strong>',
@@ -1105,7 +1140,10 @@ const TRANSLATIONS_IDX = {
     'hof.loading': 'Loading…', 'hof.no_entry': 'No entry yet — be the first!',
     'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
     'pp.diff.bebe_inv': '🔄 Babies', 'pp.diff.piquer_inv': '🔄 Getting Tricky', 'pp.diff.cauchemar_inv': '🔄 Nightmare',
-    'pp.diff.survie': '💀 Survival',
+    'pp.diff.bebe_yb': '🙈 Babies', 'pp.diff.piquer_yb': '🙈 Getting Tricky', 'pp.diff.cauchemar_yb': '🙈 Nightmare',
+    'pp.diff.bebe_yb_inv': '🙈🔄 Babies', 'pp.diff.piquer_yb_inv': '🙈🔄 Getting Tricky', 'pp.diff.cauchemar_yb_inv': '🙈🔄 Nightmare',
+    'pp.diff.survie': '💀 Survival', 'pp.diff.survie_inv': '🔄 Survival', 'pp.diff.survie_yb': '🙈 Survival', 'pp.diff.survie_yb_inv': '🙈🔄 Survival',
+    'mhof.mirror': 'Mirror', 'mhof.blindfold': 'Blindfold',
     'idx.subtitle': 'an electric circuit game',
     'idx.key_left': 'Left switch',
     'idx.key_right': 'Right switch',
@@ -1140,7 +1178,10 @@ const TRANSLATIONS_IDX = {
     'idx.pseudo_error': '✗ Error: ',
     'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
     'pp.diff.bebe_inv': '🔄 Babies', 'pp.diff.piquer_inv': '🔄 Getting Tricky', 'pp.diff.cauchemar_inv': '🔄 Nightmare',
-    'pp.diff.survie': '💀 Survival',
+    'pp.diff.bebe_yb': '🙈 Babies', 'pp.diff.piquer_yb': '🙈 Getting Tricky', 'pp.diff.cauchemar_yb': '🙈 Nightmare',
+    'pp.diff.bebe_yb_inv': '🙈🔄 Babies', 'pp.diff.piquer_yb_inv': '🙈🔄 Getting Tricky', 'pp.diff.cauchemar_yb_inv': '🙈🔄 Nightmare',
+    'pp.diff.survie': '💀 Survival', 'pp.diff.survie_inv': '🔄 Survival', 'pp.diff.survie_yb': '🙈 Survival', 'pp.diff.survie_yb_inv': '🙈🔄 Survival',
+    'mhof.mirror': 'Mirror', 'mhof.blindfold': 'Blindfold',
     'bg.default': '▦ Grid', 'bg.electrons': '⚡ Electrons', 'bg.stars': '✦ Stars',
     'bg.matrix': '⌨ Code', 'bg.aurora': '〜 Aurora', 'bg.void': '○ Void',
     'ach.first_death': 'First Shock', 'ach.centurion': 'Lightning Rod',
@@ -1153,6 +1194,13 @@ const TRANSLATIONS_IDX = {
     'ach.survie_10': 'Resilient', 'ach.survie_20': 'Indestructible',
     'ach.survie_50': 'Living Legend', 'ach.survie_deathless': 'Emergency Doctor',
     'ach.survie_comeback': 'Last Breath',
+    'ach.yb_bebe': 'Blind Crossing', 'ach.yb_piquer': 'Touch No See',
+    'ach.yb_cauchemar': 'Wire Whisperer', 'ach.yb_deathless': 'Proprioception',
+    'ach.yb_cauchemar_deathless': 'Blindfolded Electrician',
+    'ach.survie_inv_5': 'Upside Down and Standing', 'ach.survie_inv_10': 'Rewired',
+    'ach.survie_inv_20': 'Master of Backwards', 'ach.survie_inv_deathless': 'Bilateral Brain',
+    'ach.survie_inv_comeback': 'Return to Sender',
+    'ach.platine': 'Yo je vise l\'or le platine',
   }
 };
 let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
@@ -1779,7 +1827,7 @@ async function renderHOF() {
 }
 
 const FB_ACH_RANKS = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/achievement_ranks';
-const ACH_TOTAL = 19; // nb total de hauts-faits dans le jeu
+const ACH_TOTAL = 37; // nb total de hauts-faits dans le jeu
 
 async function renderAchRanks() {
   const el = document.getElementById('ach-rank-list');
@@ -1937,11 +1985,6 @@ const FB_URL_INDEX    = 'https://dieandretry-af391-default-rtdb.europe-west1.fir
 const FB_ACH_URL      = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/achievement_ranks';
 const FB_VB_RANKS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
 const HOF_VER         = 'v0_1_0';
-const PP_DIFFS = [
-  { id: 'bebe' }, { id: 'piquer' }, { id: 'cauchemar' },
-  { id: 'bebe_inv' }, { id: 'piquer_inv' }, { id: 'cauchemar_inv' },
-  { id: 'survie' },
-];
 const ACH_NAMES = [
   {id:'first_death',emoji:'💀'},{id:'centurion',emoji:'⚡'},
   {id:'bebe_won',emoji:'🍼'},{id:'piquer_won',emoji:'⚡'},
@@ -1953,8 +1996,22 @@ const ACH_NAMES = [
   {id:'survie_10',emoji:'🩸'},{id:'survie_20',emoji:'💀'},
   {id:'survie_50',emoji:'👑'},{id:'survie_deathless',emoji:'🩺'},
   {id:'survie_comeback',emoji:'🔋'},
+  {id:'yb_bebe',emoji:'🙈'},{id:'yb_piquer',emoji:'🙈'},
+  {id:'yb_cauchemar',emoji:'🙈'},{id:'yb_deathless',emoji:'🎯'},
+  {id:'yb_cauchemar_deathless',emoji:'🏅'},
+  {id:'survie_inv_5',emoji:'🔄'},{id:'survie_inv_10',emoji:'🌀'},
+  {id:'survie_inv_20',emoji:'🪞'},{id:'survie_inv_deathless',emoji:'🧠'},
+  {id:'survie_inv_comeback',emoji:'🔁'},
+  {id:'platine',emoji:'🏆'},
 ];
-let _ppUid = null, _ppCache = {};
+let _ppUid = null, _ppCache = {}, _ppCamp = 'bebe', _ppInv = false, _ppYb = false;
+const PP_CAMPS = [
+  { id: 'bebe',      label: () => t_idx('pp.diff.bebe') },
+  { id: 'piquer',    label: () => t_idx('pp.diff.piquer') },
+  { id: 'cauchemar', label: () => t_idx('pp.diff.cauchemar') },
+  { id: 'survie',    label: () => t_idx('pp.diff.survie') },
+];
+function _ppCurrentDiff() { return _ppCamp + (_ppYb ? '_yb' : '') + (_ppInv ? '_inv' : ''); }
 
 document.getElementById('pp-close').onclick = () => document.getElementById('pp-overlay').classList.remove('open');
 document.addEventListener('click', e => {
@@ -1972,16 +2029,40 @@ async function openPlayerProfile(uid, pseudo) {
   document.getElementById('pp-hof-content').innerHTML = `<span style="color:#224433;font-size:11px">${t_idx('idx.pp_loading')}</span>`;
   document.getElementById('pp-ach-list').innerHTML = `<span class="pp-ach-none">${t_idx('idx.pp_loading')}</span>`;
   document.getElementById('pp-overlay').classList.add('open');
-  const tabsEl = document.getElementById('pp-diff-tabs');
-  tabsEl.innerHTML = '';
-  PP_DIFFS.forEach((d, i) => {
+  _ppCamp = 'bebe'; _ppInv = false; _ppYb = false;
+  const campRow = document.getElementById('pp-camp-row');
+  const modRow  = document.getElementById('pp-mod-row');
+  campRow.innerHTML = ''; modRow.innerHTML = '';
+
+  function _ppRefresh() {
+    campRow.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.toggle('active', b.dataset.camp === _ppCamp));
+    modRow.querySelectorAll('.pp-mod-btn').forEach(b => {
+      if (b.dataset.mod === 'inv') b.classList.toggle('active', _ppInv);
+      if (b.dataset.mod === 'yb')  b.classList.toggle('active', _ppYb);
+    });
+    _ppShowDiff(_ppCurrentDiff());
+  }
+
+  PP_CAMPS.forEach(c => {
     const btn = document.createElement('button');
-    btn.className = 'pp-diff-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = t_idx('pp.diff.' + d.id);
-    btn.onclick = () => { tabsEl.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); _ppShowDiff(d.id); };
-    tabsEl.appendChild(btn);
+    btn.className = 'pp-diff-btn';
+    btn.textContent = c.label();
+    btn.dataset.camp = c.id;
+    btn.onclick = () => { _ppCamp = c.id; _ppRefresh(); };
+    campRow.appendChild(btn);
   });
-  _ppShowDiff('bebe');
+  [
+    { mod: 'inv', label: '🔄 ' + t_idx('mhof.mirror') },
+    { mod: 'yb',  label: '🙈 ' + t_idx('mhof.blindfold') },
+  ].forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'pp-mod-btn';
+    btn.textContent = m.label;
+    btn.dataset.mod = m.mod;
+    btn.onclick = () => { if (m.mod === 'inv') _ppInv = !_ppInv; else _ppYb = !_ppYb; _ppRefresh(); };
+    modRow.appendChild(btn);
+  });
+  _ppRefresh();
   _ppLoadAch(uid);
 }
 
@@ -1999,7 +2080,7 @@ async function _ppShowDiff(diff) {
       const res = await fetch(`${FB_URL_INDEX}/${HOF_VER}/${diff}.json`);
       _ppCache[diff] = (res.ok ? await res.json() : null) || {};
     }
-    const isSurvival = diff === 'survie';
+    const isSurvival = _mhofIsSurvival(diff);
     const sorted = Object.values(_ppCache[diff])
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
@@ -2016,7 +2097,7 @@ async function _ppShowDiff(diff) {
 
 function _d64(s) { const p=(4-s.length%4)%4; return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(s.length+p,'=')))); }
 
-const _PP_EMOTES = { none:'🐥', bolt:'⚡', skull:'💀', crown:'👑', ghost:'👻', fire:'🔥', robot:'🤖', alien:'👾', diamond:'💎', devil:'😈', comet:'☄️', godmode:'✨' };
+const _PP_EMOTES = { none:'🐥', bolt:'⚡', skull:'💀', crown:'👑', ghost:'👻', fire:'🔥', robot:'🤖', alien:'👾', diamond:'💎', devil:'😈', comet:'☄️', godmode:'✨', rich:'🤑' };
 const _PP_SKIN_COLORS = {
   default: ['#88ccff','#0055ff'], plasma: ['#ff88ff','#aa00ff'],
   soleil:  ['#ffdd44','#ff6600'], venin:  ['#88ff88','#006600'],
@@ -2090,13 +2171,23 @@ function _closeModal(id) { document.getElementById(id).classList.remove('open');
 function _openModal(id)  { document.getElementById(id).classList.add('open'); }
 
 // ── HOF MODAL (identique game.html) ────────────────────────
-const MHOF_DIFFS = ['bebe','piquer','cauchemar','bebe_inv','piquer_inv','cauchemar_inv','survie'];
-const MHOF_PER_DIFF = new Set(['v0_1_0','v0_0_5','v0_0_4']);
-const MHOF_DIFF_META = {
-  bebe:{ color:'#44ff88' }, piquer:{ color:'#ffaa00' }, cauchemar:{ color:'#ff4466' },
-  bebe_inv:{ color:'#99ffcc' }, piquer_inv:{ color:'#ffcc66' },
-  cauchemar_inv:{ color:'#ff88aa' }, survie:{ color:'#ff4466' },
+const MHOF_CAMPS = ['bebe','piquer','cauchemar','survie'];
+const MHOF_CAMP_META = {
+  bebe:      { color:'#44ff88' }, piquer: { color:'#ffaa00' },
+  cauchemar: { color:'#ff4466' }, survie: { color:'#ff8877' },
 };
+const MHOF_DIFFS = MHOF_CAMPS.flatMap(c => [c, c+'_yb', c+'_inv', c+'_yb_inv']);
+const MHOF_PER_DIFF = new Set(['v0_1_0','v0_0_5','v0_0_4']);
+function _mhofDecompose(diff) {
+  let s = diff || 'bebe';
+  const inv = s.endsWith('_inv'); if (inv) s = s.slice(0,-4);
+  const yb  = s.endsWith('_yb');  if (yb)  s = s.slice(0,-3);
+  return { camp: s, inv, yb };
+}
+function _mhofCompose(camp, yb, inv) { return camp + (yb?'_yb':'') + (inv?'_inv':''); }
+function _mhofIsSurvival(diff) { return (diff||'').startsWith('survie'); }
+const MHOF_DIFF_META = {};
+MHOF_DIFFS.forEach(d => { const { camp } = _mhofDecompose(d); MHOF_DIFF_META[d] = MHOF_CAMP_META[camp]; });
 const DEVICE_ICON = { pc:'🖥️', mobile:'📱', tablet:'📟' };
 let _mhofVersion = HOF_VERSIONS[0], _mhofDiff = 'bebe', _mhofEmoteMap = {};
 
@@ -2108,7 +2199,7 @@ async function _mhofFetch(version, diff) {
     if (!res.ok) return [];
     const data = await res.json();
     if (!data) return [];
-    const isSurvival = diff === 'survie';
+    const isSurvival = _mhofIsSurvival(diff);
     const entries = Object.entries(data).flatMap(([k, e]) =>
       e && typeof e === 'object' && !e.pseudo && !e.score
         ? Object.entries(e).map(([k2, e2]) => ({ ...e2, _fbKey: k2 }))
@@ -2158,6 +2249,7 @@ function _mhofRenderBody(entries, isSurvival = false) {
 }
 
 function _mhofBuildTabs(activeVersion, activeDiff) {
+  // Version tabs
   const tabsEl = document.getElementById('modal-hof-tabs');
   tabsEl.innerHTML = '';
   HOF_VERSIONS.forEach(v => {
@@ -2167,28 +2259,46 @@ function _mhofBuildTabs(activeVersion, activeDiff) {
     btn.onclick = () => openMhof(v, MHOF_PER_DIFF.has(v) ? (activeDiff || 'bebe') : null);
     tabsEl.appendChild(btn);
   });
+
   const diffRow = document.getElementById('modal-hof-diff-row');
-  if (MHOF_PER_DIFF.has(activeVersion)) {
-    diffRow.classList.remove('hidden');
-    diffRow.innerHTML = '';
-    MHOF_DIFFS.forEach(d => {
-      if (d === 'bebe_inv' || d === 'survie') {
-        const br = document.createElement('div');
-        br.style.cssText = 'flex-basis:100%;height:0;border-top:1px solid #0d2a1a';
-        diffRow.appendChild(br);
-      }
-      const meta = MHOF_DIFF_META[d];
-      const btn = document.createElement('button');
-      btn.className = 'mhof-diff-tab' + (d === activeDiff ? ' active' : '');
-      btn.style.color = d === activeDiff ? meta.color : '#446655';
-      if (d === activeDiff) btn.style.borderBottomColor = meta.color;
-      btn.textContent = t_idx('pp.diff.' + d);
-      btn.onclick = () => openMhof(activeVersion, d);
-      diffRow.appendChild(btn);
-    });
-  } else {
+  const modeRow = document.getElementById('modal-hof-mode-row');
+  if (!MHOF_PER_DIFF.has(activeVersion)) {
     diffRow.classList.add('hidden');
+    modeRow.classList.add('hidden');
+    return;
   }
+
+  const { camp, inv, yb } = _mhofDecompose(activeDiff);
+  const campMeta = MHOF_CAMP_META[camp] || MHOF_CAMP_META.bebe;
+
+  // Campaign tabs row
+  diffRow.classList.remove('hidden');
+  diffRow.innerHTML = '';
+  MHOF_CAMPS.forEach(c => {
+    const meta = MHOF_CAMP_META[c];
+    const isActive = c === camp;
+    const btn = document.createElement('button');
+    btn.className = 'mhof-diff-tab' + (isActive ? ' active' : '');
+    btn.style.color = isActive ? meta.color : '#446655';
+    if (isActive) btn.style.borderBottomColor = meta.color;
+    btn.textContent = t_idx('pp.diff.' + c);
+    btn.onclick = () => openMhof(activeVersion, _mhofCompose(c, yb, inv));
+    diffRow.appendChild(btn);
+  });
+
+  // Mode toggle row
+  modeRow.classList.remove('hidden');
+  modeRow.innerHTML = '';
+  [
+    { key: 'mhof.mirror',    active: inv, toggle: () => openMhof(activeVersion, _mhofCompose(camp, yb, !inv)) },
+    { key: 'mhof.blindfold', active: yb,  toggle: () => openMhof(activeVersion, _mhofCompose(camp, !yb, inv)) },
+  ].forEach(({ key, active, toggle }) => {
+    const btn = document.createElement('button');
+    btn.className = 'mhof-mode-btn' + (active ? ' active' : '');
+    btn.textContent = (active ? '✓ ' : '') + t_idx(key);
+    btn.onclick = toggle;
+    modeRow.appendChild(btn);
+  });
 }
 
 function _mhofBuildSpecials() {
@@ -2221,7 +2331,7 @@ async function openMhof(version, diff) {
   if (achData) Object.entries(achData).forEach(([uid, a]) => {
     if (a?.emote && a.emote !== 'none') _mhofEmoteMap[uid] = _PP_EMOTES[a.emote] || a.emote;
   });
-  _mhofRenderBody(entries, diff === 'survie');
+  _mhofRenderBody(entries, _mhofIsSurvival(diff));
 }
 
 document.getElementById('idx-open-hof').onclick = () => openMhof();
@@ -2256,7 +2366,6 @@ async function _idxRenderAchModal() {
         if (raw && typeof raw === 'object') ids = Object.keys(raw).map(k => _d64(k));
       }
     }
-    const ACH_TOTAL = 19;
     const unlocked = (ids || []).map(id => ACH_NAMES.find(x => x.id === id)).filter(Boolean);
     const locked = ACH_NAMES.filter(a => !(ids || []).includes(a.id));
     titleBar.innerHTML = `<span style="color:#aa44ff">${unlocked.length}</span>/${ACH_TOTAL} ${currentLang === 'fr' ? 'débloqué(s)' : 'unlocked'}`;

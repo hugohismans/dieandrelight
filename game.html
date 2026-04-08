@@ -892,38 +892,54 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   }
 
   .camp-select-btn.libre {
-    opacity: 0.45;
     grid-template-columns: 48px 1fr;
   }
-  .camp-select-btn.libre:hover { opacity: 0.7; transform: translateX(4px); }
+  .camp-select-btn.libre:hover { transform: translateX(4px); }
   .camp-select-btn.libre .camp-btn-badge { font-size: 20px; min-height: 50px; }
   .camp-select-btn.libre .camp-btn-body { padding: 10px 16px; }
   .camp-select-btn.libre .camp-name { font-size: 11px; letter-spacing: 3px; }
 
-  /* ── INVERT TOGGLE ───────────────────────────────────────── */
-  #invert-camp-wrap {
+  /* ── MODE TILES (camp select) ────────────────────────────── */
+  #mode-camp-wrap {
+    width: min(360px, 90vw);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 0;
     margin-top: 4px;
   }
-  #invert-camp-desc {
+  #mode-camp-tiles {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+  .mode-tile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 10px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #1a4535;
+    border-radius: 5px;
+    cursor: pointer;
     font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: #2a5040;
-    text-align: center;
-    margin: 0;
-    max-width: 280px;
-    line-height: 1.6;
-    transition: color 0.15s;
+    color: #3a6650;
+    transition: all 0.15s;
   }
-  #invert-btn-camp.active ~ #invert-camp-desc,
-  #invert-camp-wrap:has(#invert-btn-camp.active) #invert-camp-desc {
-    color: #cc6600;
+  .mode-tile:hover { border-color: #00ffcc44; color: #00ffcc88; background: rgba(0,255,200,0.04); }
+  .mode-tile.active {
+    border-color: #ff8800;
+    color: #ff8800;
+    background: rgba(255,136,0,0.07);
+    box-shadow: 0 0 18px #ff880022;
   }
+  .mode-tile-icon { font-size: 22px; line-height: 1; }
+  .mode-tile-name { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+  .mode-tile-sub  { font-size: 9px; opacity: 0.5; letter-spacing: 1px; }
 
+  /* ── INVERT TOGGLE (sidebar only) ───────────────────────── */
   .invert-toggle {
     font-family: 'Courier New', monospace;
     font-size: 11px;
@@ -952,8 +968,6 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     background: currentColor;
     flex-shrink: 0;
   }
-  .invert-toggle-label { font-size: 11px; }
-  .invert-toggle-keys  { font-size: 13px; letter-spacing: 1px; opacity: 0.7; }
 
   /* ── GG CELEBRATION ──────────────────────────────────────── */
   #gg-overlay {
@@ -1309,20 +1323,30 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .hof-tab:hover { color: #00ffcc; background: #0a1a14; }
   .hof-tab.active { color: #00ffcc; background: #0d2218; border-bottom: 2px solid #00ffcc; }
   #hof-diff-row {
-    display: flex; gap: 0;
-    flex-wrap: wrap;
-    flex-shrink: 0;
+    display: flex; gap: 0; flex-shrink: 0; border-bottom: 1px solid #1a5a3a;
   }
   #hof-diff-row.hidden { display: none; }
   .hof-diff-tab {
     background: none; border: none; border-right: 1px solid #1a5a3a;
-    border-bottom: 1px solid #1a5a3a;
+    color: #446655;
     font-family: 'Courier New', monospace; font-size: 11px;
-    letter-spacing: 1px; padding: 7px 12px; cursor: pointer; white-space: nowrap;
+    letter-spacing: 1px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
     transition: all 0.12s;
   }
   .hof-diff-tab:hover { background: #0a1a14; }
   .hof-diff-tab.active { background: #0d2218; border-bottom: 2px solid; }
+  #hof-mode-row {
+    display: flex; gap: 6px; padding: 6px 10px; flex-shrink: 0;
+    border-bottom: 1px solid #1a5a3a; background: #05090a;
+  }
+  #hof-mode-row.hidden { display: none; }
+  .hof-mode-btn {
+    background: none; border: 1px solid #1a5a3a; color: #446655;
+    font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 1px;
+    padding: 3px 10px; cursor: pointer; border-radius: 2px; transition: all 0.15s;
+  }
+  .hof-mode-btn:hover { background: #0a1a14; color: #aaffcc; }
+  .hof-mode-btn.active { background: #0d2218; border-color: #00ffcc88; color: #00ffcc; }
   #hof-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
   #hof-body::-webkit-scrollbar { width: 4px; }
   #hof-body::-webkit-scrollbar-thumb { background: #1a5a3a; border-radius: 2px; }
@@ -1426,19 +1450,33 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #pp-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
   #pp-hof-section { padding: 14px 18px; border-bottom: 1px solid #1a5a3a; }
   #pp-ach-section { padding: 14px 18px; }
-  #pp-hof-title, #pp-ach-title {
+  #pp-hof-title {
+    font-size: 10px; letter-spacing: 3px; color: #224433;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  #pp-ach-title {
     font-size: 10px; letter-spacing: 3px; color: #224433;
     text-transform: uppercase; margin-bottom: 10px;
   }
-  #pp-diff-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  #pp-diff-tabs { display: flex; flex-direction: column; margin-bottom: 10px; border: 1px solid #1a5a3a; }
+  #pp-camp-row { display: flex; flex-wrap: wrap; border-bottom: 1px solid #1a5a3a; }
+  #pp-mod-row  { display: flex; gap: 6px; padding: 5px 8px; background: #020e09; }
   .pp-diff-btn {
-    background: none; border: 1px solid #1a5a3a; color: #446655;
+    background: none; border: none; border-right: 1px solid #1a5a3a; color: #446655;
     font-family: 'Courier New', monospace; font-size: 10px;
-    letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.12s;
+    letter-spacing: 1px; padding: 7px 11px; cursor: pointer; transition: all 0.12s;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
   }
-  .pp-diff-btn:hover { border-color: #446655; color: #00ffcc; }
-  .pp-diff-btn.active { border-color: #00ffcc; color: #00ffcc; background: #0d2218; }
-  #pp-hof-content { font-size: 12px; color: #446655; min-height: 28px; }
+  .pp-diff-btn:hover { color: #00ffcc; background: #0a1a14; }
+  .pp-diff-btn.active { color: #00ffcc; background: #0d2218; border-bottom-color: #00ffcc; }
+  .pp-mod-btn {
+    background: none; border: 1px solid #1a4535; color: #446655;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 1px; padding: 2px 9px; cursor: pointer; border-radius: 2px; transition: all 0.12s;
+  }
+  .pp-mod-btn:hover { border-color: #446655; color: #aaffcc; }
+  .pp-mod-btn.active { border-color: #ff880088; color: #ff8800; background: rgba(255,136,0,0.08); }
+  #pp-hof-content { font-size: 12px; color: #446655; min-height: 28px; padding: 10px 2px 2px; }
   .pp-hof-entry { display: flex; gap: 16px; align-items: baseline; }
   .pp-hof-rank { color: #ffdd44; font-size: 16px; }
   .pp-hof-time { color: #00ffcc; font-variant-numeric: tabular-nums; }
@@ -1707,20 +1745,27 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   <h2 id="camp-select-title">⚡ Choisir une campagne</h2>
   <div id="camp-select-btns"></div>
   <div class="camp-libre-sep" style="width:min(360px,90vw);opacity:0.6"></div>
-  <button class="camp-select-btn libre" id="survival-start-btn" style="width:min(360px,90vw);border:1px solid #ff446655" onclick="startSurvival()">
+  <button class="camp-select-btn libre" id="survival-start-btn" style="width:min(360px,90vw);border:1px solid #ff446655;color:#ff4466" onclick="startSurvival()">
     <div class="camp-btn-badge" style="font-size:22px;min-height:52px;border-color:#ff446644;color:#ff4466">💀</div>
     <div class="camp-btn-body">
-      <div class="camp-name" style="color:#ff4466;font-size:12px">Mode Survie</div>
-      <div class="camp-desc" style="opacity:0.7">3 vies — niveaux Cauchemar aléatoires — infini</div>
+      <div class="camp-name" style="color:#ff4466;font-size:12px" id="surv-btn-name">Mode Survie</div>
+      <div class="camp-desc" style="opacity:0.7" id="surv-btn-desc">∞ niveaux Cauchemar aléatoires · 3 vies · HOF séparé · Miroir & Yeux bandés compatibles</div>
+      <div style="font-size:9px;letter-spacing:1px;opacity:0.7;margin-top:2px" id="camp-vb-survie"></div>
     </div>
   </button>
-  <div id="invert-camp-wrap">
-    <button class="invert-toggle" id="invert-btn-camp">
-      <span class="toggle-pip"></span>
-      <span class="invert-toggle-label">Mode miroir</span>
-      <span class="invert-toggle-keys">Q ↔ P</span>
-    </button>
-    <p id="invert-camp-desc">Inverse les touches de contrôle — Q pilote les interrupteurs P, et vice-versa.</p>
+  <div id="mode-camp-wrap">
+    <div id="mode-camp-tiles">
+      <button class="mode-tile" id="invert-btn-camp">
+        <span class="mode-tile-icon">🔄</span>
+        <span class="mode-tile-name" id="mode-mirror-name">Miroir</span>
+        <span class="mode-tile-sub">Q ↔ P</span>
+      </button>
+      <button class="mode-tile" id="yb-btn-camp">
+        <span class="mode-tile-icon">🙈</span>
+        <span class="mode-tile-name" id="mode-yb-name">Yeux bandés</span>
+        <span class="mode-tile-sub">HOF séparé</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1765,6 +1810,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <div id="survival-hud">
   <span id="sg-lives">❤️❤️❤️</span>
   <span id="sg-counter">0 niveau</span>
+  <span id="sg-mods" style="font-size:13px;letter-spacing:1px;"></span>
 </div>
 
 <!-- Survival Game Over -->
@@ -1800,6 +1846,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     </div>
     <div id="hof-tabs"></div>
     <div id="hof-diff-row"></div>
+    <div id="hof-mode-row"></div>
     <div id="hof-body"></div>
     <div id="hof-specials">
       <h3>✦ Special Thanks &amp; Content Creators</h3>
@@ -1822,7 +1869,10 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div id="pp-body">
       <div id="pp-hof-section">
         <div id="pp-hof-title">🏆 Scores HOF</div>
-        <div id="pp-diff-tabs"></div>
+        <div id="pp-diff-tabs">
+          <div id="pp-camp-row"></div>
+          <div id="pp-mod-row"></div>
+        </div>
         <div id="pp-hof-content"></div>
       </div>
       <div id="pp-ach-section">
@@ -2012,6 +2062,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     </div>
     <div style="margin-top:auto;padding-top:12px;border-top:1px solid #1a5a3a;display:flex;flex-direction:column;gap:4px">
       <button class="invert-toggle" id="invert-btn-sidebar"><span class="toggle-pip"></span>Mode miroir Q↔P</button>
+      <button class="invert-toggle" id="yb-btn-sidebar"><span class="toggle-pip"></span>🙈 Yeux bandés</button>
       <button class="replay-btn" id="launch-camp-btn" style="border-color:#00cc99;color:#00cc99">⚡ Choisir une campagne</button>
       <button class="replay-btn" id="profile-open-btn" style="border-color:#00ddaa;color:#00ddaa">👤 Profil</button>
       <button class="replay-btn" id="ach-open-btn" style="border-color:#aa66ff;color:#aa66ff">🏅 Hauts-Faits</button>
@@ -2213,7 +2264,7 @@ const TRANSLATIONS = {
     'key.closed': '█ FERMÉ',
     'key.open': '░ OUVERT',
     'overlay.restart': '[R] pour recommencer',
-    'waiting.key': '▶  APPUIE SUR UNE TOUCHE',
+    'waiting.key': '▶  APPUIE SUR Q OU P',
     'waiting.keys': 'Q   ESPACE   P',
     'win': 'CIRCUIT COMPLET !',
     'dead': 'COURT-CIRCUIT !',
@@ -2245,9 +2296,9 @@ const TRANSLATIONS = {
     // Campaign select
     'camp.select.title': '⚡ Choisir une campagne',
     'camp.survival.name': 'Mode Survie',
-    'camp.survival.desc': '3 vies — niveaux Cauchemar aléatoires — infini',
-    'camp.mirror.label': 'Mode miroir',
-    'camp.mirror.desc': 'Inverse les touches de contrôle — Q pilote les interrupteurs P, et vice-versa.',
+    'camp.survival.desc': '∞ niveaux Cauchemar aléatoires · 3 vies · HOF séparé · Miroir & Yeux bandés compatibles',
+    'camp.mirror.name': 'Miroir',
+    'camp.yb.name': 'Yeux bandés',
     // Campaign names
     'camp.bebe.name': 'Pour les Bébés',
     'camp.piquer.name': 'Ça commence à piquer',
@@ -2297,6 +2348,42 @@ const TRANSLATIONS = {
     'ach.survie_deathless.desc': 'Terminer 3 niveaux de survie sans mourir une seule fois',
     'ach.survie_comeback.name': 'Dernier souffle',
     'ach.survie_comeback.desc': 'Gagner un niveau avec une seule vie restante',
+    'ach.yb_bebe.name': 'Traversée à l\'aveugle',
+    'ach.yb_bebe.desc': 'Terminer la campagne Bébés en mode yeux bandés',
+    'ach.yb_piquer.name': 'Touch no see',
+    'ach.yb_piquer.desc': 'Terminer la campagne Piquer en mode yeux bandés',
+    'ach.yb_cauchemar.name': 'Le toucher du bout des fils',
+    'ach.yb_cauchemar.desc': 'Terminer Cauchemar en mode yeux bandés',
+    'ach.yb_deathless.name': 'Sens proprioceptif',
+    'ach.yb_deathless.desc': 'Terminer une campagne en mode yeux bandés sans mourir',
+    'ach.yb_cauchemar_deathless.name': 'Électricien les yeux fermés',
+    'ach.yb_cauchemar_deathless.desc': 'Terminer Cauchemar en mode yeux bandés sans mourir',
+    'ach.survie_inv_5.name': 'À l\'envers et debout',
+    'ach.survie_inv_5.desc': 'Survivre à 5 niveaux en mode survie miroir',
+    'ach.survie_inv_10.name': 'Câblage inversé',
+    'ach.survie_inv_10.desc': 'Survivre à 10 niveaux en mode survie miroir',
+    'ach.survie_inv_20.name': 'Maître du contre-sens',
+    'ach.survie_inv_20.desc': 'Survivre à 20 niveaux en mode survie miroir',
+    'ach.survie_inv_deathless.name': 'Cerveau bilatéral',
+    'ach.survie_inv_deathless.desc': 'Terminer 3 niveaux de survie miroir consécutifs sans mourir',
+    'ach.survie_inv_comeback.name': 'Retour à l\'expéditeur',
+    'ach.survie_inv_comeback.desc': 'Gagner un niveau de survie miroir avec une seule vie restante',
+    'ach.yb_inv_won.name': 'Double aveugle',
+    'ach.yb_inv_won.desc': 'Terminer une campagne en mode yeux bandés + miroir',
+    'ach.yb_inv_cauchemar.name': 'Transcendance sensorielle',
+    'ach.yb_inv_cauchemar.desc': 'Terminer Cauchemar en mode yeux bandés + miroir',
+    'ach.yb_inv_cauchemar_deathless.name': 'Au-delà des sens',
+    'ach.yb_inv_cauchemar_deathless.desc': 'Terminer Cauchemar en mode yeux bandés + miroir sans mourir une seule fois',
+    'ach.survie_yb_5.name': 'Nuit profonde',
+    'ach.survie_yb_5.desc': 'Survivre à 5 niveaux en mode survie yeux bandés',
+    'ach.survie_yb_10.name': 'Écho dans le noir',
+    'ach.survie_yb_10.desc': 'Survivre à 10 niveaux en mode survie yeux bandés',
+    'ach.survie_yb_deathless.name': 'Sonar actif',
+    'ach.survie_yb_deathless.desc': 'Terminer 3 niveaux de survie yeux bandés consécutifs sans mourir',
+    'ach.survie_yb_inv_5.name': 'Chaos total',
+    'ach.survie_yb_inv_5.desc': 'Survivre à 5 niveaux en mode survie yeux bandés + miroir',
+    'ach.platine.name': 'Yo je vise l\'or le platine',
+    'ach.platine.desc': 'Débloquer tous les autres hauts-faits du jeu',
     // Shop
     'shop.title': '⚡ BOUTIQUE VOLTBUCKS',
     'shop.tab.skins': '🔵 Boule',
@@ -2333,6 +2420,8 @@ const TRANSLATIONS = {
     'emote.devil.name': 'Diable',
     'emote.comet.name': 'Comète',
     'emote.godmode.name': 'Transcendance',
+    'emote.rich.name': 'I\'m rich',
+    'emote.rich.unlock': 'Atteindre 50 000 VB',
     // Background names
     'bg.default.name': 'Grille',
     'bg.electrons.name': 'Électrons',
@@ -2354,6 +2443,10 @@ const TRANSLATIONS = {
     'consum.fuse.desc': 'Verrouille un switch pour le niveau',
     'consum.attenuator.name': 'Atténuateur',
     'consum.attenuator.desc': 'Vitesse à 75% pour tout le niveau',
+    'consum.hint.name': 'Indice',
+    'consum.hint.desc': 'Révèle la description d\'un haut-fait verrouillé',
+    'consum.hint.btn': '🔍 Révéler',
+    'consum.hint.stock': 'En stock : {n}',
     // Consumable use confirms
     'consum.heart.confirm': '❤️ Utiliser le Cœur pour gagner +1 vie ?',
     'consum.fuse.confirm': '🔌 Utiliser le Fusible ? Clique ensuite sur un switch pour le verrouiller fermé.',
@@ -2402,6 +2495,7 @@ const TRANSLATIONS = {
     'finish.sending': 'Envoi…',
     'finish.saved': '✓ Enregistré !',
     'finish.error': '✗ Erreur : ',
+    'mode.mirror': 'Miroir', 'mode.blindfold': 'Yeux bandés',
     // HOF
     'hof.title': '🏆 HALL OF FAME',
     'hof.loading': 'Chargement…',
@@ -2433,6 +2527,8 @@ const TRANSLATIONS = {
     'misc.by': 'par ',
     'misc.reset_deaths': 'Réinitialiser le compteur de morts total ?',
     'misc.mirror_confirm': 'Activer le mode miroir annulera la campagne en cours.\nContinuer ?',
+    'misc.mirror_confirm_surv': 'Activer le mode miroir annulera la survie en cours.\nContinuer ?',
+    'misc.yb_confirm_surv': 'Activer les yeux bandés annulera la survie en cours.\nContinuer ?',
     'misc.free': 'Gratuit',
     'misc.vb_retro': '🎁 +{vb} VB récupérés',
     'misc.replay_restart': '↺ Revoir depuis le début',
@@ -2451,7 +2547,8 @@ const TRANSLATIONS = {
     // PP diff tabs
     'pp.diff.bebe': '🍼 Bébés', 'pp.diff.piquer': '⚡ Piquer', 'pp.diff.cauchemar': '💀 Cauchemar',
     'pp.diff.bebe_inv': '🔄 Bébés', 'pp.diff.piquer_inv': '🔄 Piquer', 'pp.diff.cauchemar_inv': '🔄 Cauchemar',
-    'pp.diff.survie': '💀 Survie',
+    'pp.diff.bebe_yb': '🙈 Bébés', 'pp.diff.piquer_yb': '🙈 Piquer', 'pp.diff.cauchemar_yb': '🙈 Cauchemar',
+    'pp.diff.survie': '💀 Survie', 'pp.diff.survie_inv': '🔄 Survie Miroir',
   },
   en: {
     'sidebar.title': 'Levels',
@@ -2494,7 +2591,7 @@ const TRANSLATIONS = {
     'key.closed': '█ CLOSED',
     'key.open': '░ OPEN',
     'overlay.restart': '[R] to restart',
-    'waiting.key': '▶  PRESS ANY KEY',
+    'waiting.key': '▶  PRESS Q OR P',
     'waiting.keys': 'Q   SPACE   P',
     'win': 'CIRCUIT COMPLETE!',
     'dead': 'SHORT CIRCUIT!',
@@ -2525,9 +2622,9 @@ const TRANSLATIONS = {
     // Campaign select
     'camp.select.title': '⚡ Choose a campaign',
     'camp.survival.name': 'Survival Mode',
-    'camp.survival.desc': '3 lives — random Nightmare levels — endless',
-    'camp.mirror.label': 'Mirror mode',
-    'camp.mirror.desc': 'Swaps controls — Q drives P switches, and vice versa.',
+    'camp.survival.desc': '∞ random Nightmare levels · 3 lives · separate HOF · Mirror & Blindfold compatible',
+    'camp.mirror.name': 'Mirror',
+    'camp.yb.name': 'Blindfold',
     // Campaign names
     'camp.bebe.name': 'For Babies',
     'camp.piquer.name': 'Getting Tricky',
@@ -2577,6 +2674,42 @@ const TRANSLATIONS = {
     'ach.survie_deathless.desc': 'Complete 3 survival levels without dying once',
     'ach.survie_comeback.name': 'Last Breath',
     'ach.survie_comeback.desc': 'Win a level with only one life remaining',
+    'ach.yb_bebe.name': 'Blind Crossing',
+    'ach.yb_bebe.desc': 'Complete the Babies campaign in blindfold mode',
+    'ach.yb_piquer.name': 'Touch No See',
+    'ach.yb_piquer.desc': 'Complete the Getting Tricky campaign in blindfold mode',
+    'ach.yb_cauchemar.name': 'Wire Whisperer',
+    'ach.yb_cauchemar.desc': 'Complete the Nightmare campaign in blindfold mode',
+    'ach.yb_deathless.name': 'Proprioception',
+    'ach.yb_deathless.desc': 'Complete any blindfold campaign without dying',
+    'ach.yb_cauchemar_deathless.name': 'Blindfolded Electrician',
+    'ach.yb_cauchemar_deathless.desc': 'Complete Nightmare in blindfold mode without dying',
+    'ach.survie_inv_5.name': 'Upside Down and Standing',
+    'ach.survie_inv_5.desc': 'Survive 5 levels in mirror survival mode',
+    'ach.survie_inv_10.name': 'Rewired',
+    'ach.survie_inv_10.desc': 'Survive 10 levels in mirror survival mode',
+    'ach.survie_inv_20.name': 'Master of Backwards',
+    'ach.survie_inv_20.desc': 'Survive 20 levels in mirror survival mode',
+    'ach.survie_inv_deathless.name': 'Bilateral Brain',
+    'ach.survie_inv_deathless.desc': 'Complete 3 consecutive mirror survival levels without dying',
+    'ach.survie_inv_comeback.name': 'Return to Sender',
+    'ach.survie_inv_comeback.desc': 'Win a mirror survival level with only one life remaining',
+    'ach.yb_inv_won.name': 'Double Blind',
+    'ach.yb_inv_won.desc': 'Complete a campaign in blindfold + mirror mode',
+    'ach.yb_inv_cauchemar.name': 'Sensory Transcendence',
+    'ach.yb_inv_cauchemar.desc': 'Complete Nightmare in blindfold + mirror mode',
+    'ach.yb_inv_cauchemar_deathless.name': 'Beyond the Senses',
+    'ach.yb_inv_cauchemar_deathless.desc': 'Complete Nightmare in blindfold + mirror mode without dying',
+    'ach.survie_yb_5.name': 'Deep Night',
+    'ach.survie_yb_5.desc': 'Survive 5 levels in blindfold survival mode',
+    'ach.survie_yb_10.name': 'Echo in the Dark',
+    'ach.survie_yb_10.desc': 'Survive 10 levels in blindfold survival mode',
+    'ach.survie_yb_deathless.name': 'Active Sonar',
+    'ach.survie_yb_deathless.desc': 'Complete 3 consecutive blindfold survival levels without dying',
+    'ach.survie_yb_inv_5.name': 'Total Chaos',
+    'ach.survie_yb_inv_5.desc': 'Survive 5 levels in blindfold + mirror survival mode',
+    'ach.platine.name': 'Yo je vise l\'or le platine',
+    'ach.platine.desc': 'Unlock all other achievements in the game',
     // Shop
     'shop.title': '⚡ VOLTBUCKS SHOP',
     'shop.tab.skins': '🔵 Ball',
@@ -2613,6 +2746,8 @@ const TRANSLATIONS = {
     'emote.devil.name': 'Devil',
     'emote.comet.name': 'Comet',
     'emote.godmode.name': 'Transcendence',
+    'emote.rich.name': 'I\'m rich',
+    'emote.rich.unlock': 'Reach 50,000 VB',
     // Background names
     'bg.default.name': 'Grid',
     'bg.electrons.name': 'Electrons',
@@ -2634,6 +2769,10 @@ const TRANSLATIONS = {
     'consum.fuse.desc': 'Locks a switch for the whole level',
     'consum.attenuator.name': 'Attenuator',
     'consum.attenuator.desc': 'Speed at 75% for the whole level',
+    'consum.hint.name': 'Hint',
+    'consum.hint.desc': 'Reveals the description of a locked achievement',
+    'consum.hint.btn': '🔍 Reveal',
+    'consum.hint.stock': 'In stock: {n}',
     // Consumable use confirms
     'consum.heart.confirm': '❤️ Use the Heart to gain +1 life?',
     'consum.fuse.confirm': '🔌 Use the Fuse? Then click a switch to lock it closed.',
@@ -2682,6 +2821,7 @@ const TRANSLATIONS = {
     'finish.sending': 'Sending…',
     'finish.saved': '✓ Saved!',
     'finish.error': '✗ Error: ',
+    'mode.mirror': 'Mirror', 'mode.blindfold': 'Blindfold',
     // HOF
     'hof.title': '🏆 HALL OF FAME',
     'hof.loading': 'Loading…',
@@ -2713,6 +2853,8 @@ const TRANSLATIONS = {
     'misc.by': 'by ',
     'misc.reset_deaths': 'Reset total death counter?',
     'misc.mirror_confirm': 'Enabling mirror mode will cancel the current campaign.\nContinue?',
+    'misc.mirror_confirm_surv': 'Enabling mirror mode will cancel the current survival run.\nContinue?',
+    'misc.yb_confirm_surv': 'Enabling blindfold mode will cancel the current survival run.\nContinue?',
     'misc.free': 'Free',
     'misc.vb_retro': '🎁 +{vb} VB recovered',
     'misc.replay_restart': '↺ Rewatch from the start',
@@ -2732,7 +2874,8 @@ const TRANSLATIONS = {
     // PP diff tabs
     'pp.diff.bebe': '🍼 Babies', 'pp.diff.piquer': '⚡ Getting Tricky', 'pp.diff.cauchemar': '💀 Nightmare',
     'pp.diff.bebe_inv': '🔄 Babies', 'pp.diff.piquer_inv': '🔄 Getting Tricky', 'pp.diff.cauchemar_inv': '🔄 Nightmare',
-    'pp.diff.survie': '💀 Survival',
+    'pp.diff.bebe_yb': '🙈 Babies', 'pp.diff.piquer_yb': '🙈 Getting Tricky', 'pp.diff.cauchemar_yb': '🙈 Nightmare',
+    'pp.diff.survie': '💀 Survival', 'pp.diff.survie_inv': '🔄 Mirror Survival',
   }
 };
 
@@ -2855,11 +2998,11 @@ function applyLang() {
   if (_survName) _survName.textContent = t('camp.survival.name');
   const _survDesc = document.querySelector('#survival-start-btn .camp-desc');
   if (_survDesc) _survDesc.textContent = t('camp.survival.desc');
-  // Mirror toggle
-  const _mirrorLabel = document.querySelector('.invert-toggle-label');
-  if (_mirrorLabel) _mirrorLabel.textContent = t('camp.mirror.label');
-  const _mirrorDesc = document.getElementById('invert-camp-desc');
-  if (_mirrorDesc) _mirrorDesc.textContent = t('camp.mirror.desc');
+  // Mode tiles
+  const _mirrorName = document.getElementById('mode-mirror-name');
+  if (_mirrorName) _mirrorName.textContent = t('camp.mirror.name');
+  const _ybName = document.getElementById('mode-yb-name');
+  if (_ybName) _ybName.textContent = t('camp.yb.name');
   // Auth overlay
   const _authDesc = document.getElementById('auth-desc');
   if (_authDesc) _authDesc.innerHTML = t('auth.hof_desc');
@@ -2940,7 +3083,7 @@ async function _apFindUidByPseudo(pseudo, token) {
   const uid1 = await r1.json();
   if (uid1 && typeof uid1 === 'string') return uid1;
   // Fallback : scanner les diffs HOF
-  const diffs = ['cauchemar','piquer','bebe','cauchemar_inv','piquer_inv','bebe_inv','survie'];
+  const diffs = ['cauchemar','piquer','bebe','cauchemar_inv','piquer_inv','bebe_inv','cauchemar_yb','piquer_yb','bebe_yb','survie','survie_inv'];
   for (const diff of diffs) {
     try {
       const r2 = await fetch(`${_FB_BASE}/hof/${HOF_VERSION}/${diff}.json?auth=${token}`);
@@ -3162,7 +3305,7 @@ document.getElementById('ap-ban-btn').onclick = async () => {
   const diff = document.getElementById('ap-ban-diff').value;
   const st   = document.getElementById('ap-ban-status');
   if (!uid) { st.textContent = 'UID requis.'; return; }
-  const diffs = diff === '*' ? ['bebe','piquer','cauchemar','bebe_inv','piquer_inv','cauchemar_inv','survie'] : [diff];
+  const diffs = diff === '*' ? ['bebe','piquer','cauchemar','bebe_inv','piquer_inv','cauchemar_inv','bebe_yb','piquer_yb','cauchemar_yb','survie','survie_inv'] : [diff];
   if (!confirm(`Purger ${uid} de [${diffs.join(', ')}] ?`)) return;
   st.style.color = '#886622'; st.textContent = 'Purge en cours…';
   try {
@@ -3434,6 +3577,9 @@ function selectLevel(idx) {
   resumeAudio();
   replayMode = false;
   particles = []; shakeTimer = 0; bulbFlash = 0;
+  // Yeux bandés : toujours visible au chargement d'un niveau
+  _ybFade = 0; _ybStarted = false;
+  _freshKeyPressed = false;
   for (const k in keys) keys[k] = false;
   _fuseMode = false;
   document.getElementById('fuse-hint').style.display = 'none';
@@ -3746,10 +3892,40 @@ function updateCampaignHUD() {
     badge.classList.toggle('active', campRunning);
     if (campRunning) {
       const camp = CAMPAIGNS[currentCampaignId];
-      badge.textContent = camp.emoji + ' ' + iname(camp).toUpperCase() + (invertControls ? '  🔄' : '');
+      const _mods = [invertControls && '🔄', ybMode && '🙈'].filter(Boolean).join('');
+      badge.textContent = camp.emoji + ' ' + iname(camp).toUpperCase() + (_mods ? '  ' + _mods : '');
     }
   }
   if (cd) cd.classList.toggle('active', campRunning);
+}
+
+// ── VB MODIFIERS ───────────────────────────────────────────
+const VB_BASE        = { bebe: 1,  piquer: 10, cauchemar: 50, survie: 3 };
+const VB_MIRROR_BONUS= { bebe: 1,  piquer: 5,  cauchemar: 5,  survie: 1 };
+const VB_YB_MULT     = { bebe: 10, piquer: 8,  cauchemar: 5,  survie: 5 };
+
+function _calcVb(campId) {
+  const base  = VB_BASE[campId]         || 0;
+  const bonus = invertControls ? (VB_MIRROR_BONUS[campId] || 0) : 0;
+  const mult  = ybMode         ? (VB_YB_MULT[campId]     || 1) : 1;
+  return Math.round((base + bonus) * mult);
+}
+
+function _vbLabel(campId) {
+  const total = _calcVb(campId);
+  const parts = [];
+  if (invertControls) parts.push('+' + VB_MIRROR_BONUS[campId] + '🔄');
+  if (ybMode)         parts.push('×' + VB_YB_MULT[campId]      + '🙈');
+  return `⚡${total} VB` + (parts.length ? `<span style="opacity:0.55;font-size:8px"> (${parts.join(' ')})</span>` : '');
+}
+
+function _updateCampVbLabels() {
+  for (const id of Object.keys(VB_BASE)) {
+    const el = document.getElementById('camp-vb-' + id);
+    if (!el) continue;
+    const suffix = id === 'survie' ? (currentLang === 'en' ? ' / level' : ' / niveau') : '';
+    el.innerHTML = _vbLabel(id) + suffix;
+  }
 }
 
 function openCampSelect() {
@@ -3762,7 +3938,6 @@ function openCampSelect() {
   btnsEl.innerHTML = '';
   // difficulté visuelle : 1 = facile (bebe), 2 = moyen, 3 = difficile (cauchemar)
   const CAMP_DIFF = { bebe: 1, piquer: 2, cauchemar: 3 };
-  const CAMP_VB   = { bebe: 1, piquer: 10, cauchemar: 50 };
   for (const [id, camp] of Object.entries(CAMPAIGNS)) {
     const btn = document.createElement('button');
     btn.className = 'camp-select-btn';
@@ -3771,7 +3946,6 @@ function openCampSelect() {
     btn.style.color = camp.color;
     const n = camp.levels.length;
     const diff = CAMP_DIFF[id] || 1;
-    const vb = CAMP_VB[id] || 0;
     const dots = [1,2,3].map(d =>
       `<span style="background:${d <= diff ? camp.color : 'transparent'};border:1px solid ${camp.color}66"></span>`
     ).join('');
@@ -3783,7 +3957,7 @@ function openCampSelect() {
           <span class="camp-desc">${n} ${currentLang === 'en' ? 'level' + (n > 1 ? 's' : '') : 'niveau' + (n > 1 ? 'x' : '')}</span>
           <div style="display:flex;align-items:center;gap:8px">
             <div class="camp-difficulty">${dots}</div>
-            <span style="font-size:9px;letter-spacing:1px;opacity:0.7">⚡${vb} VB</span>
+            <span id="camp-vb-${id}" style="font-size:9px;letter-spacing:1px;opacity:0.7">${_vbLabel(id)}</span>
           </div>
         </div>
       </div>`;
@@ -3803,10 +3977,10 @@ function openCampSelect() {
   btnsEl.appendChild(libreSep);
   const libreBtn = document.createElement('button');
   libreBtn.className = 'camp-select-btn libre';
-  libreBtn.style.border = '1px solid #2a4a3a44';
-  libreBtn.style.color = '#3a6650';
+  libreBtn.style.border = '1px solid #1a5a3a';
+  libreBtn.style.color = '#00cc99';
   libreBtn.innerHTML = `
-    <div class="camp-btn-badge" style="border-color:#2a4a3a33;color:#3a6650">🎮</div>
+    <div class="camp-btn-badge" style="border-color:#1a5a3a;color:#00cc99">🎮</div>
     <div class="camp-btn-body">
       <span class="camp-name">${currentLang === 'en' ? 'Free Play' : 'Mode libre'}</span>
       <span class="camp-desc">${currentLang === 'en' ? 'Choose levels from the list' : 'Choisir ses niveaux dans la liste'}</span>
@@ -3819,6 +3993,7 @@ function openCampSelect() {
     openMenu();
   };
   btnsEl.appendChild(libreBtn);
+  _updateCampVbLabels();
   overlay.classList.add('open');
 }
 
@@ -3919,29 +4094,34 @@ function downloadReplay() {
 }
 
 // ── MODE MIROIR (invert Q↔P) ───────────────────────────────
-const _invertBtns = () => document.querySelectorAll('.invert-toggle');
-
 function _applyInvertUI() {
-  _invertBtns().forEach(b => b.classList.toggle('active', invertControls));
+  document.getElementById('invert-btn-camp')?.classList.toggle('active', invertControls);
+  document.getElementById('invert-btn-sidebar')?.classList.toggle('active', invertControls);
+  _updateCampVbLabels();
 }
 
 function toggleInvert() {
-  // Si campagne en cours → confirmation
-  if (campRunning && !invertControls) {
+  if (survivalRunning) {
+    const ok = confirm(t('misc.mirror_confirm_surv'));
+    if (!ok) return;
+    endSurvival();
+  } else if (campRunning) {
     const ok = confirm(t('misc.mirror_confirm'));
     if (!ok) return;
     campStop();
     campRunning = false;
-    document.getElementById('campaign-badge').style.display = 'none';
   }
   invertControls = !invertControls;
   // Remettre les touches à zéro pour éviter un état bloqué
   for (const k in keys) keys[k] = false;
   _applyInvertUI();
+  updateCampaignHUD();
 }
 
 document.getElementById('invert-btn-camp').addEventListener('click', toggleInvert);
+document.getElementById('yb-btn-camp').addEventListener('click', toggleYb);
 document.getElementById('invert-btn-sidebar').addEventListener('click', toggleInvert);
+document.getElementById('yb-btn-sidebar').addEventListener('click', toggleYb);
 
 // ── LEVEL FETCH HELPER ─────────────────────────────────────
 const _loadingEl  = document.getElementById('loading-overlay');
@@ -4182,6 +4362,30 @@ const ACHIEVEMENTS = [
   { id:'survie_50',        emoji:'👑', name:'Légende vivante',        desc:'Survivre à 50 niveaux en mode survie',     _nameKey:'ach.survie_50.name',                _descKey:'ach.survie_50.desc' },
   { id:'survie_deathless', emoji:'🩺', name:'Médecin urgentiste',     desc:'Terminer 3 niveaux de survie sans mourir une seule fois', _nameKey:'ach.survie_deathless.name', _descKey:'ach.survie_deathless.desc' },
   { id:'survie_comeback',  emoji:'🔋', name:'Dernier souffle',        desc:'Gagner un niveau avec une seule vie restante', _nameKey:'ach.survie_comeback.name',      _descKey:'ach.survie_comeback.desc' },
+  // — Yeux bandés —
+  { id:'yb_bebe',              emoji:'🙈', name:'Traversée à l\'aveugle',    desc:'Terminer la campagne Bébés en mode yeux bandés',                    _nameKey:'ach.yb_bebe.name',              _descKey:'ach.yb_bebe.desc' },
+  { id:'yb_piquer',            emoji:'🙈', name:'Touch no see',               desc:'Terminer la campagne Piquer en mode yeux bandés',                    _nameKey:'ach.yb_piquer.name',            _descKey:'ach.yb_piquer.desc' },
+  { id:'yb_cauchemar',         emoji:'🙈', name:'Le toucher du bout des fils', desc:'Terminer Cauchemar en mode yeux bandés',                            _nameKey:'ach.yb_cauchemar.name',         _descKey:'ach.yb_cauchemar.desc' },
+  { id:'yb_deathless',         emoji:'🎯', name:'Sens proprioceptif',          desc:'Terminer une campagne en mode yeux bandés sans mourir',             _nameKey:'ach.yb_deathless.name',         _descKey:'ach.yb_deathless.desc' },
+  { id:'yb_cauchemar_deathless',emoji:'🏅', name:'Électricien les yeux fermés', desc:'Terminer Cauchemar en mode yeux bandés sans mourir une seule fois', _nameKey:'ach.yb_cauchemar_deathless.name',_descKey:'ach.yb_cauchemar_deathless.desc' },
+  // — Survie Miroir —
+  { id:'survie_inv_5',       emoji:'🔄', name:'À l\'envers et debout',       desc:'Survivre à 5 niveaux en mode survie miroir',                      _nameKey:'ach.survie_inv_5.name',         _descKey:'ach.survie_inv_5.desc' },
+  { id:'survie_inv_10',      emoji:'🌀', name:'Câblage inversé',             desc:'Survivre à 10 niveaux en mode survie miroir',                     _nameKey:'ach.survie_inv_10.name',        _descKey:'ach.survie_inv_10.desc' },
+  { id:'survie_inv_20',      emoji:'🪞', name:'Maître du contre-sens',       desc:'Survivre à 20 niveaux en mode survie miroir',                     _nameKey:'ach.survie_inv_20.name',        _descKey:'ach.survie_inv_20.desc' },
+  { id:'survie_inv_deathless',emoji:'🧠',name:'Cerveau bilatéral',           desc:'Terminer 3 niveaux de survie miroir consécutifs sans mourir',     _nameKey:'ach.survie_inv_deathless.name', _descKey:'ach.survie_inv_deathless.desc' },
+  { id:'survie_inv_comeback', emoji:'🔁',name:'Retour à l\'expéditeur',      desc:'Gagner un niveau de survie miroir avec une seule vie restante',   _nameKey:'ach.survie_inv_comeback.name',  _descKey:'ach.survie_inv_comeback.desc' },
+  // — YB + Miroir (campagnes) —
+  { id:'yb_inv_won',               emoji:'🫣', name:'Double aveugle',             desc:'Terminer une campagne en mode yeux bandés + miroir',                        _nameKey:'ach.yb_inv_won.name',               _descKey:'ach.yb_inv_won.desc' },
+  { id:'yb_inv_cauchemar',         emoji:'💫', name:'Transcendance sensorielle',  desc:'Terminer Cauchemar en mode yeux bandés + miroir',                           _nameKey:'ach.yb_inv_cauchemar.name',         _descKey:'ach.yb_inv_cauchemar.desc' },
+  { id:'yb_inv_cauchemar_deathless',emoji:'🌠',name:'Au-delà des sens',            desc:'Terminer Cauchemar en mode yeux bandés + miroir sans mourir une seule fois',_nameKey:'ach.yb_inv_cauchemar_deathless.name',_descKey:'ach.yb_inv_cauchemar_deathless.desc' },
+  // — Survie YB —
+  { id:'survie_yb_5',      emoji:'🙈', name:'Nuit profonde',     desc:'Survivre à 5 niveaux en mode survie yeux bandés',                   _nameKey:'ach.survie_yb_5.name',      _descKey:'ach.survie_yb_5.desc' },
+  { id:'survie_yb_10',     emoji:'🌑', name:'Écho dans le noir', desc:'Survivre à 10 niveaux en mode survie yeux bandés',                  _nameKey:'ach.survie_yb_10.name',     _descKey:'ach.survie_yb_10.desc' },
+  { id:'survie_yb_deathless',emoji:'🦇',name:'Sonar actif',      desc:'Terminer 3 niveaux de survie yeux bandés consécutifs sans mourir', _nameKey:'ach.survie_yb_deathless.name',_descKey:'ach.survie_yb_deathless.desc' },
+  // — Survie YB + Miroir —
+  { id:'survie_yb_inv_5',  emoji:'🌀', name:'Chaos total',       desc:'Survivre à 5 niveaux en mode survie yeux bandés + miroir',         _nameKey:'ach.survie_yb_inv_5.name',  _descKey:'ach.survie_yb_inv_5.desc' },
+  // — Platine —
+  { id:'platine', emoji:'🏆', name:'Yo je vise l\'or le platine', desc:'Débloquer tous les autres hauts-faits du jeu', _nameKey:'ach.platine.name', _descKey:'ach.platine.desc' },
 ];
 
 const _ACH_LS = 'elecgame_achievements';
@@ -4212,6 +4416,24 @@ const ACH_VB = {
   survie_50:               1500,
   survie_deathless:         400,
   survie_comeback:          200,
+  yb_bebe:                  300,
+  yb_piquer:                800,
+  yb_cauchemar:            2000,
+  yb_deathless:             500,
+  yb_cauchemar_deathless:  3000,
+  survie_inv_5:             200,
+  survie_inv_10:            400,
+  survie_inv_20:            800,
+  survie_inv_deathless:     600,
+  survie_inv_comeback:      300,
+  yb_inv_won:               800,
+  yb_inv_cauchemar:        3000,
+  yb_inv_cauchemar_deathless: 5000,
+  survie_yb_5:              300,
+  survie_yb_10:             700,
+  survie_yb_deathless:      600,
+  survie_yb_inv_5:          500,
+  platine:                 5000,
 };
 
 function _syncVB() {
@@ -4246,6 +4468,22 @@ function earnVoltbucks(amount, reason) {
     el.classList.add('show');
     clearTimeout(el._t);
     el._t = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+  // Emote "I'm rich" — débloquée à 50 000 VB
+  if (voltbucks >= 50000 && !_ownedItems.has('emote_rich')) {
+    _ownedItems.add('emote_rich');
+    _saveInventory();
+    setTimeout(() => {
+      const t2 = document.getElementById('vb-toast');
+      if (t2) {
+        t2.textContent = '🤑 Emote "I\'m rich" débloquée !';
+        t2.classList.remove('show');
+        void t2.offsetWidth;
+        t2.classList.add('show');
+        clearTimeout(t2._t);
+        t2._t = setTimeout(() => t2.classList.remove('show'), 3500);
+      }
+    }, 2600);
   }
 }
 
@@ -4313,6 +4551,11 @@ function unlockAchievement(id) {
       }).catch(() => {});
     }
   }).catch(() => {});
+  // Vérifier le platine (tous les autres hauts-faits complétés)
+  if (id !== 'platine') {
+    const baseAchs = ACHIEVEMENTS.filter(a => a.id !== 'platine');
+    if (baseAchs.every(a => _achDone.has(a.id))) unlockAchievement('platine');
+  }
 }
 
 function checkAchievements(trigger) {
@@ -4324,18 +4567,34 @@ function checkAchievements(trigger) {
   // — Survie (inline dans endSurvival / win hook) — handled elsewhere
   // — Fin de campagne —
   if (trigger === 'camp' && _lastCamp) {
-    const { campId, deaths, time, inv } = _lastCamp;
-    if (campId === 'bebe')      unlockAchievement('bebe_won');
-    if (campId === 'piquer')    unlockAchievement('piquer_won');
-    if (campId === 'cauchemar') unlockAchievement('cauchemar_won');
-    if (campId === 'bebe'      && deaths === 0) unlockAchievement('bebe_deathless');
-    if (campId === 'piquer'    && deaths === 0) unlockAchievement('piquer_deathless');
-    if (campId === 'cauchemar' && deaths === 0) unlockAchievement('cauchemar_deathless');
-    if (campId === 'bebe'      && time < 180000) unlockAchievement('bebe_speed');
-    if (campId === 'cauchemar' && time < 900000) unlockAchievement('cauchemar_speed');
-    if (inv)                             unlockAchievement('mirror_won');
-    if (campId === 'cauchemar' && inv)   unlockAchievement('cauchemar_mirror');
-    if (campId === 'cauchemar' && inv && deaths === 0) unlockAchievement('cauchemar_mirror_deathless');
+    const { campId, deaths, time, inv, yb } = _lastCamp;
+    if (!yb) {
+      if (campId === 'bebe')      unlockAchievement('bebe_won');
+      if (campId === 'piquer')    unlockAchievement('piquer_won');
+      if (campId === 'cauchemar') unlockAchievement('cauchemar_won');
+      if (campId === 'bebe'      && deaths === 0) unlockAchievement('bebe_deathless');
+      if (campId === 'piquer'    && deaths === 0) unlockAchievement('piquer_deathless');
+      if (campId === 'cauchemar' && deaths === 0) unlockAchievement('cauchemar_deathless');
+      if (campId === 'bebe'      && time < 180000) unlockAchievement('bebe_speed');
+      if (campId === 'cauchemar' && time < 900000) unlockAchievement('cauchemar_speed');
+      if (inv)                             unlockAchievement('mirror_won');
+      if (campId === 'cauchemar' && inv)   unlockAchievement('cauchemar_mirror');
+      if (campId === 'cauchemar' && inv && deaths === 0) unlockAchievement('cauchemar_mirror_deathless');
+    } else if (!inv) {
+      // Yeux bandés seul
+      if (campId === 'bebe')      unlockAchievement('yb_bebe');
+      if (campId === 'piquer')    unlockAchievement('yb_piquer');
+      if (campId === 'cauchemar') unlockAchievement('yb_cauchemar');
+      if (deaths === 0)           unlockAchievement('yb_deathless');
+      if (campId === 'cauchemar' && deaths === 0) unlockAchievement('yb_cauchemar_deathless');
+    } else {
+      // Yeux bandés + miroir
+      unlockAchievement('mirror_won');        // miroir actif → compte pour mirror_won
+      unlockAchievement('yb_inv_won');
+      if (campId === 'cauchemar') unlockAchievement('yb_inv_cauchemar');
+      if (deaths === 0)           unlockAchievement('yb_deathless');  // YB sans mourir, peu importe le miroir
+      if (campId === 'cauchemar' && deaths === 0) unlockAchievement('yb_inv_cauchemar_deathless');
+    }
   }
 }
 
@@ -4367,6 +4626,8 @@ function updateSurvivalHUD() {
     '❤️'.repeat(lives) + '🖤'.repeat(Math.max(0, 3 - lives));
   document.getElementById('sg-counter').textContent =
     survivalScore + ' ' + t('hof.levels');
+  const _mods = [invertControls && '🔄', ybMode && '🙈'].filter(Boolean).join('');
+  document.getElementById('sg-mods').textContent = _mods;
 }
 
 function goSurvivalLevel(entry) {
@@ -4395,8 +4656,6 @@ function startSurvival() {
   survivalDeaths   = 0;
   survivalStreak   = 0;
   survivalHistory  = [];
-  invertControls   = false;
-  _applyInvertUI();
   document.getElementById('camp-select-overlay').classList.remove('open');
   closeMenu();
   updateSurvivalHUD();
@@ -4408,10 +4667,21 @@ function endSurvival() {
   updateSurvivalHUD();
   // Achievements survie
   if (!adminMode) {
-    if (survivalScore >= 5)  unlockAchievement('survie_5');
-    if (survivalScore >= 10) unlockAchievement('survie_10');
-    if (survivalScore >= 20) unlockAchievement('survie_20');
-    if (survivalScore >= 50) unlockAchievement('survie_50');
+    if (!ybMode && invertControls) {
+      if (survivalScore >= 5)  unlockAchievement('survie_inv_5');
+      if (survivalScore >= 10) unlockAchievement('survie_inv_10');
+      if (survivalScore >= 20) unlockAchievement('survie_inv_20');
+    } else if (!ybMode && !invertControls) {
+      if (survivalScore >= 5)  unlockAchievement('survie_5');
+      if (survivalScore >= 10) unlockAchievement('survie_10');
+      if (survivalScore >= 20) unlockAchievement('survie_20');
+      if (survivalScore >= 50) unlockAchievement('survie_50');
+    } else if (ybMode && !invertControls) {
+      if (survivalScore >= 5)  unlockAchievement('survie_yb_5');
+      if (survivalScore >= 10) unlockAchievement('survie_yb_10');
+    } else if (ybMode && invertControls) {
+      if (survivalScore >= 5)  unlockAchievement('survie_yb_inv_5');
+    }
   }
   // Show game over overlay
   _openSurvivalGameOver();
@@ -4422,6 +4692,10 @@ async function _openSurvivalGameOver() {
   const pseudoEl = document.getElementById('sg-pseudo');
   const submitEl = document.getElementById('sg-submit');
   const statusEl = document.getElementById('sg-status');
+  const _survModes = [ybMode && '🙈', invertControls && '🔄'].filter(Boolean).join('');
+  document.getElementById('sg-title').textContent =
+    (_survModes ? _survModes + ' ' : '💀 ') +
+    (currentLang === 'fr' ? 'SURVIE TERMINÉE' : 'SURVIVAL OVER');
   document.getElementById('sg-score').textContent = survivalScore;
   document.getElementById('sg-result').innerHTML = t('surv.result').replace('{score}', `<strong>${survivalScore}</strong>`);
   statusEl.style.color = '#446655';
@@ -4473,10 +4747,11 @@ async function _openSurvivalGameOver() {
   submitEl.disabled = true;
   overlay.classList.add('open');
 
+  const _survDiff = _composeDiff('survie', ybMode, invertControls);
   let _survivalPrevKey = null;
   let _survivalPrevScore = null;
   try {
-    const res = await fetch(`${FB_URL}/${HOF_VERSION}/survie.json`);
+    const res = await fetch(`${FB_URL}/${HOF_VERSION}/${_survDiff}.json`);
     if (res.ok) {
       const data = await res.json();
       if (data) {
@@ -4574,10 +4849,11 @@ async function _submitSurvivalScore(prevKey = null) {
   statusEl.textContent = t('surv.sending');
   submitEl.disabled = true;
   try {
+    const _survDiff2 = _composeDiff('survie', ybMode, invertControls);
     const entry = { pseudo, uid: currentUser.uid, score: survivalScore, ts: Date.now() - 2000, device: detectDevice(), bonuses: _runUsedConsumables.size ? [..._runUsedConsumables] : undefined };
     const url = prevKey
-      ? `${FB_URL}/${HOF_VERSION}/survie/${prevKey}.json`
-      : `${FB_URL}/${HOF_VERSION}/survie.json`;
+      ? `${FB_URL}/${HOF_VERSION}/${_survDiff2}/${prevKey}.json`
+      : `${FB_URL}/${HOF_VERSION}/${_survDiff2}.json`;
     const res = await _fbWrite(url, prevKey ? 'PUT' : 'POST', entry);
     if (!res.ok) {
       statusEl._lastHofErrCode = res.status;
@@ -4589,7 +4865,7 @@ async function _submitSurvivalScore(prevKey = null) {
     submitEl.style.opacity = '0.4';
     if (!currentPseudo) { currentPseudo = pseudo; updateAuthUI(); }
   } catch(err) {
-    _showHofFallback(statusEl, submitEl, { pseudo, diff: 'survie', score: survivalScore, uid: currentUser?.uid });
+    _showHofFallback(statusEl, submitEl, { pseudo, diff: _composeDiff('survie', ybMode, invertControls), score: survivalScore, uid: currentUser?.uid });
   }
 }
 
@@ -4608,17 +4884,37 @@ function openAchievements() {
   document.getElementById('ach-progress').textContent =
     t('ach.progress').replace('{done}', done).replace('{total}', total);
   const list = document.getElementById('ach-list');
+  const hintsAvail = Number(_consumables.hint) || 0;
   list.innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = _achDone.has(a.id);
+    const revealed = !unlocked && _revealedAchs.has(a.id);
     const vb = ACH_VB[a.id] || 0;
+    const descHtml = unlocked
+      ? idesc(a)
+      : revealed
+        ? `<span style="font-style:italic;opacity:0.6">${idesc(a)}</span>`
+        : (hintsAvail > 0
+            ? `??? <button class="ach-hint-btn" data-ach="${a.id}" style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:1px;background:none;border:1px solid #336644;color:#00cc99;padding:1px 6px;cursor:pointer;margin-left:6px">${t('consum.hint.btn')}</button>`
+            : '???');
     return `<div class="ach-item${unlocked ? ' unlocked' : ''}">
       <div class="ach-emoji">${a.emoji}</div>
       <div class="ach-info">
         <div class="ach-name">${iname(a)}${vb ? `<span class="ach-vb${unlocked ? ' earned' : ''}">⚡${vb} VB</span>` : ''}</div>
-        <div class="ach-desc">${unlocked ? idesc(a) : '???'}</div>
+        <div class="ach-desc">${descHtml}</div>
       </div>
     </div>`;
   }).join('');
+  list.querySelectorAll('.ach-hint-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.ach;
+      if ((Number(_consumables.hint) || 0) <= 0) return;
+      _consumables.hint = (Number(_consumables.hint) || 0) - 1;
+      _saveConsumables();
+      _revealedAchs.add(id);
+      _saveRevealedAchs();
+      openAchievements(); // refresh
+    });
+  });
   document.getElementById('ach-overlay').classList.add('open');
 }
 
@@ -5001,18 +5297,65 @@ const HOF_VERSION  = 'v0_1_0';
 const ADMIN_UID    = 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2';
 let _hofVersion = HOF_VERSION, _hofDiff = null;
 const HOF_VERSIONS = ['v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1']; // add new versions here
-const HOF_DIFFS    = ['bebe', 'piquer', 'cauchemar', 'bebe_inv', 'piquer_inv', 'cauchemar_inv', 'survie'];
-const HOF_DIFF_META = {
-  bebe:          { key: 'pp.diff.bebe',          color: '#44ff88' },
-  piquer:        { key: 'pp.diff.piquer',         color: '#ffaa00' },
-  cauchemar:     { key: 'pp.diff.cauchemar',      color: '#ff4466' },
-  bebe_inv:      { key: 'pp.diff.bebe_inv',       color: '#99ffcc' },
-  piquer_inv:    { key: 'pp.diff.piquer_inv',     color: '#ffcc66' },
-  cauchemar_inv: { key: 'pp.diff.cauchemar_inv',  color: '#ff88aa' },
-  survie:        { key: 'pp.diff.survie',         color: '#ff4466', survival: true },
+// ── HOF : campagnes de base + helpers de composition ───────
+const HOF_CAMPS = ['bebe', 'piquer', 'cauchemar', 'survie'];
+const HOF_CAMP_META = {
+  bebe:      { key: 'pp.diff.bebe',    color: '#44ff88' },
+  piquer:    { key: 'pp.diff.piquer',  color: '#ffaa00' },
+  cauchemar: { key: 'pp.diff.cauchemar', color: '#ff4466' },
+  survie:    { key: 'pp.diff.survie',  color: '#ff8877', survival: true },
 };
-// Retourne le diffId effectif selon le mode miroir actif
-function _diffId() { return currentCampaignId + (invertControls ? '_inv' : ''); }
+// Toutes les combinaisons : camp × [, _inv] × [, _yb]
+const HOF_DIFFS = HOF_CAMPS.flatMap(c => [c, c+'_yb', c+'_inv', c+'_yb_inv']);
+
+function _decomposeDiff(diff) {
+  let s = diff || 'bebe';
+  const inv = s.endsWith('_inv'); if (inv) s = s.slice(0, -4);
+  const yb  = s.endsWith('_yb');  if (yb)  s = s.slice(0, -3);
+  return { camp: s, inv, yb };
+}
+function _composeDiff(camp, yb, inv) {
+  return camp + (yb ? '_yb' : '') + (inv ? '_inv' : '');
+}
+function _isSurvivalDiff(diff) { return diff.startsWith('survie'); }
+
+// Compatibilité avec l'ancien HOF_DIFF_META (admin lookup)
+const HOF_DIFF_META = {};
+HOF_DIFFS.forEach(d => { const { camp } = _decomposeDiff(d); HOF_DIFF_META[d] = HOF_CAMP_META[camp]; });
+// ── MODE YEUX BANDÉS ───────────────────────────────────────
+let ybMode      = false;  // mode actif
+let _ybFade     = 0;      // opacité du voile (0 = visible, 1 = noir total)
+let _ybStarted  = false;  // le premier input a été détecté
+
+function _applyYbUI() {
+  document.getElementById('yb-btn-camp')?.classList.toggle('active', ybMode);
+  document.getElementById('yb-btn-sidebar')?.classList.toggle('active', ybMode);
+  _updateCampVbLabels();
+}
+
+function toggleYb() {
+  if (survivalRunning) {
+    const ok = confirm(t('misc.yb_confirm_surv'));
+    if (!ok) return;
+    endSurvival();
+  } else if (campRunning) {
+    const ok = confirm(currentLang === 'fr'
+      ? 'Activer les yeux bandés va réinitialiser la campagne. Continuer ?'
+      : 'Activating blindfold mode will reset the current campaign. Continue?');
+    if (!ok) return;
+    campStop();
+    campRunning = false;
+  }
+  ybMode = !ybMode;
+  for (const k in keys) keys[k] = false;
+  _applyYbUI();
+  updateCampaignHUD();
+}
+
+// Retourne le diffId effectif selon les modes actifs
+function _diffId() {
+  return _composeDiff(currentCampaignId, ybMode, invertControls);
+}
 const FB_URL       = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/hof';
 const FB_USERS     = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
 const FB_ACH_RANKS = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/achievement_ranks';
@@ -5100,7 +5443,7 @@ async function hofFetch(version, diff) {
     if (!res.ok) return [];
     const data = await res.json();
     if (!data) return [];
-    const isSurvival = diff === 'survie';
+    const isSurvival = diff.startsWith('survie');
     // Flatten: handle both flat {key: entry} and nested {diff: {key: entry}} structures
     // Preserve Firebase keys for admin deletion
     const raw = Object.entries(data);
@@ -5172,32 +5515,49 @@ function hofBuildTabs(activeVersion, activeDiff) {
     const btn = document.createElement('button');
     btn.className = 'hof-tab' + (v === activeVersion ? ' active' : '');
     btn.textContent = v.replace(/_/g, '.');
-    btn.onclick = () => openHOF(v, HOF_PER_DIFF_VERSIONS.has(v) ? (activeDiff || (HOF_DIFFS.includes(currentCampaignId) ? currentCampaignId : 'bebe')) : null);
+    btn.onclick = () => openHOF(v, HOF_PER_DIFF_VERSIONS.has(v) ? activeDiff : null);
     tabsEl.appendChild(btn);
   });
-  // Difficulty row (v0_0_4+)
+
   const diffRow = document.getElementById('hof-diff-row');
-  if (activeVersion === 'v0_1_0' || activeVersion === 'v0_0_5' || activeVersion === 'v0_0_4') {
+  const modeRow = document.getElementById('hof-mode-row');
+  if (HOF_PER_DIFF_VERSIONS.has(activeVersion)) {
+    const { camp, inv, yb } = _decomposeDiff(activeDiff);
+    const campMeta = HOF_CAMP_META[camp] || HOF_CAMP_META.bebe;
+
+    // Campagne row
     diffRow.classList.remove('hidden');
     diffRow.innerHTML = '';
-    HOF_DIFFS.forEach(d => {
-      // Retour à la ligne entre normal et miroir, et avant survie
-      if (d === 'bebe_inv' || d === 'survie') {
-        const br = document.createElement('div');
-        br.style.cssText = 'flex-basis:100%;height:0;border-top:1px solid #0d2a1a';
-        diffRow.appendChild(br);
-      }
-      const meta = HOF_DIFF_META[d];
+    HOF_CAMPS.forEach(c => {
+      const meta = HOF_CAMP_META[c];
+      const isActive = c === camp;
       const btn = document.createElement('button');
-      btn.className = 'hof-diff-tab' + (d === activeDiff ? ' active' : '');
-      btn.style.color = d === activeDiff ? meta.color : '#446655';
-      if (d === activeDiff) btn.style.borderBottomColor = meta.color;
+      btn.className = 'hof-diff-tab' + (isActive ? ' active' : '');
+      btn.style.color = isActive ? meta.color : '#446655';
+      if (isActive) btn.style.borderBottomColor = meta.color;
       btn.textContent = t(meta.key);
-      btn.onclick = () => openHOF(activeVersion, d);
+      btn.onclick = () => openHOF(activeVersion, _composeDiff(c, yb, inv));
       diffRow.appendChild(btn);
+    });
+
+    // Mode toggles row
+    modeRow.classList.remove('hidden');
+    modeRow.innerHTML = '';
+    [
+      { label: '🔄 ' + t('mode.mirror'),    active: inv, toggle: () => openHOF(activeVersion, _composeDiff(camp, yb, !inv)) },
+      { label: '🙈 ' + t('mode.blindfold'), active: yb,  toggle: () => openHOF(activeVersion, _composeDiff(camp, !yb, inv)) },
+    ].forEach(({ label, active, toggle }) => {
+      const btn = document.createElement('button');
+      btn.className = 'hof-mode-btn' + (active ? ' active' : '');
+      btn.style.borderColor = active ? campMeta.color + '88' : '';
+      btn.style.color = active ? campMeta.color : '';
+      btn.textContent = label;
+      btn.onclick = toggle;
+      modeRow.appendChild(btn);
     });
   } else {
     diffRow.classList.add('hidden');
+    modeRow.classList.add('hidden');
   }
 }
 
@@ -5218,8 +5578,11 @@ const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
 let _hofEmoteMap = {};
 
 async function openHOF(version = HOF_VERSION, diff = null) {
-  if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) diff = HOF_DIFFS.includes(_diffId()) ? _diffId() : 'bebe';
-  if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null; // old flat versions
+  if (HOF_PER_DIFF_VERSIONS.has(version) && !diff) {
+    const base = survivalRunning ? 'survie' : (HOF_CAMPS.includes(currentCampaignId) ? currentCampaignId : 'bebe');
+    diff = _composeDiff(base, ybMode, invertControls);
+  }
+  if (!HOF_PER_DIFF_VERSIONS.has(version)) diff = null;
   _hofVersion = version; _hofDiff = diff;
   document.getElementById('hof-overlay').classList.add('open');
   hofBuildTabs(version, diff);
@@ -5236,7 +5599,7 @@ async function openHOF(version = HOF_VERSION, diff = null) {
       _hofEmoteMap[uid] = eo ? eo.emoji : a.emote;
     }
   });
-  hofRenderBody(entries, diff === 'survie');
+  hofRenderBody(entries, _isSurvivalDiff(diff || ''));
 }
 
 document.getElementById('hof-close').onclick = () =>
@@ -5263,11 +5626,6 @@ document.getElementById('hof-body').addEventListener('click', async e => {
 });
 
 // ── PLAYER PROFILE ─────────────────────────────────────────
-const PP_DIFFS = [
-  { id: 'bebe' }, { id: 'piquer' }, { id: 'cauchemar' },
-  { id: 'bebe_inv' }, { id: 'piquer_inv' }, { id: 'cauchemar_inv' },
-  { id: 'survie' },
-];
 let _ppUid = null;
 let _ppHofCache = {};
 
@@ -5305,20 +5663,55 @@ async function openPlayerProfile(uid, pseudo) {
   document.getElementById('pp-ach-list').innerHTML = `<span class="pp-ach-none">${t('loading.msg')}</span>`;
   document.getElementById('pp-overlay').classList.add('open');
 
-  // Build diff tabs
-  const tabsEl = document.getElementById('pp-diff-tabs');
-  tabsEl.innerHTML = '';
-  PP_DIFFS.forEach((d, i) => {
+  // Build diff tabs — 4 camp buttons + 2 modifier toggles
+  const PP_CAMPS = [
+    { id: 'bebe',      label: () => '🍼 ' + iname(CAMPAIGNS.bebe) },
+    { id: 'piquer',    label: () => '⚡ ' + iname(CAMPAIGNS.piquer) },
+    { id: 'cauchemar', label: () => '💀 ' + iname(CAMPAIGNS.cauchemar) },
+    { id: 'survie',    label: () => '💀 ' + (currentLang === 'en' ? 'Survival' : 'Survie') },
+  ];
+  let _ppCamp = 'bebe', _ppInv = false, _ppYb = false;
+
+  function _ppCurrentDiff() { return _composeDiff(_ppCamp, _ppYb, _ppInv); }
+
+  function _ppRefreshDiff() {
+    campRow.querySelectorAll('.pp-diff-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.camp === _ppCamp));
+    modRow.querySelectorAll('.pp-mod-btn').forEach(b => {
+      if (b.dataset.mod === 'inv') b.classList.toggle('active', _ppInv);
+      if (b.dataset.mod === 'yb')  b.classList.toggle('active', _ppYb);
+    });
+    _ppShowDiff(_ppCurrentDiff());
+  }
+
+  const campRow = document.getElementById('pp-camp-row');
+  const modRow  = document.getElementById('pp-mod-row');
+  campRow.innerHTML = '';
+  modRow.innerHTML  = '';
+
+  PP_CAMPS.forEach(c => {
     const btn = document.createElement('button');
-    btn.className = 'pp-diff-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = t('pp.diff.' + d.id);
-    btn.dataset.diff = d.id;
+    btn.className = 'pp-diff-btn' + (c.id === _ppCamp ? ' active' : '');
+    btn.textContent = c.label();
+    btn.dataset.camp = c.id;
+    btn.onclick = () => { _ppCamp = c.id; _ppRefreshDiff(); };
+    campRow.appendChild(btn);
+  });
+
+  [
+    { mod: 'inv', label: '🔄 ' + (currentLang === 'en' ? 'Mirror' : 'Miroir') },
+    { mod: 'yb',  label: '🙈 ' + (currentLang === 'en' ? 'Blindfold' : 'Yeux bandés') },
+  ].forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'pp-mod-btn';
+    btn.textContent = m.label;
+    btn.dataset.mod = m.mod;
     btn.onclick = () => {
-      tabsEl.querySelectorAll('.pp-diff-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      _ppShowDiff(d.id);
+      if (m.mod === 'inv') _ppInv = !_ppInv;
+      if (m.mod === 'yb')  _ppYb  = !_ppYb;
+      _ppRefreshDiff();
     };
-    tabsEl.appendChild(btn);
+    modRow.appendChild(btn);
   });
 
   // Load first diff + achievements in parallel
@@ -5335,7 +5728,7 @@ async function _ppShowDiff(diff) {
       _ppHofCache[diff] = (res.ok ? await res.json() : null) || {};
     }
     const data = _ppHofCache[diff];
-    const isSurvival = diff === 'survie';
+    const isSurvival = diff.startsWith('survie');
     const sorted = Object.values(data)
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
@@ -5475,7 +5868,7 @@ async function loadDoneFromFirebase() {
   if (!currentUser) return;
   try {
     const token = await currentUser.getIdToken();
-    const [resN, resI, resA, resD, resVB, resInv, resPaid, resConsum] = await Promise.all([
+    const [resN, resI, resA, resD, resVB, resInv, resPaid, resConsum, resRevealed] = await Promise.all([
       fetch(`${FB_USERS}/${currentUser.uid}/done.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/done_inv.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/achievements.json?auth=${token}`),
@@ -5484,6 +5877,7 @@ async function loadDoneFromFirebase() {
       fetch(`${FB_USERS}/${currentUser.uid}/inventory.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/vb_ach_paid.json?auth=${token}`),
       fetch(`${FB_USERS}/${currentUser.uid}/consumables.json?auth=${token}`),
+      fetch(`${FB_USERS}/${currentUser.uid}/revealed_ach.json?auth=${token}`),
     ]);
     if (resN.ok) { const d = await resN.json(); if (d) Object.keys(d).forEach(k => _doneLevels.add(_d64(k))); }
     if (resI.ok) { const d = await resI.json(); if (d) Object.keys(d).forEach(k => _doneInvLevels.add(_d64(k))); }
@@ -5511,6 +5905,13 @@ async function loadDoneFromFirebase() {
         _consumables = { ..._consumables, ...cs };
         localStorage.setItem(_CONSUM_LS, JSON.stringify(_consumables));
         _updateConsumHUD();
+      }
+    }
+    if (resRevealed.ok) {
+      const rv = await resRevealed.json();
+      if (Array.isArray(rv)) {
+        rv.forEach(id => _revealedAchs.add(id));
+        _saveRevealedAchs();
       }
     }
     localStorage.setItem(_DONE_LS,     JSON.stringify([..._doneLevels]));
@@ -5575,6 +5976,7 @@ const EMOTES = [
   { id: 'devil',   emoji: '😈', name: 'Diable',          price: 600,  _nameKey: 'emote.devil.name' },
   { id: 'comet',   emoji: '☄️', name: 'Comète',          price: 800,  _nameKey: 'emote.comet.name' },
   { id: 'godmode', emoji: '✨', name: 'Transcendance',   price: 1500, _nameKey: 'emote.godmode.name' },
+  { id: 'rich',    emoji: '🤑', name: 'I\'m rich',       price: 0,    _nameKey: 'emote.rich.name', unlockAt: 50000, _unlockKey: 'emote.rich.unlock' },
 ];
 
 const BACKGROUNDS = [
@@ -5593,13 +5995,27 @@ let _equippedBg    = localStorage.getItem(_BG_LS)    || 'default';
 
 // ── CONSUMABLES ─────────────────────────────────────────────
 const CONSUMABLES = [
-  { id: 'heart',      emoji: '❤️', name: 'Cœur',        price: 500,  desc: '+1 vie en mode survie',              _nameKey: 'consum.heart.name',      _descKey: 'consum.heart.desc' },
-  { id: 'fuse',       emoji: '🔌', name: 'Fusible',      price: 800,  desc: 'Verrouille un switch pour le niveau', _nameKey: 'consum.fuse.name',       _descKey: 'consum.fuse.desc' },
-  { id: 'attenuator', emoji: '🐢', name: 'Atténuateur',  price: 600,  desc: 'Vitesse à 75% pour tout le niveau',  _nameKey: 'consum.attenuator.name', _descKey: 'consum.attenuator.desc' },
+  { id: 'heart',      emoji: '❤️', name: 'Cœur',        price: 500,  desc: '+1 vie en mode survie',                                    _nameKey: 'consum.heart.name',      _descKey: 'consum.heart.desc' },
+  { id: 'fuse',       emoji: '🔌', name: 'Fusible',      price: 800,  desc: 'Verrouille un switch pour le niveau',                       _nameKey: 'consum.fuse.name',       _descKey: 'consum.fuse.desc' },
+  { id: 'attenuator', emoji: '🐢', name: 'Atténuateur',  price: 600,  desc: 'Vitesse à 75% pour tout le niveau',                        _nameKey: 'consum.attenuator.name', _descKey: 'consum.attenuator.desc' },
+  { id: 'hint',       emoji: '🔍', name: 'Indice',        price: 1000, desc: 'Révèle la description d\'un haut-fait verrouillé', stackable: true, _nameKey: 'consum.hint.name', _descKey: 'consum.hint.desc' },
 ];
 const _CONSUM_LS = 'elecgame_consumables';
 let _consumables = JSON.parse(localStorage.getItem(_CONSUM_LS) || '{}');
-// { heart: true/false, fuse: true/false, attenuator: true/false }
+// { heart: bool, fuse: bool, attenuator: bool, hint: number }
+
+const _REVEALED_ACH_LS = 'elecgame_revealed_ach';
+let _revealedAchs = new Set(JSON.parse(localStorage.getItem(_REVEALED_ACH_LS) || '[]'));
+function _saveRevealedAchs() {
+  const arr = [..._revealedAchs];
+  localStorage.setItem(_REVEALED_ACH_LS, JSON.stringify(arr));
+  if (!currentUser) return;
+  currentUser.getIdToken().then(token => {
+    fetch(`${FB_USERS}/${currentUser.uid}/revealed_ach.json?auth=${token}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(arr)
+    }).catch(() => {});
+  }).catch(() => {});
+}
 
 // Per-run state
 let _runUsedConsumables = new Set();
@@ -5867,12 +6283,15 @@ function _renderShopEmotes() {
   const body = document.getElementById('shop-body');
   body.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
   body.innerHTML = EMOTES.map(e => {
-    const owned    = _ownedItems.has('emote_' + e.id) || e.price === 0;
-    const equipped = _equippedEmote === e.id;
-    const canAfford = voltbucks >= e.price;
+    const unlocked  = !e.unlockAt || _ownedItems.has('emote_' + e.id);
+    const owned     = _ownedItems.has('emote_' + e.id) || (e.price === 0 && !e.unlockAt);
+    const equipped  = _equippedEmote === e.id;
+    const canAfford = e.unlockAt ? false : voltbucks >= e.price;
     const cls = 'shop-item' + (equipped ? ' equipped' : owned ? ' owned' : canAfford ? '' : ' broke');
     const badge = equipped ? `<span class="shop-item-badge">${t('shop.equipped')}</span>` : owned ? `<span class="shop-item-badge">${t('shop.owned')}</span>` : '';
-    const price = e.price === 0 ? t('shop.free') : owned ? '✓' : '⚡' + e.price + ' VB';
+    const price = e.unlockAt
+      ? (owned ? '✓' : `🔒 ${e.unlockAt.toLocaleString()} VB`)
+      : (e.price === 0 ? t('shop.free') : owned ? '✓' : '⚡' + e.price + ' VB');
     return `<div class="${cls}" data-emote="${e.id}">
       ${badge}
       <div style="font-size:32px;line-height:1.2;padding:4px 0">${e.emoji}</div>
@@ -5885,11 +6304,12 @@ function _renderShopEmotes() {
       const emote = EMOTES.find(e => e.id === el.dataset.emote);
       if (!emote) return;
       const key = 'emote_' + emote.id;
-      if (_ownedItems.has(key) || emote.price === 0) {
+      if (_ownedItems.has(key) || (emote.price === 0 && !emote.unlockAt)) {
         _equippedEmote = emote.id; _saveCosmetics(); _renderShopEmotes();
         document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
         return;
       }
+      if (emote.unlockAt) return; // débloquée automatiquement uniquement, pas achetable
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < emote.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(emote)).replace('{price}', emote.price))) return;
@@ -6102,32 +6522,37 @@ function _applyBackground() {
 function _renderShopBonus() {
   const body = document.getElementById('shop-body');
   body.innerHTML = CONSUMABLES.map(c => {
-    const owned = !!_consumables[c.id];
+    const count     = c.stackable ? (Number(_consumables[c.id]) || 0) : 0;
+    const owned     = c.stackable ? count > 0 : !!_consumables[c.id];
     const canAfford = voltbucks >= c.price;
+    const canBuy    = c.stackable ? canAfford : (!owned && canAfford);
     const cls = owned ? 'shop-bg-item owned' : 'shop-bg-item' + (canAfford ? '' : ' broke');
-    const badge = owned ? `<span class="shop-item-badge">${t('shop.in_stock')}</span>` : '';
-    const btnLabel = owned ? t('shop.in_stock_btn') : `⚡${c.price} VB`;
-    const btnDisabled = owned || (!canAfford && !owned) ? '' : '';
-    const btnStyle = owned ? 'opacity:0.5;cursor:default' : canAfford ? '' : 'opacity:0.4;cursor:default';
+    const badge = owned
+      ? `<span class="shop-item-badge">${c.stackable ? t('consum.hint.stock').replace('{n}', count) : t('shop.in_stock')}</span>`
+      : '';
+    const btnLabel = canBuy ? `⚡${c.price} VB` : (owned && !c.stackable ? t('shop.in_stock_btn') : `⚡${c.price} VB`);
+    const btnStyle = canBuy ? '' : 'opacity:0.4;cursor:default';
     return `<div class="${cls}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;min-width:120px">
       ${badge}
       <div style="font-size:36px">${c.emoji}</div>
       <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;color:#00ffcc">${iname(c)}</div>
       <div style="font-family:'Courier New',monospace;font-size:9px;color:#336655;text-align:center;letter-spacing:1px">${idesc(c)}</div>
-      <button class="shop-consum-buy" data-consum="${c.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid ${owned?'#1a5a3a':canAfford?'#336644':'#2a2a2a'};color:${owned?'#336655':canAfford?'#00ffcc':'#333'};padding:3px 10px;cursor:${owned||!canAfford?'default':'pointer'};${btnStyle}">${btnLabel}</button>
+      <button class="shop-consum-buy" data-consum="${c.id}" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:none;border:1px solid ${canBuy?'#336644':'#2a2a2a'};color:${canBuy?'#00ffcc':'#333'};padding:3px 10px;cursor:${canBuy?'pointer':'default'};${btnStyle}">${btnLabel}</button>
     </div>`;
   }).join('');
 
   body.querySelectorAll('.shop-consum-buy').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.consum;
+      const id   = btn.dataset.consum;
       const item = CONSUMABLES.find(c => c.id === id);
-      if (!item || _consumables[id]) return;
+      if (!item) return;
+      if (!item.stackable && _consumables[id]) return;
       if (!currentUser) { alert(t('shop.login_required')); return; }
       if (voltbucks < item.price) return;
       if (!confirm(t('shop.buy_confirm').replace('{name}', iname(item)).replace('{price}', item.price))) return;
       voltbucks -= item.price;
-      _consumables[id] = true;
+      if (item.stackable) _consumables[id] = (Number(_consumables[id]) || 0) + 1;
+      else _consumables[id] = true;
       _saveConsumables(); _syncVB(); _renderShopBonus();
       _updateConsumHUD();
       document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
@@ -6146,13 +6571,12 @@ async function openFinish(timeMs, deaths) {
   const pseudoIn  = document.getElementById('finish-pseudo');
   const titleEl   = overlay.querySelector('h2');
   const diffId    = _diffId(); // tient compte du mode miroir
-  const camp      = CAMPAIGNS[_baseCampId(diffId)];
+  const camp      = CAMPAIGNS[currentCampaignId];
   // Enregistre le résultat pour checkAchievements
-  _lastCamp = { campId: _baseCampId(diffId), deaths, time: timeMs, inv: invertControls };
+  _lastCamp = { campId: currentCampaignId, deaths, time: timeMs, inv: invertControls, yb: ybMode };
   checkAchievements('camp');
-  // Gain VoltBucks pour complétion de campagne
-  const _vbCamp = { bebe: 1, piquer: 10, cauchemar: 50 };
-  if (!adminMode) earnVoltbucks(_vbCamp[_baseCampId(diffId)] || 0, 'campaign');
+  // Gain VoltBucks pour complétion de campagne (modificateurs inclus)
+  if (!adminMode) earnVoltbucks(_calcVb(_baseCampId(diffId)), 'campaign');
 
   // Reset overlay state
   pseudoIn.style.display = 'none';
@@ -6425,8 +6849,8 @@ document.addEventListener('keydown', e => {
     }
   }
 
-  // Si le niveau est gagné et que le bouton "suivant" est visible → n'importe quelle touche avance
-  if (state && state.won) {
+  // Si le niveau est gagné et que le bouton "suivant" est visible → ESPACE uniquement
+  if (state && state.won && e.key === ' ') {
     const nlWrap = document.getElementById('next-level-wrap');
     const nlBtn  = document.getElementById('next-level-btn');
     if (nlWrap && nlWrap.style.display !== 'none' && nlBtn && nlBtn.style.display !== 'none') {
@@ -6437,6 +6861,9 @@ document.addEventListener('keydown', e => {
   }
 
   keys[k] = true;
+  if ((k === 'Q' || k === 'P') && !e.repeat) {
+    _freshKeyPressed = true;
+  }
   if (e.key === ' ' && !e.repeat) { spacePressCount++; recordKey('keydown', ' '); }
   else if (k !== 'R') recordKey('keydown', k);
   if (k === 'R' && (!(state && state.won) || adminMode)) selectLevel(currentLevel);
@@ -6611,9 +7038,10 @@ function sfxWin() {
 function update(dt) {
   if (state.won || state.dead) return;
   if (state.waiting) {
-    const anyKey = Object.values(keys).some(v => v);
-    if (!anyKey) return;
+    if (!_freshKeyPressed) return;
+    _freshKeyPressed = false;
     state.waiting = false;
+    if (ybMode) _ybStarted = true; // le fade démarre exactement quand la balle part
   }
 
   if (state.type === 'custom') { updateCustom(dt); return; }
@@ -7027,6 +7455,19 @@ function drawParticles() {
 function draw() {
   ctx.clearRect(0, 0, W, H);
 
+  // ── Yeux bandés : fond noir opaque, rien d'autre (son + mémoire uniquement)
+  // Jamais actif pendant state.waiting — le niveau doit être visible avant le premier input
+  const _ybActive = ybMode && _ybStarted && !state.waiting;
+  if (_ybActive && _ybFade >= 1) {
+    ctx.fillStyle = '#050508';
+    ctx.fillRect(0, 0, W, H);
+    // Microprocesseur : afficher le défi même en mode yeux bandés
+    if (state.type === 'custom' && state.microChallenge) drawMicroOverlay(state.microChallenge);
+    document.getElementById('bg-flash').style.opacity = 0;
+    drawParticles();
+    return;
+  }
+
   // Screen shake on death
   const shakeAmt = shakeTimer > 0 ? (Math.random() - 0.5) * 10 * (shakeTimer / 0.22) : 0;
   ctx.save();
@@ -7038,6 +7479,15 @@ function draw() {
   if (state.type === 'custom') drawCustom();
   else if (state.type === 'single') drawLevel1();
   else drawLevel2();
+
+  // ── Yeux bandés en cours de fade (transition)
+  if (_ybActive && _ybFade > 0) {
+    ctx.save();
+    ctx.globalAlpha = _ybFade;
+    ctx.fillStyle = '#050508';
+    ctx.fillRect(-20, -20, W + 40, H + 40);
+    ctx.restore();
+  }
 
   if (state.type !== 'custom') {
     if (state.won)  drawOverlay(t('win'),  '#ffff44', '#ffff00');
@@ -8115,17 +8565,23 @@ function edgePolylineFrom(edge, nodes, t) {
   return result;
 }
 
+// ── FRESH KEY PRESS (pour démarrer un niveau) ──────────────
+let _freshKeyPressed = false; // true uniquement après un nouveau keydown (pas une touche maintenue)
+
 // ── LOOP ───────────────────────────────────────────────────
 let lastTimestamp = 0;
 function loop(timestamp) {
   const dt = lastTimestamp ? Math.min((timestamp - lastTimestamp) / 1000, 0.05) : 1 / 60;
   lastTimestamp = timestamp;
+  // Yeux bandés : anime le fondu au noir après le premier input
+  if (ybMode && _ybStarted && _ybFade < 1) _ybFade = Math.min(1, _ybFade + dt * 1.2);
   if (replayMode) updateReplay();
   const wasWon  = state.won;
   const wasDead = state.dead;
   update(dt);
   updateParticles(dt);
   if (!wasDead && state.dead && !replayMode) {
+    if (ybMode) { _ybFade = 0; _ybStarted = false; } // révèle l'overlay mort
     registerDeath();
     // Spawn death sparks at last known ball position
     if (state.type === 'custom' && state.balls && state.balls.length > 0) {
@@ -8138,6 +8594,7 @@ function loop(timestamp) {
     }
   }
   if (!wasWon && state.won && !replayMode) {
+    if (ybMode) { _ybFade = 0; _ybStarted = false; } // révèle l'overlay victoire
     markLevelDone(currentLevel);
     stopRecordingWin();
     // Win burst particles at bulb position
@@ -8155,12 +8612,18 @@ function loop(timestamp) {
     if (survivalRunning) {
       survivalScore++;
       survivalStreak++;
-      if (!adminMode && survivalStreak >= 3) unlockAchievement('survie_deathless');
-      if (!adminMode && survivalLives === 1) unlockAchievement('survie_comeback');
+      if (!adminMode) earnVoltbucks(_calcVb('survie'), 'survival');
+      if (!adminMode && survivalStreak >= 3) {
+        if      (ybMode && invertControls)  { /* pas d'ach streak spécifique yb+inv pour l'instant */ }
+        else if (ybMode)                    unlockAchievement('survie_yb_deathless');
+        else if (invertControls)            unlockAchievement('survie_inv_deathless');
+        else                                unlockAchievement('survie_deathless');
+      }
+      if (!adminMode && survivalLives === 1) unlockAchievement(invertControls && !ybMode ? 'survie_inv_comeback' : 'survie_comeback');
       updateSurvivalHUD();
       nlBtn.style.display = 'none';
       nlWrap.style.display = 'none';
-      setTimeout(() => { if (survivalRunning) goSurvivalLevel(survivalPickNext()); }, 1600);
+      setTimeout(() => { if (survivalRunning) { _freshKeyPressed = true; goSurvivalLevel(survivalPickNext()); } }, 1600);
     }
 
     // Bouton campagne
@@ -8169,7 +8632,7 @@ function loop(timestamp) {
     if (cp >= 0 && !survivalRunning) {
       if (cp + 1 < CAMPAIGN.length) {
         nlBtn.innerHTML = t('btn.next_level') + '<br><span style="font-size:11px;letter-spacing:2px;opacity:0.5">' + (currentLang === 'fr' ? '[ ESPACE ]' : '[ SPACE ]') + '</span>';
-        nlBtn.onclick = () => { nlWrap.style.display = 'none'; goNextCampaign(cp + 1); };
+        nlBtn.onclick = () => { nlWrap.style.display = 'none'; _freshKeyPressed = true; goNextCampaign(cp + 1); };
       } else {
         // Last campaign level — campaign complete only if run started from TUTO1
         const wasFullRun  = campRunning;

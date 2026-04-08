@@ -5,10 +5,10 @@
         ".read": true,
         ".validate": "$version.matches(/^v0_(0_(1|2|3|4|5)|1_0)$/)",
         "$diff": {
-          ".validate": "$diff.matches(/^(bebe|piquer|cauchemar|bebe_inv|piquer_inv|cauchemar_inv|survie)$/)",
+          ".validate": "$diff.matches(/^(bebe|piquer|cauchemar|survie|bebe_inv|piquer_inv|cauchemar_inv|survie_inv|bebe_yb|piquer_yb|cauchemar_yb|survie_yb|bebe_yb_inv|piquer_yb_inv|cauchemar_yb_inv|survie_yb_inv)$/)",
           "$key": {
             ".write": "auth != null && (auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || (!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && data.child('uid').val() === auth.uid))",
-            ".validate": "auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || (newData.hasChildren(['pseudo', 'uid', 'ts']) && newData.child('uid').val() === auth.uid && newData.child('pseudo').isString() && newData.child('pseudo').val().length >= 1 && newData.child('pseudo').val().length <= 20 && newData.child('ts').isNumber() && newData.child('ts').val() <= now && ($diff === 'survie' ? (newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('score').val() <= 9999) : (newData.child('time').isNumber() && newData.child('time').val() > 10000 && newData.child('time').val() < 7200000 && newData.child('deaths').isNumber() && newData.child('deaths').val() >= 0 && newData.child('deaths').val() <= 99999)))"
+            ".validate": "auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || (newData.hasChildren(['pseudo', 'uid', 'ts']) && newData.child('uid').val() === auth.uid && newData.child('pseudo').isString() && newData.child('pseudo').val().length >= 1 && newData.child('pseudo').val().length <= 20 && newData.child('ts').isNumber() && newData.child('ts').val() <= now && ($diff === 'survie' || $diff === 'survie_inv' || $diff === 'survie_yb' || $diff === 'survie_yb_inv' ? (newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('score').val() <= 9999) : (newData.child('time').isNumber() && newData.child('time').val() > 10000 && newData.child('time').val() < 7200000 && newData.child('deaths').isNumber() && newData.child('deaths').val() >= 0 && newData.child('deaths').val() <= 99999)))"
           }
         }
       }
@@ -26,7 +26,7 @@
       ".read": true,
       "$uid": {
         ".write": "auth != null && (auth.uid === 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2' || auth.uid === $uid)",
-        ".validate": "newData.hasChildren(['pseudo', 'count', 'ts']) && newData.child('pseudo').isString() && newData.child('pseudo').val().length <= 20 && newData.child('count').isNumber() && newData.child('count').val() >= 0 && newData.child('count').val() <= 19"
+        ".validate": "newData.hasChildren(['pseudo', 'count', 'ts']) && newData.child('pseudo').isString() && newData.child('pseudo').val().length <= 20 && newData.child('count').isNumber() && newData.child('count').val() >= 0 && newData.child('count').val() <= 37"
       }
     },
     "voltbucks_ranks": {
