@@ -228,6 +228,43 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   }
   #skip-btn:hover, #prev-btn:hover { border-color: #ffcc44; color: #ffcc44; box-shadow: 0 0 12px #ffaa0055; }
 
+  /* ── CONTROLLER MODAL ──────────────────────────────────── */
+  #ctrl-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 950;
+    background: #000000cc; align-items: center; justify-content: center;
+  }
+  #ctrl-modal-overlay.open { display: flex; }
+  #ctrl-modal-box {
+    background: #08080f; border: 1px solid #00ffcc55;
+    box-shadow: 0 0 40px #00ffcc22, inset 0 0 30px #00ffcc08;
+    padding: 32px 40px 28px; border-radius: 6px;
+    font-family: 'Courier New', monospace; color: #00ffcc;
+    text-align: center; max-width: 420px; width: 90vw;
+  }
+  #ctrl-modal-box h2 {
+    font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  #ctrl-modal-box p {
+    font-size: 0.78rem; color: #00ffcc88; margin-bottom: 28px;
+  }
+  .ctrl-modal-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  }
+  .ctrl-modal-btn {
+    background: transparent; border: 1px solid #00ffcc44;
+    color: #00ffcc; font-family: 'Courier New', monospace;
+    font-size: 0.85rem; padding: 14px 22px; border-radius: 4px;
+    cursor: pointer; transition: border-color .15s, box-shadow .15s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    min-width: 100px;
+  }
+  .ctrl-modal-btn:hover {
+    border-color: #00ffcc; box-shadow: 0 0 14px #00ffcc44;
+  }
+  .ctrl-modal-btn .ctrl-icon { font-size: 1.8rem; }
+  .ctrl-modal-btn .ctrl-label { font-size: 0.75rem; letter-spacing: 1px; }
+
   /* ── ADMIN PANEL ────────────────────────────────────────── */
   #admin-panel-overlay {
     display: none; position: fixed; inset: 0; z-index: 900;
@@ -1923,6 +1960,28 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   </div>
 </div>
 
+<!-- Controller Selection Modal -->
+<div id="ctrl-modal-overlay">
+  <div id="ctrl-modal-box">
+    <h2 data-i18n="ctrl.modal.title">Contrôles</h2>
+    <p data-i18n="ctrl.modal.sub">Choisissez votre méthode de contrôle</p>
+    <div class="ctrl-modal-btns">
+      <button class="ctrl-modal-btn" id="ctrl-btn-xbox">
+        <span class="ctrl-icon">🎮</span>
+        <span class="ctrl-label">XBOX</span>
+      </button>
+      <button class="ctrl-modal-btn" id="ctrl-btn-ps">
+        <span class="ctrl-icon">🕹️</span>
+        <span class="ctrl-label">PLAYSTATION</span>
+      </button>
+      <button class="ctrl-modal-btn" id="ctrl-btn-kb">
+        <span class="ctrl-icon">⌨️</span>
+        <span class="ctrl-label" data-i18n="ctrl.modal.kb">CLAVIER</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Admin Panel -->
 <div id="admin-panel-overlay">
   <div id="admin-panel-box">
@@ -2278,14 +2337,22 @@ const TRANSLATIONS = {
     'group.levels': 'NIVEAUX',
     'tuto1.name': 'Tutoriel 1',
     'tuto1.hint': 'Maintiens [Q] pour fermer l\'interrupteur — [R] pour recommencer',
+    'tuto1.hint.ps': 'Maintiens [L2] pour fermer l\'interrupteur — [○] pour recommencer',
+    'tuto1.hint.xbox': 'Maintiens [LT] pour fermer l\'interrupteur — [B] pour recommencer',
     'tuto1.bg_hint': 'Maintiens Q',
     'tuto2.bg_hint_verb': 'Maintiens',
     'resistance.bg_hint': 'SPAM ESPACE !',
     'tuto2.name': 'Tutoriel 2',
     'tuto2.hint': 'Maintiens [Q] et [P] simultanément — [R] pour recommencer',
+    'tuto2.hint.ps': 'Maintiens [L2] et [R2] simultanément — [○] pour recommencer',
+    'tuto2.hint.xbox': 'Maintiens [LT] et [RT] simultanément — [B] pour recommencer',
     'tuto3.name': 'Tutoriel 3',
     'tuto3.hint': '[Q] ▶ relâche [Q] ▶ [P] ▶ relâche [P] — [R] pour recommencer',
+    'tuto3.hint.ps': '[L2] ▶ relâche [L2] ▶ [R2] ▶ relâche [R2] — [○] pour recommencer',
+    'tuto3.hint.xbox': '[LT] ▶ relâche [LT] ▶ [RT] ▶ relâche [RT] — [B] pour recommencer',
     'hint.restart': '— [R] pour recommencer',
+    'hint.restart.ps': '— [○] pour recommencer',
+    'hint.restart.xbox': '— [B] pour recommencer',
     'hint.replay_suffix': '— replay',
     'hint.custom': 'Niveau custom — [R] pour recommencer',
     'btn.save_replay': '💾 Sauvegarder le replay',
@@ -2326,6 +2393,10 @@ const TRANSLATIONS = {
     'space.inactive.xbox': 'A  ░',
     'overlay.restart.ps': '[○] pour recommencer',
     'overlay.restart.xbox': '[B] pour recommencer',
+    // Controller modal
+    'ctrl.modal.title': 'Contrôles',
+    'ctrl.modal.sub': 'Choisissez votre méthode de contrôle',
+    'ctrl.modal.kb': 'CLAVIER',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Connecte-toi pour soumettre ton score.<br>Seul un pseudo de ton choix sera visible — jamais ton nom réel.',
@@ -2640,14 +2711,22 @@ const TRANSLATIONS = {
     'group.levels': 'LEVELS',
     'tuto1.name': 'Tutorial 1',
     'tuto1.hint': 'Hold [Q] to close the switch — [R] to restart',
+    'tuto1.hint.ps': 'Hold [L2] to close the switch — [○] to restart',
+    'tuto1.hint.xbox': 'Hold [LT] to close the switch — [B] to restart',
     'tuto1.bg_hint': 'Hold Q',
     'tuto2.bg_hint_verb': 'Hold',
     'resistance.bg_hint': 'SPAM SPACE !',
     'tuto2.name': 'Tutorial 2',
     'tuto2.hint': 'Hold [Q] and [P] simultaneously — [R] to restart',
+    'tuto2.hint.ps': 'Hold [L2] and [R2] simultaneously — [○] to restart',
+    'tuto2.hint.xbox': 'Hold [LT] and [RT] simultaneously — [B] to restart',
     'tuto3.name': 'Tutorial 3',
     'tuto3.hint': '[Q] ▶ release [Q] ▶ [P] ▶ release [P] — [R] to restart',
+    'tuto3.hint.ps': '[L2] ▶ release [L2] ▶ [R2] ▶ release [R2] — [○] to restart',
+    'tuto3.hint.xbox': '[LT] ▶ release [LT] ▶ [RT] ▶ release [RT] — [B] to restart',
     'hint.restart': '— [R] to restart',
+    'hint.restart.ps': '— [○] to restart',
+    'hint.restart.xbox': '— [B] to restart',
     'hint.replay_suffix': '— replay',
     'hint.custom': 'Custom level — [R] to restart',
     'btn.save_replay': '💾 Save replay',
@@ -2687,6 +2766,10 @@ const TRANSLATIONS = {
     'space.active.xbox': 'A  █',
     'space.inactive.ps': '✕  ░',
     'space.inactive.xbox': 'A  ░',
+    // Controller modal
+    'ctrl.modal.title': 'Controls',
+    'ctrl.modal.sub': 'Choose your control method',
+    'ctrl.modal.kb': 'KEYBOARD',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Sign in to submit your score.<br>Only a username of your choice will be visible — never your real name.',
@@ -3633,6 +3716,35 @@ document.getElementById('btn-gp-xbox').addEventListener('click', () => {
 });
 _applyGamepadMode();
 
+// ── CONTROLLER SELECTION MODAL ──────────────────────────────
+(function() {
+  // Only show on non-touch devices and only once (key absent or empty)
+  const isTouchDev = document.body.classList.contains('touch-device')
+    || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
+  const gpAlreadySet = localStorage.getItem('elecgame_gp_mode') !== null
+    && localStorage.getItem('elecgame_gp_mode') !== '';
+  const modalSeen = localStorage.getItem('elecgame_ctrl_modal_seen');
+
+  if (!isTouchDev && !gpAlreadySet && !modalSeen) {
+    const overlay = document.getElementById('ctrl-modal-overlay');
+    overlay.classList.add('open');
+
+    function closeModal(mode) {
+      overlay.classList.remove('open');
+      localStorage.setItem('elecgame_ctrl_modal_seen', '1');
+      if (mode) {
+        _gamepadMode = mode;
+        localStorage.setItem('elecgame_gp_mode', mode);
+        _applyGamepadMode();
+      }
+    }
+
+    document.getElementById('ctrl-btn-xbox').addEventListener('click', () => closeModal('xbox'));
+    document.getElementById('ctrl-btn-ps').addEventListener('click',   () => closeModal('ps'));
+    document.getElementById('ctrl-btn-kb').addEventListener('click',   () => closeModal(null));
+  }
+})();
+
 // ── LEVELS ─────────────────────────────────────────────────
 const LEVELS = [
   {
@@ -3774,18 +3886,29 @@ let invertControls = false;
 // Swape Q↔P quand le mode miroir est actif
 function _ikey(k) { return invertControls ? (k === 'Q' ? 'P' : k === 'P' ? 'Q' : k) : k; }
 
+function _gpKey(k) {
+  if (!_gamepadMode) return k;
+  if (k === 'Q') return _gamepadMode === 'ps' ? 'L2' : 'LT';
+  if (k === 'P') return _gamepadMode === 'ps' ? 'R2' : 'RT';
+  if (k === ' ') return _gamepadMode === 'ps' ? '✕' : 'A';
+  if (k === 'R') return _gamepadMode === 'ps' ? '○' : 'B';
+  return k;
+}
+
 function _buildTutoHint(idx) {
   const el = document.getElementById('tuto-q-hint');
   if (!el) return;
   const O = 'color:#ffaa00;text-shadow:0 0 18px #ffaa00,0 0 40px #ff8800';
   const P = 'color:#cc44ff;text-shadow:0 0 18px #cc44ff,0 0 40px #aa00ff';
   const Y = 'color:#ffee00;text-shadow:0 0 18px #ffee00,0 0 40px #ffaa00';
+  const kQ = _gpKey('Q'), kP = _gpKey('P');
   if (idx === 0) {
-    el.innerHTML = `<span style="${O}">${t('tuto1.bg_hint')}</span>`;
+    const verb = t('tuto2.bg_hint_verb');
+    el.innerHTML = `<span style="color:#7799aa">${verb} </span><span style="${O}">${kQ}</span>`;
     el.classList.add('visible');
   } else if (idx === 1) {
     const verb = t('tuto2.bg_hint_verb');
-    el.innerHTML = `<span style="color:#7799aa">${verb} </span><span style="${O}">Q</span><span style="color:#334455"> + </span><span style="${P}">P</span>`;
+    el.innerHTML = `<span style="color:#7799aa">${verb} </span><span style="${O}">${kQ}</span><span style="color:#334455"> + </span><span style="${P}">${kP}</span>`;
     el.classList.add('visible');
   } else if (LEVELS[idx]?.bgHint === 'resistance') {
     el.innerHTML = `<span style="${Y}">${t('resistance.bg_hint')}</span>`;
@@ -7598,7 +7721,7 @@ function drawSwitch(sw) {
   ctx.textAlign = 'center';
   ctx.fillStyle = c.main;
   ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
-  ctx.fillText('[' + _ikey(sw.key) + ']', x, labelY);
+  ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
   ctx.restore();
   // Cadenas si switch verrouillé par fusible
   if (sw === _lockedSwitchRef) {
@@ -7683,14 +7806,15 @@ function drawSource(x, y) {
 }
 
 function drawKeyIndicator(key, px, py) {
-  const dk   = _ikey(key);          // touche effective affichée
+  const dk   = _ikey(key);          // touche effective (Q ou P après invert)
+  const label = _gpKey(dk);         // label affiché selon mode manette
   const held = !!keys[dk];
-  const c = keyColor(key);          // keyColor applique _ikey en interne
+  const c = keyColor(key);
   ctx.save();
   ctx.font = 'bold 14px Courier New'; ctx.textAlign = 'left';
   ctx.fillStyle = held ? c.main : c.dim;
   ctx.shadowBlur = held ? 10 : 0; ctx.shadowColor = c.glow;
-  ctx.fillText(dk + '  ' + (held ? t('key.closed') : t('key.open')), px, py);
+  ctx.fillText(label + '  ' + (held ? t('key.closed') : t('key.open')), px, py);
   ctx.restore();
 }
 
@@ -8854,7 +8978,7 @@ function drawCustom() {
       ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
       ctx.fillStyle = c.main;
       ctx.shadowBlur = sw.open ? 0 : 6; ctx.shadowColor = c.glow;
-      ctx.fillText('[' + _ikey(sw.key) + ']', 0, 44);
+      ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', 0, 44);
       // Cadenas si verrouillé par fusible
       if (edge.id === _lockedSwitchEid) {
         ctx.font = '16px serif'; ctx.fillStyle = '#ffaa00';
