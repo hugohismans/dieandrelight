@@ -1720,7 +1720,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 <!-- Audio controls -->
 <div id="audio-controls">
   <button class="audio-btn" id="btn-mute-all" title="Couper tout le son">🔊</button>
-  <button class="audio-btn" id="btn-gamepad-mode" title="Mode manette PlayStation" style="font-size:14px">🎮</button>
+  <button class="audio-btn" id="btn-gp-ps"  title="Mode manette PlayStation" style="font-size:11px;letter-spacing:0">PS</button>
+  <button class="audio-btn" id="btn-gp-xbox" title="Mode manette Xbox"        style="font-size:11px;letter-spacing:0">XB</button>
 </div>
 
 <!-- Language toggle -->
@@ -2301,22 +2302,28 @@ const TRANSLATIONS = {
     'key.open': '░ OUVERT',
     'overlay.restart': '[R] pour recommencer',
     'waiting.key': '▶  APPUIE SUR Q OU P',
-    'waiting.key.gp': '▶  APPUIE SUR L2 OU R2',
+    'waiting.key.ps': '▶  APPUIE SUR L2 OU R2',
+    'waiting.key.xbox': '▶  APPUIE SUR LT OU RT',
     'waiting.keys': 'Q   ESPACE   P',
-    'waiting.keys.gp': 'L2   ✕   R2',
+    'waiting.keys.ps': 'L2   ✕   R2',
+    'waiting.keys.xbox': 'LT   A   RT',
     'win': 'CIRCUIT COMPLET !',
     'dead': 'COURT-CIRCUIT !',
     'replay': '● REPLAY',
     'resistance.active': '[ ESPACE ]',
-    'resistance.active.gp': '[ ✕ ]',
+    'resistance.active.ps': '[ ✕ ]',
+    'resistance.active.xbox': '[ A ]',
     'resistance.label': 'résistance',
     'micro.title': '— MICROPROCESSEUR —',
     'micro.prompt': '▼  tape le code  ▼',
     'space.active': 'ESPACE  █',
-    'space.active.gp': '✕  █',
+    'space.active.ps': '✕  █',
+    'space.active.xbox': 'A  █',
     'space.inactive': 'ESPACE  ░',
-    'space.inactive.gp': '✕  ░',
-    'overlay.restart.gp': '[○] pour recommencer',
+    'space.inactive.ps': '✕  ░',
+    'space.inactive.xbox': 'A  ░',
+    'overlay.restart.ps': '[○] pour recommencer',
+    'overlay.restart.xbox': '[B] pour recommencer',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Connecte-toi pour soumettre ton score.<br>Seul un pseudo de ton choix sera visible — jamais ton nom réel.',
@@ -2656,22 +2663,28 @@ const TRANSLATIONS = {
     'key.closed': '█ CLOSED',
     'key.open': '░ OPEN',
     'overlay.restart': '[R] to restart',
-    'overlay.restart.gp': '[○] to restart',
+    'overlay.restart.ps': '[○] to restart',
+    'overlay.restart.xbox': '[B] to restart',
     'waiting.key': '▶  PRESS Q OR P',
-    'waiting.key.gp': '▶  PRESS L2 OR R2',
+    'waiting.key.ps': '▶  PRESS L2 OR R2',
+    'waiting.key.xbox': '▶  PRESS LT OR RT',
     'waiting.keys': 'Q   SPACE   P',
-    'waiting.keys.gp': 'L2   ✕   R2',
+    'waiting.keys.ps': 'L2   ✕   R2',
+    'waiting.keys.xbox': 'LT   A   RT',
     'win': 'CIRCUIT COMPLETE!',
     'dead': 'SHORT CIRCUIT!',
     'replay': '● REPLAY',
     'resistance.active': '[ SPACE ]',
-    'resistance.active.gp': '[ ✕ ]',
+    'resistance.active.ps': '[ ✕ ]',
+    'resistance.active.xbox': '[ A ]',
     'resistance.label': 'resistance',
     'micro.title': '— MICROPROCESSOR —',
     'micro.prompt': '▼  type the code  ▼',
     'space.active': 'SPACE  █',
-    'space.active.gp': '✕  █',
-    'space.inactive.gp': '✕  ░',
+    'space.active.ps': '✕  █',
+    'space.active.xbox': 'A  █',
+    'space.inactive.ps': '✕  ░',
+    'space.inactive.xbox': 'A  ░',
     // Auth
     'auth.hof_title': '🏆 Hall of Fame',
     'auth.hof_desc': 'Sign in to submit your score.<br>Only a username of your choice will be visible — never your real name.',
@@ -2976,13 +2989,12 @@ const TRANSLATIONS = {
 let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
 let allMuted = localStorage.getItem('elecgame_mute_all') === '1';
 
-let _gamepadMode = localStorage.getItem('elecgame_gp_mode') === '1';
+let _gamepadMode = localStorage.getItem('elecgame_gp_mode') || null; // 'ps' | 'xbox' | null
 
 function t(key) {
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.fr;
-  // En mode manette, préférer la clé .gp si elle existe
   if (_gamepadMode) {
-    const gpVal = dict[key + '.gp'] || TRANSLATIONS.fr[key + '.gp'];
+    const gpVal = dict[key + '.' + _gamepadMode] || TRANSLATIONS.fr[key + '.' + _gamepadMode];
     if (gpVal) return gpVal;
   }
   return dict[key] || TRANSLATIONS.fr[key] || key;
@@ -3585,28 +3597,36 @@ applyAudioMuteUI();
 
 // ── GAMEPAD MODE TOGGLE ─────────────────────────────────────
 function _applyGamepadMode() {
-  const btn = document.getElementById('btn-gamepad-mode');
-  const btnQ = document.getElementById('btn-q');
-  const btnP = document.getElementById('btn-p');
-  const btnSp = document.getElementById('btn-space');
-  if (_gamepadMode) {
-    btn.style.opacity = '1';
-    btn.title = 'Mode manette PS actif — cliquer pour désactiver';
+  const btnPs   = document.getElementById('btn-gp-ps');
+  const btnXbox = document.getElementById('btn-gp-xbox');
+  const btnQ    = document.getElementById('btn-q');
+  const btnP    = document.getElementById('btn-p');
+  const btnSp   = document.getElementById('btn-space');
+  if (btnPs)   btnPs.style.opacity   = _gamepadMode === 'ps'   ? '1' : '0.35';
+  if (btnXbox) btnXbox.style.opacity = _gamepadMode === 'xbox' ? '1' : '0.35';
+  if (_gamepadMode === 'ps') {
     if (btnQ)  btnQ.textContent  = 'L2';
     if (btnP)  btnP.textContent  = 'R2';
     if (btnSp) btnSp.textContent = '✕';
+  } else if (_gamepadMode === 'xbox') {
+    if (btnQ)  btnQ.textContent  = 'LT';
+    if (btnP)  btnP.textContent  = 'RT';
+    if (btnSp) btnSp.textContent = 'A';
   } else {
-    btn.style.opacity = '0.4';
-    btn.title = 'Activer le mode manette PlayStation';
     if (btnQ)  btnQ.textContent  = 'Q';
     if (btnP)  btnP.textContent  = 'P';
     if (btnSp) btnSp.textContent = t('touch.space');
   }
 }
 
-document.getElementById('btn-gamepad-mode').addEventListener('click', () => {
-  _gamepadMode = !_gamepadMode;
-  localStorage.setItem('elecgame_gp_mode', _gamepadMode ? '1' : '0');
+document.getElementById('btn-gp-ps').addEventListener('click', () => {
+  _gamepadMode = _gamepadMode === 'ps' ? null : 'ps';
+  localStorage.setItem('elecgame_gp_mode', _gamepadMode || '');
+  _applyGamepadMode();
+});
+document.getElementById('btn-gp-xbox').addEventListener('click', () => {
+  _gamepadMode = _gamepadMode === 'xbox' ? null : 'xbox';
+  localStorage.setItem('elecgame_gp_mode', _gamepadMode || '');
   _applyGamepadMode();
 });
 _applyGamepadMode();
