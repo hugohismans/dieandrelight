@@ -5449,9 +5449,11 @@ function campTickDisplay() {
 // ── DEVICE DETECTION ───────────────────────────────────────
 function detectDevice() {
   const ua = navigator.userAgent;
-  const touch = navigator.maxTouchPoints > 1;
-  if (/tablet|ipad/i.test(ua) || (touch && !/mobile/i.test(ua) && window.innerWidth >= 768)) return 'tablet';
-  if (/mobile|android|iphone|ipod|blackberry|windows phone/i.test(ua) || (touch && window.innerWidth < 768)) return 'mobile';
+  // Windows déclare maxTouchPoints > 0 même sans écran tactile — on se fie surtout au UA
+  const isMobileUA  = /mobile|android|iphone|ipod|blackberry|windows phone/i.test(ua);
+  const isTabletUA  = /tablet|ipad/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua));
+  if (isTabletUA) return 'tablet';
+  if (isMobileUA) return 'mobile';
   return 'pc';
 }
 const DEVICE_ICON = { pc: '🖥️', mobile: '📱', tablet: '📟' };
