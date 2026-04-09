@@ -2471,8 +2471,8 @@ const TRANSLATIONS = {
     'waiting.key.ps': '▶  APPUIE SUR L2 OU R2',
     'waiting.key.xbox': '▶  APPUIE SUR LT OU RT',
     'waiting.keys': 'Q   ESPACE   P',
-    'waiting.keys.ps': 'L2        R2',
-    'waiting.keys.xbox': 'LT        RT',
+    'waiting.keys.ps': 'L2   ✕   R2',
+    'waiting.keys.xbox': 'LT   A   RT',
     'win': 'CIRCUIT COMPLET !',
     'dead': 'COURT-CIRCUIT !',
     'replay': '● REPLAY',
@@ -2864,8 +2864,8 @@ const TRANSLATIONS = {
     'waiting.key.ps': '▶  PRESS L2 OR R2',
     'waiting.key.xbox': '▶  PRESS LT OR RT',
     'waiting.keys': 'Q   SPACE   P',
-    'waiting.keys.ps': 'L2        R2',
-    'waiting.keys.xbox': 'LT        RT',
+    'waiting.keys.ps': 'L2   ✕   R2',
+    'waiting.keys.xbox': 'LT   A   RT',
     'win': 'CIRCUIT COMPLETE!',
     'dead': 'SHORT CIRCUIT!',
     'replay': '● REPLAY',
@@ -7992,13 +7992,15 @@ document.addEventListener('keyup', e => {
     const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of gamepads) {
       if (!gp) continue;
-      // Boutons : 1=B/Rond, 6=LT/L2, 7=RT/R2  (X/Croix retiré — seuls L2/R2 lancent le niveau)
+      // Boutons : 0=X/Croix→Espace, 1=B/Rond→R, 6=LT/L2→Q, 7=RT/R2→P
+      const btnA  = gp.buttons[0]?.pressed;
       const btnB  = gp.buttons[1]?.pressed;
       const lt    = gp.buttons[6]?.pressed || (gp.buttons[6]?.value ?? 0) > 0.3;
       const rt    = gp.buttons[7]?.pressed || (gp.buttons[7]?.value ?? 0) > 0.3;
 
       lt   ? _gpPressKey('Q') : _gpReleaseKey('Q');
       rt   ? _gpPressKey('P') : _gpReleaseKey('P');
+      btnA ? _gpPressKey(' ') : _gpReleaseKey(' ');
       btnB ? _gpPressKey('R') : _gpReleaseKey('R');
 
       // D-pad pour micro challenge (12=↑ 13=↓ 14=← 15=→)
