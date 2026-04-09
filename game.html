@@ -1660,7 +1660,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   #lang-toggle {
     position: fixed;
     top: 14px;
-    right: 160px;
+    right: 198px;
     z-index: 150;
     background: #0a1a14;
     border: 1px solid #00cc99;
@@ -1815,6 +1815,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   <button class="audio-btn" id="btn-gp-pc"   title="Mode clavier"              style="font-size:11px;letter-spacing:0">KB</button>
   <button class="audio-btn" id="btn-gp-ps"   title="Mode manette PlayStation"  style="font-size:11px;letter-spacing:0">PS</button>
   <button class="audio-btn" id="btn-gp-xbox" title="Mode manette Xbox"         style="font-size:11px;letter-spacing:0">XB</button>
+  <button class="audio-btn" id="btn-hide-labels" title="Masquer les labels de touches" style="font-size:11px;letter-spacing:0">[Q]</button>
 </div>
 
 <!-- Language toggle -->
@@ -3200,6 +3201,7 @@ const TRANSLATIONS = {
 
 let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
 let allMuted = localStorage.getItem('elecgame_mute_all') === '1';
+let _hideLabels = localStorage.getItem('elecgame_hide_labels') === '1';
 
 let _gamepadMode = localStorage.getItem('elecgame_gp_mode') || null; // 'ps' | 'xbox' | null
 
@@ -4000,6 +4002,12 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 
 // Init audio control buttons
 document.getElementById('btn-mute-all').addEventListener('click', toggleMuteAll);
+document.getElementById('btn-hide-labels').addEventListener('click', () => {
+  _hideLabels = !_hideLabels;
+  localStorage.setItem('elecgame_hide_labels', _hideLabels ? '1' : '0');
+  const btn = document.getElementById('btn-hide-labels');
+  btn.style.opacity = _hideLabels ? '0.35' : '1';
+});
 applyAudioMuteUI();
 
 // ── GAMEPAD MODE (3-way exclusive: null=pc, 'ps', 'xbox') ───
@@ -8052,6 +8060,8 @@ function resumeAudio() {
 function applyAudioMuteUI() {
   const btnAll = document.getElementById('btn-mute-all');
   if (btnAll) { btnAll.textContent = allMuted ? '🔇' : '🔊'; btnAll.classList.toggle('muted', allMuted); }
+  const btnLbl = document.getElementById('btn-hide-labels');
+  if (btnLbl) btnLbl.style.opacity = _hideLabels ? '0.35' : '1';
 }
 
 function toggleMuteAll() {
@@ -8311,14 +8321,16 @@ function drawSwitch(sw) {
   }
 
   // Label: above for top track, below for others
-  const labelY = isTop ? y - 42 : y + 44;
-  ctx.save();
-  ctx.font = 'bold 12px Courier New';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = c.main;
-  ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
-  ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
-  ctx.restore();
+  if (!_hideLabels) {
+    const labelY = isTop ? y - 42 : y + 44;
+    ctx.save();
+    ctx.font = 'bold 12px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = c.main;
+    ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
+    ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
+    ctx.restore();
+  }
   // Cadenas si switch verrouillé par fusible
   if (sw === _lockedSwitchRef) {
     ctx.save();
@@ -9762,10 +9774,12 @@ function drawCustom() {
       // Label: perpendicular to wire, offset to the side
       ctx.save();
       ctx.rotate(-angle); // unrotate for readable text
-      ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
-      ctx.fillStyle = c.main;
-      ctx.shadowBlur = sw.open ? 0 : 6; ctx.shadowColor = c.glow;
-      ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', 0, 44);
+      if (!_hideLabels) {
+        ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
+        ctx.fillStyle = c.main;
+        ctx.shadowBlur = sw.open ? 0 : 6; ctx.shadowColor = c.glow;
+        ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', 0, 44);
+      }
       // Cadenas si verrouillé par fusible
       if (edge.id === _lockedSwitchEid) {
         ctx.font = '16px serif'; ctx.fillStyle = '#ffaa00';
