@@ -85,6 +85,9 @@ export default {
       if (path === '/admin/set-emote' && request.method === 'POST')
         return await handleAdminSetEmote(request, env, cors);
 
+      if (path === '/admin/adjust-vb' && request.method === 'POST')
+        return await handleAdminAdjustVb(request, env, cors);
+
       return err('Not found', 404, cors);
 
     } catch (e) {
@@ -142,8 +145,9 @@ async function handleEarnVb(request, env, cors) {
   // Vérifier unlock "I'm rich"
   let richUnlocked = false;
   const inv2 = await getInventory(user.uid, saToken);
-  if (shouldUnlockRich(newVb, inv2.owned || [])) {
-    inv2.owned = [...(inv2.owned || []), 'emote_rich'];
+  const inv2Owned = Array.isArray(inv2.owned) ? inv2.owned : [];
+  if (shouldUnlockRich(newVb, inv2Owned)) {
+    inv2.owned = [...inv2Owned, 'emote_rich'];
     await setInventory(user.uid, inv2, saToken);
     richUnlocked = true;
   }
@@ -181,8 +185,9 @@ async function handleEarnVbSurvival(request, env, cors) {
   // Unlock "I'm rich" si applicable
   let richUnlocked = false;
   const inventory = await getInventory(user.uid, saToken);
-  if (shouldUnlockRich(newVb, inventory.owned || [])) {
-    inventory.owned = [...(inventory.owned || []), 'emote_rich'];
+  const survOwnedArr = Array.isArray(inventory.owned) ? inventory.owned : [];
+  if (shouldUnlockRich(newVb, survOwnedArr)) {
+    inventory.owned = [...survOwnedArr, 'emote_rich'];
     await setInventory(user.uid, inventory, saToken);
     richUnlocked = true;
   }
@@ -205,7 +210,7 @@ async function handleBuyItem(request, env, cors) {
   const saToken   = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
   const currentVb = await getVb(user.uid, saToken);
   const inventory = await getInventory(user.uid, saToken);
-  const owned     = inventory.owned || [];
+  const owned     = Array.isArray(inventory.owned) ? inventory.owned : [];
 
   const validation = validatePurchase(itemId, currentVb, owned);
   if (!validation.ok) return err(validation.error, 400, cors);
@@ -295,8 +300,9 @@ async function handleUnlockAch(request, env, cors) {
   // Unlock "I'm rich" si applicable
   let richUnlocked = false;
   const inventory = await getInventory(user.uid, saToken);
-  if (shouldUnlockRich(newVb, inventory.owned || [])) {
-    inventory.owned = [...(inventory.owned || []), 'emote_rich'];
+  const achOwnedArr = Array.isArray(inventory.owned) ? inventory.owned : [];
+  if (shouldUnlockRich(newVb, achOwnedArr)) {
+    inventory.owned = [...achOwnedArr, 'emote_rich'];
     await setInventory(user.uid, inventory, saToken);
     richUnlocked = true;
   }
@@ -376,4 +382,27 @@ async function handleAdminSetEmote(request, env, cors) {
   }
 
   return json({ ok: true }, 200, cors);
+}
+
+// ── ENDPOINT : /admin/adjust-vb ──────────────────────────────
+// Réservé admin — ajoute ou retire des VB à l'utilisateur connecté.
+// Le client envoie : { amount } — positif ou négatif
+async function handleAdminAdjustVb(request, env, cors) {
+  const user = await authenticate(request, env);
+  if (user.uid !== env.ADMIN_UID) return err('Interdit', 403, cors);
+
+  const { amount } = await request.json();
+  if (typeof amount !== 'number' || amount === 0) return err('Montant invalide', 400, cors);
+
+  const saToken   = await getServiceAccountToken(env.FIREBASE_SERVICE_ACCOUNT);
+  const currentVb = await getVb(user.uid, saToken);
+  const newVb     = Math.max(0, currentVb + amount);
+
+  const existingRank = await fbRead(`voltbucks_ranks/${user.uid}`, saToken);
+  await setVb(user.uid, newVb, saToken);
+  if (existingRank?.pseudo) {
+    await syncVbRank(user.uid, existingRank.pseudo, newVb, saToken);
+  }
+
+  return json({ ok: true, vb: newVb }, 200, cors);
 }

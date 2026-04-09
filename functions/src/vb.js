@@ -5,7 +5,7 @@ export const VB_BASE         = { bebe: 1,  piquer: 10, cauchemar: 50, survie: 3 
 export const VB_MIRROR_BONUS = { bebe: 1,  piquer: 5,  cauchemar: 5,  survie: 1  };
 export const VB_YB_MULT      = { bebe: 10, piquer: 8,  cauchemar: 5,  survie: 5  };
 
-export const HOF_VERSION = 'v0_1_0';
+export const HOF_VERSION = 'v0_1_1';
 
 // Camps valides
 const VALID_CAMPS = ['bebe', 'piquer', 'cauchemar', 'survie'];

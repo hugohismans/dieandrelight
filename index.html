@@ -493,6 +493,32 @@ canvas#bg {
 
 .key-sep { color: #1a4035; font-size: 20px; padding-bottom: 20px; }
 
+body.touch-device .touch-hidden { display: none !important; }
+
+/* Fallback fiable pour mobile réel : pointer coarse + pas de hover */
+@media (pointer: coarse) and (hover: none) {
+  .key-gp-hint { display: none !important; }
+}
+
+.key-gp-hint {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #446655;
+  text-align: center;
+  line-height: 1.6;
+  animation: gp-float 4s ease-in-out infinite;
+  white-space: nowrap;
+}
+.key-gp-hint .gp-or   { color: #2a5a45; }
+.key-gp-hint .gp-ps   { color: #6688ff; }
+.key-gp-hint .gp-xbox { color: #44bb55; }
+.key-gp-hint .gp-sep  { color: #1a3a2a; }
+@keyframes gp-float {
+  0%, 100% { transform: translateY(0); opacity: 0.8; }
+  50%       { transform: translateY(-2px); opacity: 0.5; }
+}
+
 /* ── PLAY BUTTON ─────────────────────────────────────────── */
 #play-btn {
   background: transparent;
@@ -976,94 +1002,7 @@ canvas#bg {
       <h2>📋 PATCH NOTES</h2>
       <button id="modal-patch-close">✕</button>
     </div>
-    <div id="modal-patch-body">
-
-      <div class="pn-version latest">
-        <div class="pn-tag">VERSION ACTUELLE</div>
-        <div class="pn-ver">v0.1.0</div>
-        <div class="pn-subtitle">VoltBucks, Boutique &amp; Sécurité</div>
-        <ul>
-          <li>⚡ <strong>VoltBucks</strong> — la monnaie du jeu. Gagne-en en complétant des campagnes, du mode Survie et des hauts-faits.</li>
-          <li>🛒 <strong>Boutique</strong> — dépense tes VB pour personnaliser ta balle (8 skins), choisir une emote de profil (12+), un fond d'écran (5) ou des consommables.</li>
-          <li>🤑 <strong>Emote "I'm rich"</strong> — débloquée automatiquement à 50 000 VoltBucks.</li>
-          <li>❤️ <strong>Consommables</strong> — Cœur (vie bonus en Survie), Fusible (verrouille un interrupteur), Atténuateur (vitesse réduite), Indice (révèle un haut-fait caché).</li>
-          <li>🏅 <strong>37 hauts-faits</strong> — des objectifs pour récompenser tous les styles de jeu.</li>
-          <li>🏆 <strong>Classement VoltBucks</strong> — qui a accumulé le plus de VB ?</li>
-          <li>👁️ <strong>Mode Yeux Bandés</strong> — joue sans voir le niveau.</li>
-          <li>👤 <strong>Profil joueur</strong> — clique sur un pseudo dans le HOF pour voir son profil, ses hauts-faits et ses scores.</li>
-          <li>🌐 <strong>Traduction FR/EN complète</strong> — tout le jeu est disponible dans les deux langues.</li>
-          <li>🔒 <strong>Sécurité renforcée</strong> — tous les gains VB, achats et hauts-faits sont vérifiés côté serveur.</li>
-        </ul>
-      </div>
-
-      <div class="pn-version">
-        <div class="pn-ver">v0.0.5</div>
-        <div class="pn-subtitle">Nouveaux niveaux, Survie &amp; Hauts-faits</div>
-        <ul>
-          <li>💀 <strong>Mode Survie</strong> — des niveaux s'enchaînent à l'infini avec 3 vies. Jusqu'où iras-tu ?</li>
-          <li>🏆 <strong>HOF Survie</strong> — classement par nombre de niveaux atteints.</li>
-          <li>🏅 <strong>Système de hauts-faits</strong> — 13 objectifs cachés débloqués selon tes exploits.</li>
-          <li>🎆 <strong>Célébration fin de campagne</strong> — feux d'artifice et fanfare à la victoire.</li>
-          <li>🎬 <strong>Replay</strong> — revois ta run depuis le début après avoir terminé une campagne.</li>
-          <li>👤 <strong>Profil joueur</strong> — clique sur un pseudo dans le HOF pour voir ses scores.</li>
-          <li>➕ Nouveaux niveaux : Fibonacci, CR7, La Course, PingPong, Where Am I.</li>
-        </ul>
-      </div>
-
-      <div class="pn-version">
-        <div class="pn-ver">v0.0.4</div>
-        <div class="pn-subtitle">3 Campagnes &amp; Mode Miroir</div>
-        <ul>
-          <li>💀 <strong>Campagne "Cauchemar"</strong> — pour les joueurs qui pensaient avoir tout vu.</li>
-          <li>🔀 <strong>Mode Miroir</strong> — tous les niveaux retournés horizontalement. Q et P échangent leurs rôles.</li>
-          <li>🏆 <strong>HOF par difficulté</strong> — un classement séparé pour Bébés, Piquer, Cauchemar et leurs versions Miroir.</li>
-          <li>🏆 HOF consultable sans connexion.</li>
-          <li>👤 Connexion Google sur la page d'accueil avec avertissement HOF si non connecté.</li>
-          <li>🖥️ Refonte de l'écran de sélection de campagne.</li>
-        </ul>
-      </div>
-
-      <div class="pn-version">
-        <div class="pn-ver">v0.0.3</div>
-        <div class="pn-subtitle">Éditeur, Visuel &amp; Audio</div>
-        <ul>
-          <li>🛠️ <strong>Éditeur de niveaux avancé</strong> — multi-sélection, copier-coller, symétrie X/Y, glisser-déposer.</li>
-          <li>📤 <strong>Soumission de niveaux</strong> — envoie ton niveau à l'admin directement depuis l'éditeur.</li>
-          <li>🎨 <strong>Nouveau visuel</strong> — grille PCB animée, électrons flottants, vignette, scanlines, flash de victoire.</li>
-          <li>✨ <strong>Titre animé</strong> — effet neon, glitch, icône pulsante.</li>
-          <li>🔊 <strong>Contrôles audio</strong> — mute global et mute du bruit électrique séparément.</li>
-          <li>💀 <strong>Particules &amp; Screen shake</strong> — effets visuels à la mort et à la victoire.</li>
-          <li>🖼️ Aperçu miniature des niveaux au survol dans la sidebar.</li>
-        </ul>
-      </div>
-
-      <div class="pn-version">
-        <div class="pn-ver">v0.0.2</div>
-        <div class="pn-subtitle">Campagne &amp; Hall of Fame</div>
-        <ul>
-          <li>👶 <strong>Campagne "Pour les Bébés"</strong> — une progression de niveaux du tutoriel jusqu'au défi.</li>
-          <li>⚡ <strong>Campagne "Piquer"</strong> — pour ceux qui veulent souffrir un peu plus.</li>
-          <li>🏆 <strong>Hall of Fame</strong> — les meilleurs temps sauvegardés en ligne avec ton compte Google.</li>
-          <li>⏱️ Chronomètre et compteur de morts pendant la partie.</li>
-          <li>📝 Pseudo personnalisé pour apparaître dans les classements.</li>
-          <li>➕ Nouveaux niveaux : Gun, Snail et d'autres.</li>
-        </ul>
-      </div>
-
-      <div class="pn-version">
-        <div class="pn-ver">v0.0.1</div>
-        <div class="pn-subtitle">Le début de tout</div>
-        <ul>
-          <li>⚡ <strong>Die and Relight</strong> — guide une balle électrique de l'entrée à la sortie en activant des interrupteurs.</li>
-          <li>⌨️ Deux touches : <strong>Q</strong> (interrupteur gauche) et <strong>P</strong> (interrupteur droit). C'est tout.</li>
-          <li>💀 La balle meurt au contact d'une zone non alimentée. Recommence.</li>
-          <li>🔬 Éléments de circuit : fils, interrupteurs, résistances, téléporteurs, microprocesseur.</li>
-          <li>📱 Compatible mobile avec boutons tactiles à l'écran.</li>
-          <li>🌐 Traduction FR/EN dès le début.</li>
-        </ul>
-      </div>
-
-    </div>
+    <div id="modal-patch-body"></div>
   </div>
 </div>
 
@@ -1080,16 +1019,19 @@ canvas#bg {
       <div class="key-item">
         <div class="key-box q" id="key-q">Q</div>
         <div class="key-desc" id="key-desc-q">Interrupteur gauche</div>
+        <div class="key-gp-hint" id="key-gp-q"></div>
       </div>
       <div class="key-sep">+</div>
       <div class="key-item">
         <div class="key-box p" id="key-p">P</div>
         <div class="key-desc" id="key-desc-p">Interrupteur droit</div>
+        <div class="key-gp-hint" id="key-gp-p"></div>
       </div>
       <div class="key-sep">+</div>
       <div class="key-item">
         <div class="key-box space" id="key-space">ESPACE</div>
         <div class="key-desc" id="key-desc-space">Passer les résistances</div>
+        <div class="key-gp-hint" id="key-gp-space"></div>
       </div>
     </div>
 
@@ -1148,7 +1090,7 @@ canvas#bg {
   <button class="audio-btn" id="btn-mute-hum" title="Couper le bruit électrique">⚡</button>
 </div>
 
-<div id="version-badge">v0.1.0</div>
+<div id="version-badge">v0.1.1</div>
 
 <!-- Player profile modal -->
 <div id="pp-overlay">
@@ -1163,7 +1105,7 @@ canvas#bg {
     </div>
     <div id="pp-body">
       <div id="pp-hof-section">
-        <div id="pp-hof-title">🏆 Scores HOF v0.1.0</div>
+        <div id="pp-hof-title">🏆 Scores HOF v0.1.1</div>
         <div id="pp-diff-tabs">
           <div id="pp-camp-row"></div>
           <div id="pp-mod-row"></div>
@@ -1203,6 +1145,10 @@ const TRANSLATIONS_IDX = {
     'idx.key_right': 'Interrupteur droit',
     'idx.key_space_desc': 'Passer les résistances',
     'idx.key_space_label': 'ESPACE',
+    'idx.gp_or': 'ou',
+    'idx.gp_q':     'L2 · LT',
+    'idx.gp_p':     'R2 · RT',
+    'idx.gp_space': '✕ · A',
     'idx.play': 'Jouer',
     'idx.editor': 'éditeur de niveaux →',
     'idx.scroll_hint': '🏆 HOF & Special Thanks',
@@ -1276,6 +1222,10 @@ const TRANSLATIONS_IDX = {
     'idx.key_right': 'Right switch',
     'idx.key_space_desc': 'Skip resistors',
     'idx.key_space_label': 'SPACE',
+    'idx.gp_or': 'or',
+    'idx.gp_q':     'L2 · LT',
+    'idx.gp_p':     'R2 · RT',
+    'idx.gp_space': '✕ · A',
     'idx.play': 'Play',
     'idx.editor': 'level editor →',
     'idx.scroll_hint': '🏆 HOF & Special Thanks',
@@ -1330,6 +1280,15 @@ const TRANSLATIONS_IDX = {
     'ach.platine': 'Yo je vise l\'or le platine',
   }
 };
+// Détection touch — cache les éléments .touch-hidden sur mobile/tablette
+// Même logique que game.html : UA mobile OU touch + pointer coarse
+(function() {
+  const ua = navigator.userAgent;
+  const isTouchUA = /android|iphone|ipad|ipod|mobile|samsung|samsungbrowser/i.test(ua);
+  const hasTouchEvents = ('ontouchstart' in window) && navigator.maxTouchPoints > 1;
+  if (isTouchUA || hasTouchEvents) document.body.classList.add('touch-device');
+})();
+
 let currentLang = localStorage.getItem('elecgame_lang') || 'fr';
 function t_idx(key) {
   return (TRANSLATIONS_IDX[currentLang] || TRANSLATIONS_IDX.fr)[key] || TRANSLATIONS_IDX.fr[key] || key;
@@ -1434,7 +1393,9 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
 const _idxIsMobile = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
   || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
 
-_fbAuth.getRedirectResult().catch(() => {});
+_fbAuth.getRedirectResult().catch(e => {
+  if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
+});
 
 document.getElementById('idx-google-btn').onclick = async () => {
   try {
@@ -1846,7 +1807,7 @@ function startGame() {
 }
 
 // ── SIDE PANELS ────────────────────────────────────────────
-const HOF_VERSIONS = ['v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1'];
+const HOF_VERSIONS = ['v0_1_1', 'v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1'];
 const FB_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/hof';
 const HOF_FIXED_DIFF = 'cauchemar';
 let hofCurrentVersion = HOF_VERSIONS[0];
@@ -1904,7 +1865,7 @@ async function renderHOF() {
   const isSurvival = hofCurrentMode === 'survie';
   try {
     const diff = isSurvival ? 'survie' : HOF_FIXED_DIFF;
-    const perDiff = hofCurrentVersion === 'v0_1_0' || hofCurrentVersion === 'v0_0_5' || hofCurrentVersion === 'v0_0_4';
+    const perDiff = hofCurrentVersion === 'v0_1_1' || hofCurrentVersion === 'v0_1_0' || hofCurrentVersion === 'v0_0_5' || hofCurrentVersion === 'v0_0_4';
     const path = perDiff
       ? `${FB_URL}/${hofCurrentVersion}/${diff}.json`
       : `${FB_URL}/${hofCurrentVersion}.json`;
@@ -2060,6 +2021,16 @@ function applyIdxLang() {
   const kp = document.getElementById('key-desc-p');  if (kp) kp.textContent = t_idx('idx.key_right');
   const ks = document.getElementById('key-desc-space'); if (ks) ks.textContent = t_idx('idx.key_space_desc');
   const ksl = document.getElementById('key-space');  if (ksl) ksl.textContent = t_idx('idx.key_space_label');
+  // Gamepad hints (PC only — hidden on touch via .touch-hidden)
+  function _gpHint(id, keys) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const or = t_idx('idx.gp_or');
+    el.innerHTML = `<span class="gp-or">🎮 ${or}</span> <span class="gp-ps">${keys.ps}</span> <span class="gp-sep">·</span> <span class="gp-xbox">${keys.xbox}</span>`;
+  }
+  _gpHint('key-gp-q',     { ps: 'L2',  xbox: 'LT' });
+  _gpHint('key-gp-p',     { ps: 'R2',  xbox: 'RT' });
+  _gpHint('key-gp-space', { ps: '✕',   xbox: 'A'  });
   // Play button & editor link
   const pbEl = document.getElementById('play-btn');
   if (pbEl) pbEl.innerHTML = '▶ &nbsp;' + t_idx('idx.play');
@@ -2093,6 +2064,189 @@ function applyIdxLang() {
   if (typeof updateIdxAuthUI === 'function') updateIdxAuthUI();
   // Special thanks (labels bilingues)
   renderSpecials();
+  // Patch notes (bilingual dynamic)
+  buildPatchNotes();
+}
+
+function buildPatchNotes() {
+  const fr = currentLang === 'fr';
+  const body = document.getElementById('modal-patch-body');
+  if (!body) return;
+
+  const PATCHES = [
+    {
+      ver: 'v0.1.1',
+      latest: true,
+      subtitle: fr ? 'Manette, Qualité de vie &amp; Contenu' : 'Gamepad, Quality of Life &amp; Content',
+      items: fr ? [
+        '🎮 <strong>Support manette complet</strong> — PS (L2/R2/✕/○) et Xbox (LT/RT/A/B). Picker contrôleur au premier lancement.',
+        '🕹️ <strong>Hints manette sur l\'écran titre</strong> — L2/R2/LT/RT affichés à côté des touches Q/P/Espace.',
+        '🔒 <strong>Verrous de modes progressifs</strong> — Miroir : finir les 3 campagnes normales. Yeux Bandés : finir les 3 en Miroir. Survie : comme Miroir.',
+        '⏱️ <strong>Timer de campagne au premier input</strong> — le chrono démarre quand la balle part, pas au chargement du niveau.',
+        '💥 <strong>Marqueur de crash</strong> — croix rouge pulsante à l\'endroit exact où la balle s\'est écrasée.',
+        '🎯 <strong>Indicateurs flottants</strong> — "Alterne !" sur le Tuto 3, "Suis les instructions !" (bleu) sur le niveau Microprocesseur.',
+        '🎉 <strong>Niveau GG</strong> — se lance automatiquement à la victoire de campagne.',
+        '🏷️ <strong>Auteur de niveau</strong> — le créateur du niveau est affiché en jeu.',
+        '✏️ <strong>Éditeur</strong> — Ctrl+double-clic pour sélectionner tout un composant connexe. Documentation traduite en anglais.',
+        '🎭 <strong>Boutique</strong> — +14 nouvelles emotes. Emotes exclusives : OG (premiers vainqueurs), MVP, Dev.',
+        '🎱 <strong>6 nouveaux skins de balle</strong> — Étoile, Cube, Cristal, Crâne, Glitch, Trou Noir. Effets visuels uniques et rotation de roulage.',
+        '💸 <strong>Bouton de don</strong> — soutiens le projet via PayPal depuis la sidebar.',
+        '➕ <strong>Nouveau niveau</strong> : "Dans les étoiles" par KetaKoala — Campagne Cauchemar + Mode Survie.',
+        '🐛 <strong>Corrections</strong> — boutique admin +/−VB désormais synchronisée côté serveur ; version HOF correctement mise à jour.',
+      ] : [
+        '🎮 <strong>Full gamepad support</strong> — PS (L2/R2/✕/○) and Xbox (LT/RT/A/B). Controller picker on first launch.',
+        '🕹️ <strong>Gamepad hints on title screen</strong> — L2/R2/LT/RT shown next to Q/P/Space keys.',
+        '🔒 <strong>Progressive mode locks</strong> — Mirror: finish all 3 normal campaigns. Blindfolded: finish all 3 in Mirror. Survival: same as Mirror.',
+        '⏱️ <strong>Campaign timer starts on first input</strong> — the clock starts when the ball moves, not when the level loads.',
+        '💥 <strong>Crash marker</strong> — pulsing red cross at the exact spot the ball crashed.',
+        '🎯 <strong>Floating hints</strong> — "Alternate!" on Tuto 3, "Follow the instructions!" (blue) on the Microprocessor level.',
+        '🎉 <strong>GG level</strong> — launches automatically on campaign victory.',
+        '🏷️ <strong>Level author</strong> — the creator\'s name is shown in-game.',
+        '✏️ <strong>Editor</strong> — Ctrl+double-click to select an entire connected component. Documentation translated to English.',
+        '🎭 <strong>Shop</strong> — 14 new emotes. Exclusive emotes: OG (first winners), MVP, Dev.',
+        '🎱 <strong>6 new ball skins</strong> — Star, Cube, Crystal, Skull, Glitch, Black Hole. Unique visual effects and rolling rotation.',
+        '💸 <strong>Donation button</strong> — support the project via PayPal from the sidebar.',
+        '➕ <strong>New level</strong>: "Dans les étoiles" by KetaKoala — Nightmare campaign + Survival mode.',
+        '🐛 <strong>Bug fixes</strong> — admin shop +/−VB now server-side; HOF version correctly updated.',
+      ]
+    },
+    {
+      ver: 'v0.1.0',
+      subtitle: fr ? 'VoltBucks, Boutique &amp; Sécurité' : 'VoltBucks, Shop &amp; Security',
+      items: fr ? [
+        '⚡ <strong>VoltBucks</strong> — la monnaie du jeu. Gagne-en en complétant des campagnes, du mode Survie et des hauts-faits.',
+        '🛒 <strong>Boutique</strong> — dépense tes VB pour personnaliser ta balle (8 skins), choisir une emote de profil (12+), un fond d\'écran (5) ou des consommables.',
+        '🤑 <strong>Emote "I\'m rich"</strong> — débloquée automatiquement à 50 000 VoltBucks.',
+        '❤️ <strong>Consommables</strong> — Cœur (vie bonus en Survie), Fusible (verrouille un interrupteur), Atténuateur (vitesse réduite), Indice (révèle un haut-fait caché).',
+        '🏅 <strong>37 hauts-faits</strong> — des objectifs pour récompenser tous les styles de jeu.',
+        '🏆 <strong>Classement VoltBucks</strong> — qui a accumulé le plus de VB ?',
+        '👁️ <strong>Mode Yeux Bandés</strong> — joue sans voir le niveau.',
+        '👤 <strong>Profil joueur</strong> — clique sur un pseudo dans le HOF pour voir son profil, ses hauts-faits et ses scores.',
+        '🌐 <strong>Traduction FR/EN complète</strong> — tout le jeu est disponible dans les deux langues.',
+        '🔒 <strong>Sécurité renforcée</strong> — tous les gains VB, achats et hauts-faits sont vérifiés côté serveur.',
+      ] : [
+        '⚡ <strong>VoltBucks</strong> — the in-game currency. Earn some by completing campaigns, Survival mode and achievements.',
+        '🛒 <strong>Shop</strong> — spend your VB to customise your ball (8 skins), pick a profile emote (12+), a background (5) or consumables.',
+        '🤑 <strong>"I\'m rich" emote</strong> — automatically unlocked at 50 000 VoltBucks.',
+        '❤️ <strong>Consumables</strong> — Heart (bonus life in Survival), Fuse (locks a switch), Attenuator (reduced speed), Hint (reveals a hidden achievement).',
+        '🏅 <strong>37 achievements</strong> — goals to reward every play style.',
+        '🏆 <strong>VoltBucks leaderboard</strong> — who has accumulated the most VB?',
+        '👁️ <strong>Blindfolded mode</strong> — play without seeing the level.',
+        '👤 <strong>Player profile</strong> — click a name in the HOF to see their profile, achievements and scores.',
+        '🌐 <strong>Full FR/EN translation</strong> — the entire game is available in both languages.',
+        '🔒 <strong>Enhanced security</strong> — all VB earnings, purchases and achievements are verified server-side.',
+      ]
+    },
+    {
+      ver: 'v0.0.5',
+      subtitle: fr ? 'Nouveaux niveaux, Survie &amp; Hauts-faits' : 'New levels, Survival &amp; Achievements',
+      items: fr ? [
+        '💀 <strong>Mode Survie</strong> — des niveaux s\'enchaînent à l\'infini avec 3 vies. Jusqu\'où iras-tu ?',
+        '🏆 <strong>HOF Survie</strong> — classement par nombre de niveaux atteints.',
+        '🏅 <strong>Système de hauts-faits</strong> — 13 objectifs cachés débloqués selon tes exploits.',
+        '🎆 <strong>Célébration fin de campagne</strong> — feux d\'artifice et fanfare à la victoire.',
+        '🎬 <strong>Replay</strong> — revois ta run depuis le début après avoir terminé une campagne.',
+        '👤 <strong>Profil joueur</strong> — clique sur un pseudo dans le HOF pour voir ses scores.',
+        '➕ Nouveaux niveaux : Fibonacci, CR7, La Course, PingPong, Where Am I.',
+      ] : [
+        '💀 <strong>Survival mode</strong> — levels chain endlessly with 3 lives. How far can you go?',
+        '🏆 <strong>Survival HOF</strong> — leaderboard ranked by levels reached.',
+        '🏅 <strong>Achievement system</strong> — 13 hidden objectives unlocked through your exploits.',
+        '🎆 <strong>Campaign completion celebration</strong> — fireworks and fanfare on victory.',
+        '🎬 <strong>Replay</strong> — rewatch your run from the start after completing a campaign.',
+        '👤 <strong>Player profile</strong> — click a name in the HOF to see their scores.',
+        '➕ New levels: Fibonacci, CR7, La Course, PingPong, Where Am I.',
+      ]
+    },
+    {
+      ver: 'v0.0.4',
+      subtitle: fr ? '3 Campagnes &amp; Mode Miroir' : '3 Campaigns &amp; Mirror Mode',
+      items: fr ? [
+        '💀 <strong>Campagne "Cauchemar"</strong> — pour les joueurs qui pensaient avoir tout vu.',
+        '🔀 <strong>Mode Miroir</strong> — tous les niveaux retournés horizontalement. Q et P échangent leurs rôles.',
+        '🏆 <strong>HOF par difficulté</strong> — un classement séparé pour Bébés, Piquer, Cauchemar et leurs versions Miroir.',
+        '🏆 HOF consultable sans connexion.',
+        '👤 Connexion Google sur la page d\'accueil avec avertissement HOF si non connecté.',
+        '🖥️ Refonte de l\'écran de sélection de campagne.',
+      ] : [
+        '💀 <strong>"Nightmare" campaign</strong> — for players who thought they\'d seen it all.',
+        '🔀 <strong>Mirror mode</strong> — all levels flipped horizontally. Q and P swap roles.',
+        '🏆 <strong>HOF by difficulty</strong> — separate leaderboards for Babies, Tricky, Nightmare and their Mirror versions.',
+        '🏆 HOF viewable without an account.',
+        '👤 Google sign-in on the home page with HOF warning if not connected.',
+        '🖥️ Campaign selection screen redesign.',
+      ]
+    },
+    {
+      ver: 'v0.0.3',
+      subtitle: fr ? 'Éditeur, Visuel &amp; Audio' : 'Editor, Visuals &amp; Audio',
+      items: fr ? [
+        '🛠️ <strong>Éditeur de niveaux avancé</strong> — multi-sélection, copier-coller, symétrie X/Y, glisser-déposer.',
+        '📤 <strong>Soumission de niveaux</strong> — envoie ton niveau à l\'admin directement depuis l\'éditeur.',
+        '🎨 <strong>Nouveau visuel</strong> — grille PCB animée, électrons flottants, vignette, scanlines, flash de victoire.',
+        '✨ <strong>Titre animé</strong> — effet neon, glitch, icône pulsante.',
+        '🔊 <strong>Contrôles audio</strong> — mute global et mute du bruit électrique séparément.',
+        '💀 <strong>Particules &amp; Screen shake</strong> — effets visuels à la mort et à la victoire.',
+        '🖼️ Aperçu miniature des niveaux au survol dans la sidebar.',
+      ] : [
+        '🛠️ <strong>Advanced level editor</strong> — multi-select, copy-paste, X/Y symmetry, drag-and-drop.',
+        '📤 <strong>Level submission</strong> — send your level to the admin directly from the editor.',
+        '🎨 <strong>New visuals</strong> — animated PCB grid, floating electrons, vignette, scanlines, victory flash.',
+        '✨ <strong>Animated title</strong> — neon effect, glitch, pulsing icon.',
+        '🔊 <strong>Audio controls</strong> — global mute and electric noise mute separately.',
+        '💀 <strong>Particles &amp; Screen shake</strong> — visual effects on death and victory.',
+        '🖼️ Level miniature preview on hover in the sidebar.',
+      ]
+    },
+    {
+      ver: 'v0.0.2',
+      subtitle: fr ? 'Campagne &amp; Hall of Fame' : 'Campaign &amp; Hall of Fame',
+      items: fr ? [
+        '👶 <strong>Campagne "Pour les Bébés"</strong> — une progression de niveaux du tutoriel jusqu\'au défi.',
+        '⚡ <strong>Campagne "Piquer"</strong> — pour ceux qui veulent souffrir un peu plus.',
+        '🏆 <strong>Hall of Fame</strong> — les meilleurs temps sauvegardés en ligne avec ton compte Google.',
+        '⏱️ Chronomètre et compteur de morts pendant la partie.',
+        '📝 Pseudo personnalisé pour apparaître dans les classements.',
+        '➕ Nouveaux niveaux : Gun, Snail et d\'autres.',
+      ] : [
+        '👶 <strong>"For Babies" campaign</strong> — a level progression from tutorial to challenge.',
+        '⚡ <strong>"Getting Tricky" campaign</strong> — for those who want to suffer a little more.',
+        '🏆 <strong>Hall of Fame</strong> — best times saved online with your Google account.',
+        '⏱️ Stopwatch and death counter during play.',
+        '📝 Custom nickname to appear in leaderboards.',
+        '➕ New levels: Gun, Snail and others.',
+      ]
+    },
+    {
+      ver: 'v0.0.1',
+      subtitle: fr ? 'Le début de tout' : 'The beginning of everything',
+      items: fr ? [
+        '⚡ <strong>Die and Relight</strong> — guide une balle électrique de l\'entrée à la sortie en activant des interrupteurs.',
+        '⌨️ Deux touches : <strong>Q</strong> (interrupteur gauche) et <strong>P</strong> (interrupteur droit). C\'est tout.',
+        '💀 La balle meurt au contact d\'une zone non alimentée. Recommence.',
+        '🔬 Éléments de circuit : fils, interrupteurs, résistances, téléporteurs, microprocesseur.',
+        '📱 Compatible mobile avec boutons tactiles à l\'écran.',
+        '🌐 Traduction FR/EN dès le début.',
+      ] : [
+        '⚡ <strong>Die and Relight</strong> — guide an electric ball from source to bulb by toggling switches.',
+        '⌨️ Two keys: <strong>Q</strong> (left switch) and <strong>P</strong> (right switch). That\'s it.',
+        '💀 The ball dies on contact with an unpowered zone. Try again.',
+        '🔬 Circuit elements: wires, switches, resistors, teleporters, microprocessor.',
+        '📱 Mobile-friendly with on-screen touch buttons.',
+        '🌐 FR/EN translation from day one.',
+      ]
+    },
+  ];
+
+  const tag = fr ? 'VERSION ACTUELLE' : 'CURRENT VERSION';
+  body.innerHTML = PATCHES.map(p => `
+    <div class="pn-version${p.latest ? ' latest' : ''}">
+      ${p.latest ? `<div class="pn-tag">${tag}</div>` : ''}
+      <div class="pn-ver">${p.ver}</div>
+      <div class="pn-subtitle">${p.subtitle}</div>
+      <ul>${p.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>
+  `).join('');
 }
 
 document.getElementById('lang-toggle').addEventListener('click', () => {
@@ -2120,7 +2274,7 @@ window.addEventListener('scroll', () => {
 const FB_URL_INDEX    = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/hof';
 const FB_ACH_URL      = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/achievement_ranks';
 const FB_VB_RANKS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/voltbucks_ranks';
-const HOF_VER         = 'v0_1_0';
+const HOF_VER         = 'v0_1_1';
 const ACH_NAMES = [
   {id:'first_death',emoji:'💀'},{id:'centurion',emoji:'⚡'},
   {id:'bebe_won',emoji:'🍼'},{id:'piquer_won',emoji:'⚡'},
@@ -2313,7 +2467,7 @@ const MHOF_CAMP_META = {
   cauchemar: { color:'#ff4466' }, survie: { color:'#ff8877' },
 };
 const MHOF_DIFFS = MHOF_CAMPS.flatMap(c => [c, c+'_yb', c+'_inv', c+'_yb_inv']);
-const MHOF_PER_DIFF = new Set(['v0_1_0','v0_0_5','v0_0_4']);
+const MHOF_PER_DIFF = new Set(['v0_1_1','v0_1_0','v0_0_5','v0_0_4']);
 function _mhofDecompose(diff) {
   let s = diff || 'bebe';
   const inv = s.endsWith('_inv'); if (inv) s = s.slice(0,-4);

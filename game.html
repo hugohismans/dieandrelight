@@ -1993,8 +1993,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <div id="shop-title">⚡ BOUTIQUE VOLTBUCKS</div>
       <div id="shop-balance"></div>
       <div id="shop-admin-btns" style="display:none;gap:4px;flex-shrink:0">
-        <button onclick="earnVoltbucks(1000,'admin')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">+1000</button>
-        <button onclick="voltbucks=Math.max(0,voltbucks-1000);_updateVBDisplay();_syncVB();document.getElementById('shop-balance').textContent='⚡ '+voltbucks+' VB'" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">-1000</button>
+        <button onclick="_adminAdjustVb(1000)" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">+1000</button>
+        <button onclick="_adminAdjustVb(-1000)" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;background:#1a0800;border:1px solid #aa4400;color:#ff8800;padding:3px 8px;cursor:pointer">-1000</button>
       </div>
       <button id="shop-close">✕</button>
     </div>
@@ -2640,6 +2640,12 @@ const TRANSLATIONS = {
     'skin.spectre.name': 'Spectre',
     'skin.neant.name': 'Néant',
     'skin.arc.name': 'Arc-en-ciel',
+    'skin.etoile.name': 'Étoile',
+    'skin.cube.name': 'Cube',
+    'skin.cristal.name': 'Cristal',
+    'skin.crane.name': 'Crâne',
+    'skin.glitch.name': 'Glitch',
+    'skin.blackhole.name': 'Trou Noir',
     // Emote names
     'emote.none.name': 'Poussin',
     'emote.bolt.name': 'Électrique',
@@ -3024,6 +3030,12 @@ const TRANSLATIONS = {
     'skin.spectre.name': 'Spectre',
     'skin.neant.name': 'Void',
     'skin.arc.name': 'Rainbow',
+    'skin.etoile.name': 'Star',
+    'skin.cube.name': 'Cube',
+    'skin.cristal.name': 'Crystal',
+    'skin.crane.name': 'Skull',
+    'skin.glitch.name': 'Glitch',
+    'skin.blackhole.name': 'Black Hole',
     // Emote names
     'emote.none.name': 'Chick',
     'emote.bolt.name': 'Electric',
@@ -4162,6 +4174,7 @@ const CAMPAIGNS = {
       { file: 'levels/La course.json',               name: 'La course' },
       { file: 'levels/PingPong.json',                name: 'PingPong' },
       { file: 'levels/where_am_i.json',              name: 'Where Am I ?' },
+      { file: 'levels/Dans les \u00e9toiles.json',   name: 'Dans les étoiles' },
       { file: 'levels/GG.json',                       name: 'GG !', isGG: true },
     ]
   }
@@ -4290,6 +4303,8 @@ function selectLevel(idx) {
     startGGCelebration(ft, fd, CAMPAIGNS[currentCampaignId]);
     // pas de return — le niveau GG continue de tourner en fond
   }
+  // GG level: auto-start the simulation immediately (no keypress needed)
+  if (LEVELS[idx]?.isGG) _freshKeyPressed = true;
   // Resize canvas and compute fit transform for custom levels
   const touchH = window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 100 : 0;
   if (state.type === 'custom') {
@@ -4564,15 +4579,16 @@ document.getElementById('death-counter').addEventListener('click', resetDeaths);
 function updateCampaignHUD() {
   const badge = document.getElementById('campaign-badge');
   const cd    = document.getElementById('camp-death-counter');
+  const active = campRunning || campPending;
   if (badge) {
-    badge.classList.toggle('active', campRunning);
-    if (campRunning) {
+    badge.classList.toggle('active', active);
+    if (active) {
       const camp = CAMPAIGNS[currentCampaignId];
       const _mods = [invertControls && '🔄', ybMode && '🙈'].filter(Boolean).join('');
       badge.textContent = camp.emoji + ' ' + iname(camp).toUpperCase() + (_mods ? '  ' + _mods : '');
     }
   }
-  if (cd) cd.classList.toggle('active', campRunning);
+  if (cd) cd.classList.toggle('active', active);
 }
 
 // ── VB MODIFIERS ───────────────────────────────────────────
@@ -4874,6 +4890,7 @@ _loadingRetryBtn.onclick = () => {
 // Charge un niveau JSON avec affichage loading + gestion erreur propre
 function _fetchLevel(lv, onSuccess) {
   _showLoading(t('loading.msg'));
+  const fetchStart = Date.now();
   const doFetch = () => {
     fetch(lv._file)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -4881,6 +4898,8 @@ function _fetchLevel(lv, onSuccess) {
         lv._json = json;
         if (json.name)    lv.name    = json.name;
         if (json.made_by) lv.made_by = json.made_by;
+        // Exclude loading time from campaign timer
+        if (campRunning) campPaused += Date.now() - fetchStart;
         _hideLoading();
         onSuccess(json);
       })
@@ -5214,6 +5233,14 @@ function _syncVB() {
   // Mise à jour locale uniquement — les classements sont gérés par le Worker
   writeSave({ voltbucks });
   _updateVBDisplay();
+}
+
+async function _adminAdjustVb(amount) {
+  const data = await _workerCall('/admin/adjust-vb', 'POST', { amount });
+  if (!data?.ok) { alert('Erreur ajustement VB'); return; }
+  voltbucks = data.vb;
+  _syncVB();
+  document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
 }
 
 function earnVoltbucks(amount, reason) {
@@ -5883,7 +5910,9 @@ async function _signInWithGoogle() {
 }
 
 // Gérer le retour après signInWithRedirect (mobile/tablette)
-_fbAuth.getRedirectResult().catch(() => {});
+_fbAuth.getRedirectResult().catch(e => {
+  if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
+});
 
 // Auth state changes (login / logout)
 let _authReadyResolve = null;
@@ -6062,10 +6091,10 @@ document.getElementById('auth-sidebar-btn').onclick = () => {
 };
 
 // ── HALL OF FAME ───────────────────────────────────────────
-const HOF_VERSION  = 'v0_1_0';
+const HOF_VERSION  = 'v0_1_1';
 const ADMIN_UID    = 'K6f4G1RxZqfC8iB4VFYC5ICBX1z2';
 let _hofVersion = HOF_VERSION, _hofDiff = null;
-const HOF_VERSIONS = ['v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1']; // add new versions here
+const HOF_VERSIONS = ['v0_1_1', 'v0_1_0', 'v0_0_5', 'v0_0_4', 'v0_0_3', 'v0_0_2', 'v0_0_1']; // add new versions here
 // ── HOF : campagnes de base + helpers de composition ───────
 const HOF_CAMPS = ['bebe', 'piquer', 'cauchemar', 'survie'];
 const HOF_CAMP_META = {
@@ -6154,6 +6183,7 @@ function setCampScore(campId, time, deaths, key) {
 
 // ── Campaign timer & run tracking ──────────────────────────
 let campRunning  = false;
+let campPending  = false;  // true = waiting for first input to actually start the timer
 let campStart    = 0;      // Date.now() when first level started
 // campDeaths declared earlier (forward-init needed by updateDeathDisplay)
 let campPaused   = 0;      // accumulated paused ms (future-proof)
@@ -6171,24 +6201,34 @@ function campFmtTime(ms) {
 }
 
 function campStart_() {
-  campStart    = Date.now();
+  // Called when first level is selected — arm the pending flag, timer starts on first input
   campDeaths   = 0;
-  campRunning  = true;
-  _runUsedConsumables = new Set();
   campPaused   = 0;
+  campPending  = true;
+  campRunning  = false;
+  _runUsedConsumables = new Set();
   adminSkipped = false;
   campTimerEl.classList.add('active');
   updateCampaignHUD();
 }
 
+function _campCommit() {
+  // Actually start the clock — called on first player input
+  if (!campPending) return;
+  campPending = false;
+  campRunning = true;
+  campStart   = Date.now();
+}
+
 function campStop() {
   campRunning = false;
+  campPending = false;
   campTimerEl.classList.remove('active');
   updateCampaignHUD();
 }
 
 function campTickDisplay() {
-  if (!campRunning) return;
+  if (!campRunning && !campPending) return;
   campTimerEl.textContent = '⏱ ' + campFmtTime(campElapsed());
 }
 
@@ -6214,7 +6254,7 @@ function _ctrlCol(e) {
 async function hofFetch(version, diff) {
   try {
     // v0_0_4+ uses per-difficulty sub-paths; older versions are flat
-    const path = ((version === 'v0_1_0' || version === 'v0_0_5' || version === 'v0_0_4') && diff)
+    const path = ((version === 'v0_1_1' || version === 'v0_1_0' || version === 'v0_0_5' || version === 'v0_0_4') && diff)
       ? `${FB_URL}/${version}/${diff}.json`
       : `${FB_URL}/${version}.json`;
     const res = await fetch(path);
@@ -6354,7 +6394,7 @@ function hofBuildSpecials() {
   ).join('');
 }
 
-const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_0', 'v0_0_5', 'v0_0_4']);
+const HOF_PER_DIFF_VERSIONS = new Set(['v0_1_1', 'v0_1_0', 'v0_0_5', 'v0_0_4']);
 let _hofEmoteMap = {};
 
 async function openHOF(version = HOF_VERSION, diff = null) {
@@ -6976,9 +7016,40 @@ const BALL_SKINS = [
   {
     id: 'arc', name: 'Arc-en-ciel', price: 1200, _nameKey: 'skin.arc.name',
     glow: '#ff88ff', shadow: '#ff88ff',
-    outer: null, // dessin spécial
-    inner: null,
-    special: 'rainbow',
+    outer: null, inner: null, special: 'rainbow',
+  },
+  {
+    id: 'etoile', name: 'Étoile', price: 1800, _nameKey: 'skin.etoile.name',
+    shadow: '#ffee00', edge: '#ffcc00',
+    outer: null, inner: [['#ffffff', 0], ['#ffee44', 0.4], ['#ff8800', 1]],
+    special: 'star',
+  },
+  {
+    id: 'cube', name: 'Cube', price: 2500, _nameKey: 'skin.cube.name',
+    shadow: '#44aaff', edge: '#88ccff',
+    faceColor: '#1a4488', highlight: '#3399ff', dark: '#0a1a33',
+    outer: null, inner: null, special: 'cube',
+  },
+  {
+    id: 'cristal', name: 'Cristal', price: 3000, _nameKey: 'skin.cristal.name',
+    shadow: '#aaffee', edge: '#88ffee',
+    facets: [['#ffffff', 0], ['#aaffee', 0.25], ['#44ffcc', 0.5], ['#0088aa', 0.75], ['#001133', 1]],
+    outer: null, inner: null, special: 'crystal',
+  },
+  {
+    id: 'crane', name: 'Crâne', price: 3500, _nameKey: 'skin.crane.name',
+    shadow: '#ff0044', edge: '#ff0044',
+    outer: null, inner: null, special: 'skull',
+  },
+  {
+    id: 'glitch', name: 'Glitch', price: 4500, _nameKey: 'skin.glitch.name',
+    shadow: '#00ffcc', edge: '#00ffcc',
+    outer: null, inner: null, special: 'glitch',
+  },
+  {
+    id: 'blackhole', name: 'Trou Noir', price: 6000, _nameKey: 'skin.blackhole.name',
+    shadow: '#ff6600', edge: '#ff8800',
+    outer: null, inner: null, special: 'blackhole',
   },
 ];
 
@@ -7042,38 +7113,107 @@ function _renderShopSkins() {
 
 function _drawSkinPreview(cvs, skin) {
   const c = cvs.getContext('2d');
-  const x = 30, y = 30, r = 12;
+  const x = 30, y = 30, r = BALL_R;
   c.clearRect(0, 0, 60, 60);
+
   if (skin.special === 'rainbow') {
-    const t = (Date.now() / 800) % 1;
-    const outer = c.createRadialGradient(x, y, 0, x, y, 26);
-    const hue = Math.round(t * 360);
+    const hue = Math.round(((Date.now() / 800) % 1) * 360);
+    const outer = c.createRadialGradient(x, y, 0, x, y, 22);
     outer.addColorStop(0, `hsla(${hue},100%,70%,0.6)`);
     outer.addColorStop(1, `hsla(${(hue+60)%360},100%,50%,0)`);
-    c.beginPath(); c.arc(x, y, 26, 0, Math.PI * 2);
-    c.fillStyle = outer; c.fill();
+    c.beginPath(); c.arc(x, y, 22, 0, Math.PI*2); c.fillStyle = outer; c.fill();
     c.save(); c.shadowBlur = 14; c.shadowColor = `hsl(${hue},100%,60%)`;
-    const inner = c.createRadialGradient(x-2, y-2, 1, x, y, r);
-    inner.addColorStop(0, '#ffffff');
-    inner.addColorStop(0.5, `hsl(${(hue+120)%360},100%,70%)`);
-    inner.addColorStop(1, `hsl(${(hue+240)%360},100%,40%)`);
-    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
-    c.fillStyle = inner; c.fill(); c.restore();
+    const core = c.createRadialGradient(x-2, y-2, 1, x, y, r);
+    core.addColorStop(0,'#ffffff'); core.addColorStop(0.5,`hsl(${(hue+120)%360},100%,70%)`); core.addColorStop(1,`hsl(${(hue+240)%360},100%,40%)`);
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fillStyle = core; c.fill(); c.restore();
     return;
   }
-  // Halo
-  if (skin.outer) {
-    const outer = c.createRadialGradient(x, y, 0, x, y, 26);
-    skin.outer.forEach(([col, stop]) => outer.addColorStop(stop, col));
-    c.beginPath(); c.arc(x, y, 26, 0, Math.PI * 2);
-    c.fillStyle = outer; c.fill();
+  if (skin.special === 'cube') {
+    const s = r + 3;
+    c.save(); c.translate(x, y); c.rotate(Math.PI / 5);
+    c.shadowBlur = 18; c.shadowColor = skin.shadow;
+    c.fillStyle = skin.faceColor; c.fillRect(-s,-s,s*2,s*2);
+    c.fillStyle = skin.highlight; c.fillRect(-s,-s,s,s);
+    c.fillStyle = skin.dark; c.fillRect(0,0,s,s);
+    c.strokeStyle = skin.edge; c.lineWidth = 1.5; c.shadowBlur = 0;
+    c.strokeRect(-s,-s,s*2,s*2); c.restore();
+    return;
   }
-  // Core
+  if (skin.special === 'crystal') {
+    const w = r+3, h = r+5;
+    c.save(); c.translate(x, y);
+    c.shadowBlur = 18; c.shadowColor = skin.shadow;
+    c.beginPath(); c.moveTo(0,-h); c.lineTo(w,0); c.lineTo(0,h); c.lineTo(-w,0); c.closePath();
+    const grd = c.createLinearGradient(-w,-h,w,h);
+    skin.facets.forEach(([col,stop]) => grd.addColorStop(stop,col));
+    c.fillStyle = grd; c.fill();
+    c.strokeStyle = skin.edge; c.lineWidth = 1; c.globalAlpha = 0.6;
+    c.beginPath(); c.moveTo(0,-h); c.lineTo(0,h); c.stroke();
+    c.beginPath(); c.moveTo(-w,0); c.lineTo(w,0); c.stroke();
+    c.globalAlpha = 1; c.restore();
+    return;
+  }
+  if (skin.special === 'star') {
+    const r1 = r+5, r2 = r-2, pts = 5;
+    c.save(); c.translate(x, y); c.rotate(-Math.PI/2);
+    c.shadowBlur = 18; c.shadowColor = skin.shadow;
+    c.beginPath();
+    for (let i = 0; i < pts*2; i++) {
+      const a = (i*Math.PI)/pts; const rad = i%2===0 ? r1 : r2;
+      i===0 ? c.moveTo(Math.cos(a)*rad, Math.sin(a)*rad) : c.lineTo(Math.cos(a)*rad, Math.sin(a)*rad);
+    }
+    c.closePath();
+    const grd = c.createRadialGradient(-2,-3,1,0,0,r1);
+    skin.inner.forEach(([col,stop]) => grd.addColorStop(stop,col));
+    c.fillStyle = grd; c.fill(); c.strokeStyle = skin.edge; c.lineWidth = 1.2; c.stroke();
+    c.restore();
+    return;
+  }
+  if (skin.special === 'skull') {
+    c.save(); c.translate(x, y); c.font = `${r*2+6}px serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.shadowBlur = 16; c.shadowColor = '#ff0044'; c.fillStyle = '#ffffff';
+    c.fillText('💀', 0, 0); c.restore();
+    return;
+  }
+  if (skin.special === 'blackhole') {
+    c.save(); c.translate(x, y);
+    for (let i = 3; i >= 0; i--) {
+      const rad = r+3+i*4;
+      c.beginPath(); c.arc(0,0,rad,0,Math.PI*2);
+      c.strokeStyle = `hsla(${20+i*18},100%,${55+i*4}%,${0.55-i*0.1})`; c.lineWidth = 2.5-i*0.4;
+      c.shadowBlur = 10; c.shadowColor = '#ff6600'; c.stroke();
+    }
+    const grd = c.createRadialGradient(-2,-2,1,0,0,r);
+    grd.addColorStop(0,'#330022'); grd.addColorStop(0.6,'#080008'); grd.addColorStop(1,'#000000');
+    c.beginPath(); c.arc(0,0,r,0,Math.PI*2); c.fillStyle = grd; c.shadowBlur = 0; c.fill();
+    c.restore();
+    return;
+  }
+  if (skin.special === 'glitch') {
+    const t = Date.now();
+    const cols = ['#00ffcc','#ff00ff','#ffff00','#ff4400'];
+    c.save();
+    for (let i = 0; i < 4; i++) {
+      const ox = Math.round(Math.sin(t/70+i*1.8)*5), oy = Math.round(Math.cos(t/90+i*2.5)*4);
+      c.globalAlpha = 0.45; c.fillStyle = cols[(i+Math.floor(t/120))%cols.length];
+      c.shadowBlur = 5; c.shadowColor = cols[i];
+      c.beginPath(); c.arc(x+ox, y+oy, r+1, 0, Math.PI*2); c.fill();
+    }
+    c.globalAlpha = 1; c.fillStyle = '#eeffee'; c.shadowBlur = 12; c.shadowColor = '#00ffcc';
+    c.beginPath(); c.arc(x, y, r-1, 0, Math.PI*2); c.fill();
+    c.restore();
+    return;
+  }
+  // Standard skins
+  if (skin.outer) {
+    const grd = c.createRadialGradient(x, y, 0, x, y, 22);
+    skin.outer.forEach(([col, stop]) => grd.addColorStop(stop, col));
+    c.beginPath(); c.arc(x, y, 22, 0, Math.PI*2); c.fillStyle = grd; c.fill();
+  }
   c.save(); c.shadowBlur = 14; c.shadowColor = skin.shadow;
-  const inner = c.createRadialGradient(x-2, y-2, 1, x, y, r);
-  skin.inner.forEach(([col, stop]) => inner.addColorStop(stop, col));
-  c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
-  c.fillStyle = inner; c.fill(); c.restore();
+  const grd = c.createRadialGradient(x-2, y-2, 1, x, y, r);
+  skin.inner.forEach(([col, stop]) => grd.addColorStop(stop, col));
+  c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fillStyle = grd; c.fill(); c.restore();
 }
 
 function _shopItemClick(skinId) {
@@ -7096,7 +7236,7 @@ function _shopItemClick(skinId) {
       voltbucks = data.vb;
       _ownedItems.add(skinId);
       _equippedSkin = skinId;
-      if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+      if (Array.isArray(data.inventory?.owned)) data.inventory.owned.forEach(id => _ownedItems.add(id));
       localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
       _saveInventory();
       _syncVB();
@@ -7161,7 +7301,7 @@ function _renderShopEmotes() {
           if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
           voltbucks = data.vb;
           _ownedItems.add(key); _equippedEmote = emote.id;
-          if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+          if (Array.isArray(data.inventory?.owned)) data.inventory.owned.forEach(id => _ownedItems.add(id));
           localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
           _saveInventory(); _saveCosmetics(); _syncVB(); _renderShopEmotes();
           document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
@@ -7231,7 +7371,7 @@ function _renderShopBgs() {
           if (!data?.ok) { alert(t('shop.buy_error') || 'Erreur lors de l\'achat'); return; }
           voltbucks = data.vb;
           _ownedItems.add(key); _equippedBg = bg.id;
-          if (data.inventory?.owned) data.inventory.owned.forEach(id => _ownedItems.add(id));
+          if (Array.isArray(data.inventory?.owned)) data.inventory.owned.forEach(id => _ownedItems.add(id));
           localStorage.setItem(_OWNED_LS, JSON.stringify([..._ownedItems]));
           _saveInventory(); _saveCosmetics(); _syncVB(); _applyBackground(); _renderShopBgs();
           document.getElementById('shop-balance').textContent = '⚡ ' + voltbucks + ' VB';
@@ -7716,7 +7856,10 @@ function enterMicroDigit(digit) {
   mc.entered.push(digit);
   const pos = mc.entered.length - 1;
   if (mc.code[pos] !== digit) {
-    if (!state.dead) { state.dead = true; sfxDead(); registerDeath(); }
+    if (!state.dead) {
+      if (mc.ballRef) state._deadBallPos = { x: mc.ballRef.x, y: mc.ballRef.y };
+      state.dead = true; sfxDead(); registerDeath();
+    }
   } else if (mc.entered.length === 3) {
     if (mc.ballRef) mc.ballRef.microSolved = true;
     sfxSwitchClose();
@@ -7733,7 +7876,10 @@ function enterMicroDir(dir) {
   mc.entered.push(dir);
   const pos = mc.entered.length - 1;
   if (mc.code[pos] !== dir) {
-    if (!state.dead) { state.dead = true; sfxDead(); registerDeath(); }
+    if (!state.dead) {
+      if (mc.ballRef) state._deadBallPos = { x: mc.ballRef.x, y: mc.ballRef.y };
+      state.dead = true; sfxDead(); registerDeath();
+    }
   } else if (mc.entered.length === 3) {
     if (mc.ballRef) mc.ballRef.microSolved = true;
     sfxSwitchClose();
@@ -8038,6 +8184,7 @@ function update(dt) {
     if (!_freshKeyPressed) return;
     _freshKeyPressed = false;
     state.waiting = false;
+    _campCommit(); // start campaign timer on first valid input
     if (ybMode) _ybStarted = true; // le fade démarre exactement quand la balle part
   }
 
@@ -8085,6 +8232,7 @@ function update(dt) {
     if (state.phase === 'split') {
       for (const sw of state.switches) {
         if (sw.open && state.ballX >= sw.x - SW_GAP && state.ballX <= sw.x + SW_GAP) {
+          state._deadSplitY = sw.trackY !== undefined ? sw.trackY : WIRE_Y;
           state.dead = true; sfxDead(); return;
         }
         if (!sw.open && Math.abs(state.ballX - (sw.x + SW_GAP)) < move + 2) sfxSpark();
@@ -8194,6 +8342,150 @@ function drawBall(x, y) {
     ctx.fillStyle = core; ctx.fill(); ctx.restore();
     return;
   }
+  // ── SPECIAL SKINS ──────────────────────────────────────────
+  if (skin.special === 'cube') {
+    const ang = x / BALL_R;
+    const s = BALL_R + 3;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    // Outer glow
+    ctx.shadowBlur = 24; ctx.shadowColor = skin.shadow;
+    ctx.fillStyle = skin.faceColor;
+    ctx.fillRect(-s, -s, s * 2, s * 2);
+    // Face highlight (top-left face of cube illusion)
+    ctx.fillStyle = skin.highlight;
+    ctx.fillRect(-s, -s, s, s);
+    // Dark edge bottom-right
+    ctx.fillStyle = skin.dark;
+    ctx.fillRect(0, 0, s, s);
+    // Bright center pixel
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(-3, -3, 6, 6);
+    ctx.globalAlpha = 1;
+    // Border
+    ctx.strokeStyle = skin.edge; ctx.lineWidth = 1.5; ctx.shadowBlur = 0;
+    ctx.strokeRect(-s, -s, s * 2, s * 2);
+    ctx.restore();
+    return;
+  }
+
+  if (skin.special === 'crystal') {
+    const w = BALL_R + 3, h = BALL_R + 5;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(x / BALL_R);
+    ctx.shadowBlur = 22; ctx.shadowColor = skin.shadow;
+    // Main diamond
+    ctx.beginPath();
+    ctx.moveTo(0, -h); ctx.lineTo(w, 0); ctx.lineTo(0, h); ctx.lineTo(-w, 0);
+    ctx.closePath();
+    const grd = ctx.createLinearGradient(-w, -h, w, h);
+    skin.facets.forEach(([c, s]) => grd.addColorStop(s, c));
+    ctx.fillStyle = grd; ctx.fill();
+    // Facet lines
+    ctx.strokeStyle = skin.edge; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(0, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-w, 0); ctx.lineTo(w, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(-w, 0); ctx.lineTo(0, h); ctx.closePath(); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // White sparkle
+    ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(-w * 0.4, -h * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  if (skin.special === 'star') {
+    const r1 = BALL_R + 5, r2 = BALL_R - 2, pts = 5;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(x / BALL_R);
+    ctx.shadowBlur = 24; ctx.shadowColor = skin.shadow;
+    ctx.beginPath();
+    for (let i = 0; i < pts * 2; i++) {
+      const a = (i * Math.PI) / pts - Math.PI / 2;
+      const r = i % 2 === 0 ? r1 : r2;
+      i === 0 ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r)
+              : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath();
+    const grd = ctx.createRadialGradient(-2, -3, 1, 0, 0, r1);
+    skin.inner.forEach(([c, s]) => grd.addColorStop(s, c));
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.strokeStyle = skin.edge; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  if (skin.special === 'skull') {
+    const t = Date.now();
+    const glitch = Math.sin(t / 80) > 0.88;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(x / BALL_R);
+    ctx.font = `${BALL_R * 2 + 6}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (glitch) {
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = '#ff0044';
+      ctx.shadowBlur = 0;
+      ctx.fillText('💀', (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 4);
+      ctx.fillStyle = '#00ffff';
+      ctx.fillText('💀', -(Math.random() - 0.5) * 5, 0);
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 18; ctx.shadowColor = '#ff0044';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('💀', 0, 0);
+    ctx.restore();
+    return;
+  }
+
+  if (skin.special === 'blackhole') {
+    const t = Date.now() / 1000;
+    ctx.save(); ctx.translate(x, y);
+    // Accretion disk (orange rings)
+    for (let i = 4; i >= 0; i--) {
+      const r = BALL_R + 4 + i * 4.5;
+      const alpha = (0.55 - i * 0.09) * (0.6 + 0.4 * Math.sin(t * 3 + i * 1.2));
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `hsla(${20 + i * 18},100%,${55 + i * 4}%,${alpha})`;
+      ctx.lineWidth = 3 - i * 0.4;
+      ctx.shadowBlur = 12; ctx.shadowColor = '#ff6600';
+      ctx.stroke();
+    }
+    // Distortion halo
+    ctx.beginPath(); ctx.arc(0, 0, BALL_R + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 3; ctx.shadowBlur = 0; ctx.stroke();
+    // Event horizon
+    const grd = ctx.createRadialGradient(-2, -2, 1, 0, 0, BALL_R);
+    grd.addColorStop(0, '#330022'); grd.addColorStop(0.6, '#080008'); grd.addColorStop(1, '#000000');
+    ctx.beginPath(); ctx.arc(0, 0, BALL_R, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.shadowBlur = 0; ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  if (skin.special === 'glitch') {
+    const t = Date.now();
+    const cols = ['#00ffcc', '#ff00ff', '#ffff00', '#ff4400'];
+    ctx.save();
+    for (let i = 0; i < 4; i++) {
+      const ox = Math.round(Math.sin(t / 70 + i * 1.8) * 5);
+      const oy = Math.round(Math.cos(t / 90 + i * 2.5) * 4);
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = cols[(i + Math.floor(t / 120)) % cols.length];
+      ctx.shadowBlur = 6; ctx.shadowColor = cols[i];
+      ctx.beginPath(); ctx.arc(x + ox, y + oy, BALL_R + 1, 0, Math.PI * 2); ctx.fill();
+    }
+    // Scanline blocks
+    if (Math.sin(t / 60) > 0.6) {
+      ctx.globalAlpha = 0.35; ctx.fillStyle = '#ffffff';
+      const bh = 3 + Math.floor(Math.random() * 4);
+      ctx.fillRect(x - BALL_R, y - bh / 2, BALL_R * 2, bh);
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#eeffee'; ctx.shadowBlur = 14; ctx.shadowColor = '#00ffcc';
+    ctx.beginPath(); ctx.arc(x, y, BALL_R - 1, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    return;
+  }
+  // ── END SPECIAL SKINS ──────────────────────────────────────
+
   if (skin.outer) {
     const grd = ctx.createRadialGradient(x, y, 0, x, y, 26);
     skin.outer.forEach(([col, stop]) => grd.addColorStop(stop, col));
@@ -8377,6 +8669,36 @@ function drawLevel2() {
   drawKeyIndicator('P', 20, 50);
 }
 
+// ── CRASH MARKER ───────────────────────────────────────────
+function drawCrashMarker(x, y) {
+  const t = Date.now() / 400;
+  const pulse = 0.55 + 0.45 * Math.sin(t);
+  const r = 14;
+  ctx.save();
+  // Pulsing outer ring
+  ctx.globalAlpha = 0.55 * pulse;
+  ctx.strokeStyle = '#ff2200';
+  ctx.lineWidth = 2.5;
+  ctx.shadowBlur = 14; ctx.shadowColor = '#ff4400';
+  ctx.beginPath(); ctx.arc(x, y, r + 5 * pulse, 0, Math.PI * 2); ctx.stroke();
+  // Inner solid circle
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = '#ff2200';
+  ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+  // X cross
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.shadowBlur = 6; ctx.shadowColor = '#ff4400';
+  const s = 8;
+  ctx.beginPath();
+  ctx.moveTo(x - s, y - s); ctx.lineTo(x + s, y + s);
+  ctx.moveTo(x + s, y - s); ctx.lineTo(x - s, y + s);
+  ctx.stroke();
+  ctx.restore();
+}
+
 // ── PARTICLES ──────────────────────────────────────────────
 let particles = [];
 let shakeTimer = 0;
@@ -8384,7 +8706,7 @@ let bulbFlash  = 0; // 0..1, decays over time
 
 function spawnDeathSparks(x, y) {
   shakeTimer = 0.22;
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 28; i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 60 + Math.random() * 220;
     particles.push({
@@ -8489,7 +8811,15 @@ function draw() {
 
   if (state.type !== 'custom') {
     if (state.won)  drawOverlay(t('win'),  '#ffff44', '#ffff00');
-    if (state.dead) drawOverlay(t('dead'), '#ff4444', '#ff0000');
+    if (state.dead) {
+      drawOverlay(t('dead'), '#ff4444', '#ff0000');
+      // Crash marker for single/split types
+      if (state.type === 'single') {
+        drawCrashMarker(state.ball ?? W/2, WIRE_Y);
+      } else if (state._deadSplitY !== undefined) {
+        drawCrashMarker(state.ballX ?? W/2, state._deadSplitY);
+      }
+    }
   }
 
   if (state.waiting && !replayMode) drawWaiting();
@@ -8721,7 +9051,7 @@ function updateCustom(dt) {
         ball.gauge = Math.max(0, ball.gauge - drainPerSec * dt);
         if (spaceThisFrame > 0) sfxSpark();
         else if (Math.random() < 0.25) sfxResistance();
-        if (ball.gauge <= 0) { st.dead = true; sfxDead(); return; }
+        if (ball.gauge <= 0) { st._deadBallPos = { x: ball.x, y: ball.y }; st.dead = true; sfxDead(); return; }
       } else {
         ball.speed = Math.min(levelSpeed, ball.speed + levelSpeed * 3 * dt);
       }
@@ -8782,7 +9112,7 @@ function updateCustom(dt) {
       const tCenter = 0.5;
       const inSwZone = ball.t >= tEntry && ball.t <= tExit;
       if (sw.open && inSwZone) {
-        st.dead = true; sfxDead(); return;
+        st._deadBallPos = { x: ball.x, y: ball.y }; st.dead = true; sfxDead(); return;
       }
       if (!sw.open && prevT < tCenter && ball.t >= tCenter) {
         sfxSpark();
@@ -8843,11 +9173,18 @@ function updateCustom(dt) {
   // Décompte du défi microprocesseur actif + ceux en attente
   if (st.microChallenge) {
     st.microChallenge.timeLeft -= dt;
-    if (st.microChallenge.timeLeft <= 0) { st.dead = true; sfxDead(); return; }
+    if (st.microChallenge.timeLeft <= 0) {
+      const _mb = st.microChallenge.ballRef;
+      if (_mb) st._deadBallPos = { x: _mb.x, y: _mb.y };
+      st.dead = true; sfxDead(); return;
+    }
   }
   for (const q of st.microQueue) {
     q.timeLeft -= dt;
-    if (q.timeLeft <= 0) { st.dead = true; sfxDead(); return; }
+    if (q.timeLeft <= 0) {
+      if (q.ball) st._deadBallPos = { x: q.ball.x, y: q.ball.y };
+      st.dead = true; sfxDead(); return;
+    }
   }
 
   // Decay teleport arcs
@@ -9464,6 +9801,11 @@ function drawCustom() {
     drawBall(ball.x, ball.y);
   }
 
+  // Crash marker at the position where the ball died
+  if (st.dead && st._deadBallPos) {
+    drawCrashMarker(st._deadBallPos.x, st._deadBallPos.y);
+  }
+
   ctx.restore(); // end camera transform — UI draws in screen space
 
   // Key indicators for keys used in this level
@@ -9583,14 +9925,22 @@ function loop(timestamp) {
   if (!wasDead && state.dead && !replayMode) {
     if (ybMode) { _ybFade = 0; _ybStarted = false; } // révèle l'overlay mort
     registerDeath();
-    // Spawn death sparks at last known ball position
-    if (state.type === 'custom' && state.balls && state.balls.length > 0) {
-      const b = state.balls[0];
-      spawnDeathSparks((b.x ?? W/2) * camScale + camTX, (b.y ?? H/2) * camScale + camTY);
+    // Spawn death sparks at the crashed ball position
+    if (state.type === 'custom') {
+      const pos = state._deadBallPos;
+      if (pos) {
+        spawnDeathSparks(pos.x * camScale + camTX, pos.y * camScale + camTY);
+      } else if (state.balls && state.balls.length > 0) {
+        const b = state.balls[0];
+        spawnDeathSparks((b.x ?? W/2) * camScale + camTX, (b.y ?? H/2) * camScale + camTY);
+      } else {
+        spawnDeathSparks(W/2, H/2);
+      }
     } else if (state.type === 'single') {
-      spawnDeathSparks(state.ball ?? W/2, H/2);
+      spawnDeathSparks(state.ball ?? W/2, WIRE_Y);
     } else {
-      spawnDeathSparks(state.ballX ?? W/2, H/2);
+      // split type: spawn sparks at the exact switch track Y that killed the ball
+      spawnDeathSparks(state.ballX ?? W/2, state._deadSplitY ?? WIRE_Y);
     }
   }
   if (!wasWon && state.won && !replayMode) {

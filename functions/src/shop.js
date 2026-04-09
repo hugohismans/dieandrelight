@@ -11,6 +11,12 @@ export const SHOP_ITEMS = {
   skin_spectre:  { type: 'skin',  price: 600  },
   skin_neant:    { type: 'skin',  price: 800  },
   skin_arc:      { type: 'skin',  price: 1200 },
+  skin_etoile:   { type: 'skin',  price: 1800 },
+  skin_cube:     { type: 'skin',  price: 2500 },
+  skin_cristal:  { type: 'skin',  price: 3000 },
+  skin_crane:    { type: 'skin',  price: 3500 },
+  skin_glitch:   { type: 'skin',  price: 4500 },
+  skin_blackhole:{ type: 'skin',  price: 6000 },
 
   // Emotes
   emote_bolt:    { type: 'emote', price: 150  },
