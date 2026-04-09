@@ -2164,13 +2164,24 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
 
       <!-- TAB HAUTS-FAITS -->
       <div class="ap-section" id="ap-ach">
-        <div class="ap-info">Gestion locale des hauts-faits (localStorage). Cliquer sur un HF pour le retirer ou le réattribuer.</div>
-        <div class="ap-row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <button class="ap-btn" id="ap-ach-refresh">↺ Actualiser</button>
-          <button class="ap-btn danger" id="ap-ach-clear-all">🗑 Tout effacer</button>
+        <div class="ap-info">Gestion des hauts-faits Firebase par joueur.</div>
+        <div class="ap-row">
+          <span class="ap-label">Pseudo</span>
+          <input class="ap-input" id="ap-ach-pseudo" placeholder="pseudo exact…" maxlength="24">
+          <button class="ap-btn" id="ap-ach-search">Chercher</button>
         </div>
         <div id="ap-ach-status" class="ap-status"></div>
-        <div id="ap-ach-list"></div>
+        <div id="ap-ach-result" style="display:none">
+          <div class="ap-row" style="margin-bottom:4px">
+            <span class="ap-label">UID</span>
+            <span id="ap-ach-uid" style="font-size:10px;color:#664422;word-break:break-all"></span>
+          </div>
+          <div class="ap-row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <button class="ap-btn" id="ap-ach-refresh">↺ Actualiser</button>
+            <button class="ap-btn danger" id="ap-ach-clear-all">🗑 Tout effacer</button>
+          </div>
+          <div id="ap-ach-list"></div>
+        </div>
       </div>
 
       <!-- TAB OUTILS -->
@@ -2508,7 +2519,7 @@ const TRANSLATIONS = {
     'camp.survival.name': 'Mode Survie',
     'camp.survival.desc': '∞ niveaux Cauchemar aléatoires · 3 vies · HOF séparé · Miroir & Yeux bandés compatibles',
     'camp.mirror.name': 'Miroir',
-    'camp.yb.name': 'Yeux bandés',
+    'camp.yb.name': 'Yeux bandés', 'camp.yb.sub': 'HOF séparé',
     // Campaign names
     'camp.bebe.name': 'Pour les Bébés',
     'camp.piquer.name': 'Ça commence à piquer',
@@ -2892,7 +2903,7 @@ const TRANSLATIONS = {
     'camp.survival.name': 'Survival Mode',
     'camp.survival.desc': '∞ random Nightmare levels · 3 lives · separate HOF · Mirror & Blindfold compatible',
     'camp.mirror.name': 'Mirror',
-    'camp.yb.name': 'Blindfold',
+    'camp.yb.name': 'Blindfold', 'camp.yb.sub': 'Separate HOF',
     // Campaign names
     'camp.bebe.name': 'For Babies',
     'camp.piquer.name': 'Getting Tricky',
@@ -3379,22 +3390,43 @@ document.querySelectorAll('.ap-tab').forEach(btn => {
 // ── HAUTS-FAITS TAB ────────────────────────────────────────
 // IDs internes qui ne sont pas dans ACHIEVEMENTS mais qui servent aux verrous de mode
 const _ACH_INTERNAL = [
-  { id: 'bebe_mirror',   emoji: '🔄', name: 'Bébés (miroir) — interne' },
-  { id: 'piquer_mirror', emoji: '🔄', name: 'Piquer (miroir) — interne' },
+  { id: 'bebe_mirror',   emoji: '🔄', name: 'Bébés miroir (interne)' },
+  { id: 'piquer_mirror', emoji: '🔄', name: 'Piquer miroir (interne)' },
 ];
 
+let _apAchUid    = null;
+let _apAchFbData = {}; // { [btoa(id)]: true }
+
+async function _apAchFetch(uid, token) {
+  const r = await fetch(`${_FB_BASE}/users/${uid}/achievements.json?auth=${token}`);
+  return (await r.json()) || {};
+}
+
+async function _apAchWrite(uid, achId, value, token) {
+  // value = true pour accorder, null pour supprimer
+  const key = btoa(achId);
+  await fetch(`${_FB_BASE}/users/${uid}/achievements/${key}.json?auth=${token}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(value)
+  });
+}
+
 function _apRenderAch() {
-  const listEl  = document.getElementById('ap-ach-list');
+  const listEl   = document.getElementById('ap-ach-list');
   const statusEl = document.getElementById('ap-ach-status');
-  if (!listEl) return;
+  if (!listEl || !_apAchUid) return;
 
   const allAchs = [
     ...ACHIEVEMENTS,
     ..._ACH_INTERNAL.filter(a => !ACHIEVEMENTS.find(x => x.id === a.id))
   ];
 
-  const unlocked = allAchs.filter(a =>  _achDone.has(a.id));
-  const locked   = allAchs.filter(a => !_achDone.has(a.id));
+  // Un HF est débloqué si btoa(id) existe dans les données Firebase
+  const hasAch = id => !!_apAchFbData[btoa(id)];
+
+  const unlocked = allAchs.filter(a =>  hasAch(a.id));
+  const locked   = allAchs.filter(a => !hasAch(a.id));
 
   function makeRow(ach, has) {
     const row = document.createElement('div');
@@ -3402,18 +3434,26 @@ function _apRenderAch() {
     const btn = document.createElement('button');
     btn.className = 'ap-ach-toggle ' + (has ? 'remove' : 'grant');
     btn.textContent = has ? '✕ Retirer' : '+ Accorder';
-    btn.onclick = () => {
-      if (has) {
-        _achDone.delete(ach.id);
-        localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
-        statusEl.textContent = `✓ "${ach.id}" retiré`;
-      } else {
-        unlockAchievement(ach.id);
-        statusEl.textContent = `✓ "${ach.id}" accordé`;
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const token = await _apAdminToken();
+        await _apAchWrite(_apAchUid, ach.id, has ? null : true, token);
+        // Mettre à jour le cache local
+        const key = btoa(ach.id);
+        if (has) delete _apAchFbData[key];
+        else _apAchFbData[key] = true;
+        statusEl.style.color = '#00cc99';
+        statusEl.textContent = `✓ "${ach.id}" ${has ? 'retiré' : 'accordé'}`;
+        setTimeout(() => { statusEl.textContent = ''; }, 2500);
+        _apRenderAch();
+      } catch(e) {
+        statusEl.style.color = '#ff4444';
+        statusEl.textContent = 'Erreur : ' + e.message;
+        btn.disabled = false;
+        btn.textContent = has ? '✕ Retirer' : '+ Accorder';
       }
-      _applyModeLocks();
-      setTimeout(() => { statusEl.textContent = ''; }, 2500);
-      _apRenderAch();
     };
     row.innerHTML = `
       <span class="ap-ach-emoji">${ach.emoji || '🏅'}</span>
@@ -3423,36 +3463,66 @@ function _apRenderAch() {
     return row;
   }
 
-  listEl.innerHTML = `<div style="font-size:9px;color:#886633;letter-spacing:1px;margin-bottom:6px">
-    DÉBLOQUÉS (${unlocked.length})</div>`;
-  if (unlocked.length === 0) {
-    listEl.innerHTML += `<div style="color:#443322;font-size:10px;padding:4px">Aucun</div>`;
-  } else {
-    unlocked.forEach(a => listEl.appendChild(makeRow(a, true)));
-  }
+  listEl.innerHTML = `<div style="font-size:9px;color:#886633;letter-spacing:1px;margin-bottom:6px">DÉBLOQUÉS (${unlocked.length})</div>`;
+  if (unlocked.length === 0) listEl.innerHTML += `<div style="color:#443322;font-size:10px;padding:4px">Aucun</div>`;
+  else unlocked.forEach(a => listEl.appendChild(makeRow(a, true)));
+
   const sep = document.createElement('div');
   sep.style.cssText = 'font-size:9px;color:#443322;letter-spacing:1px;margin:10px 0 6px';
   sep.textContent = `VERROUILLÉS (${locked.length})`;
   listEl.appendChild(sep);
-  if (locked.length === 0) {
-    const none = document.createElement('div');
-    none.style.cssText = 'color:#443322;font-size:10px;padding:4px';
-    none.textContent = 'Aucun';
-    listEl.appendChild(none);
-  } else {
-    locked.forEach(a => listEl.appendChild(makeRow(a, false)));
-  }
+  if (locked.length === 0) { const n = document.createElement('div'); n.style.cssText='color:#443322;font-size:10px;padding:4px'; n.textContent='Aucun'; listEl.appendChild(n); }
+  else locked.forEach(a => listEl.appendChild(makeRow(a, false)));
 }
 
-document.getElementById('ap-ach-refresh').onclick = _apRenderAch;
-document.getElementById('ap-ach-clear-all').onclick = () => {
-  if (!confirm('Effacer TOUS les hauts-faits ? (irréversible)')) return;
-  _achDone.clear();
-  localStorage.setItem(_ACH_LS, JSON.stringify([]));
-  _applyModeLocks();
-  document.getElementById('ap-ach-status').textContent = '✓ Tous les HF effacés';
-  setTimeout(() => { document.getElementById('ap-ach-status').textContent = ''; }, 2500);
-  _apRenderAch();
+document.getElementById('ap-ach-search').onclick = async () => {
+  const pseudo = document.getElementById('ap-ach-pseudo').value.trim().toLowerCase();
+  const st = document.getElementById('ap-ach-status');
+  const res = document.getElementById('ap-ach-result');
+  if (!pseudo) { st.textContent = 'Entre un pseudo.'; return; }
+  st.style.color = '#886622'; st.textContent = 'Recherche…'; res.style.display = 'none';
+  try {
+    const token = await _apAdminToken();
+    const uid = await _apFindUidByPseudo(pseudo, token);
+    if (!uid) { st.style.color = '#ff4444'; st.textContent = 'Pseudo introuvable.'; return; }
+    _apAchUid = uid;
+    document.getElementById('ap-ach-uid').textContent = uid;
+    st.style.color = '#886622'; st.textContent = 'Chargement des HF…';
+    _apAchFbData = await _apAchFetch(uid, token);
+    st.textContent = '';
+    res.style.display = 'block';
+    _apRenderAch();
+  } catch(e) {
+    st.style.color = '#ff4444'; st.textContent = 'Erreur : ' + e.message;
+  }
+};
+
+document.getElementById('ap-ach-refresh').onclick = async () => {
+  if (!_apAchUid) return;
+  const st = document.getElementById('ap-ach-status');
+  try {
+    const token = await _apAdminToken();
+    st.style.color = '#886622'; st.textContent = 'Actualisation…';
+    _apAchFbData = await _apAchFetch(_apAchUid, token);
+    st.textContent = '';
+    _apRenderAch();
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = 'Erreur : ' + e.message; }
+};
+
+document.getElementById('ap-ach-clear-all').onclick = async () => {
+  if (!_apAchUid) return;
+  if (!confirm('Effacer TOUS les hauts-faits de ce joueur ? (irréversible)')) return;
+  const st = document.getElementById('ap-ach-status');
+  try {
+    const token = await _apAdminToken();
+    await fetch(`${_FB_BASE}/users/${_apAchUid}/achievements.json?auth=${token}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'null'
+    });
+    _apAchFbData = {};
+    st.style.color = '#00cc99'; st.textContent = '✓ Tous les HF effacés';
+    setTimeout(() => { st.textContent = ''; }, 2500);
+    _apRenderAch();
+  } catch(e) { st.style.color = '#ff4444'; st.textContent = 'Erreur : ' + e.message; }
 };
 
 // ── VB TAB ──
@@ -4667,7 +4737,7 @@ function _applyModeLocks() {
   if (ybCampBtn) {
     ybCampBtn.classList.toggle('locked', !ybOk);
     ybCampBtn.querySelector('.mode-tile-sub').textContent = ybOk
-      ? 'HOF séparé'
+      ? t('camp.yb.sub')
       : t('lock.yb');
   }
 
