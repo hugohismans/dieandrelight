@@ -325,6 +325,18 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .ap-table th { color: #886622; font-weight: normal; text-align: left; padding: 4px 8px; border-bottom: 1px solid #ffaa0033; letter-spacing: 1px; }
   .ap-table td { padding: 5px 8px; border-bottom: 1px solid #ffaa0011; color: #ccaa55; vertical-align: middle; }
   .ap-table tr:hover td { background: #ffaa0009; }
+  .ap-ach-row { display:flex; align-items:center; gap:10px; padding:5px 4px; border-bottom:1px solid #ffaa0011; }
+  .ap-ach-row:hover { background:#ffaa0009; }
+  .ap-ach-row.unlocked .ap-ach-name { color:#ffcc55; }
+  .ap-ach-row.locked-ach .ap-ach-name { color:#443322; }
+  .ap-ach-emoji { font-size:16px; width:22px; text-align:center; flex-shrink:0; }
+  .ap-ach-name  { flex:1; font-size:10px; letter-spacing:1px; }
+  .ap-ach-id    { font-size:9px; color:#664422; margin-right:4px; flex-shrink:0; }
+  .ap-ach-toggle { font-size:10px; padding:2px 8px; border-radius:2px; cursor:pointer; border:1px solid; flex-shrink:0; background:transparent; font-family:'Courier New',monospace; }
+  .ap-ach-toggle.remove { border-color:#aa4422; color:#cc5533; }
+  .ap-ach-toggle.remove:hover { background:#aa442222; }
+  .ap-ach-toggle.grant { border-color:#448833; color:#55aa44; }
+  .ap-ach-toggle.grant:hover { background:#44883322; }
   .ap-mini-btn { background: none; border: 1px solid #ffaa0055; color: #886622; font-family: 'Courier New', monospace; font-size: 9px; padding: 2px 7px; cursor: pointer; border-radius: 2px; }
   .ap-mini-btn:hover { border-color: #ffaa00; color: #ffcc44; }
   .ap-mini-btn.del { border-color: #cc220055; color: #cc4422; }
@@ -935,6 +947,15 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .camp-select-btn.libre .camp-btn-badge { font-size: 20px; min-height: 50px; }
   .camp-select-btn.libre .camp-btn-body { padding: 10px 16px; }
   .camp-select-btn.libre .camp-name { font-size: 11px; letter-spacing: 3px; }
+  .camp-select-btn.mode-locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+    border-color: #2a2010 !important;
+  }
+  .camp-select-btn.mode-locked:hover { transform: none; border-color: #2a2010 !important; }
+  .camp-select-btn.mode-locked .camp-name { color: #555 !important; }
+  .camp-select-btn.mode-locked .camp-desc { color: #886644 !important; font-style: italic; }
 
   /* ── MODE TILES (camp select) ────────────────────────────── */
   #mode-camp-wrap {
@@ -975,6 +996,16 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .mode-tile-icon { font-size: 22px; line-height: 1; }
   .mode-tile-name { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
   .mode-tile-sub  { font-size: 9px; opacity: 0.5; letter-spacing: 1px; }
+  .mode-tile.locked {
+    border-color: #3a2a1a;
+    color: #3a3022;
+    background: rgba(0,0,0,0.5);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .mode-tile.locked:hover { border-color: #3a2a1a; color: #3a3022; background: rgba(0,0,0,0.5); }
+  .mode-tile.locked .mode-tile-icon { filter: grayscale(1); opacity: 0.4; }
+  .mode-tile.locked .mode-tile-sub  { color: #886644; opacity: 1; font-style: italic; }
 
   /* ── INVERT TOGGLE (sidebar only) ───────────────────────── */
   .invert-toggle {
@@ -999,6 +1030,14 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     color: #ff8800;
     box-shadow: 0 0 12px #ff880033;
   }
+  .invert-toggle.locked {
+    border-color: #2a2010;
+    color: #3a3020;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .invert-toggle.locked:hover { border-color: #2a2010; color: #3a3020; }
+  .invert-toggle.locked .toggle-pip { background: #554433; }
   .invert-toggle .toggle-pip {
     width: 8px; height: 8px;
     border-radius: 50%;
@@ -2016,6 +2055,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <button class="ap-tab active" data-ap="vb">⚡ VoltBucks</button>
       <button class="ap-tab" data-ap="hof">🏆 HOF</button>
       <button class="ap-tab" data-ap="players">👤 Joueurs</button>
+      <button class="ap-tab" data-ap="ach">🏅 HF</button>
       <button class="ap-tab" data-ap="tools">🛠 Outils</button>
     </div>
     <div id="admin-panel-body">
@@ -2120,6 +2160,17 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
           </div>
           <div class="ap-status" id="ap-pl-save-status"></div>
         </div>
+      </div>
+
+      <!-- TAB HAUTS-FAITS -->
+      <div class="ap-section" id="ap-ach">
+        <div class="ap-info">Gestion locale des hauts-faits (localStorage). Cliquer sur un HF pour le retirer ou le réattribuer.</div>
+        <div class="ap-row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="ap-btn" id="ap-ach-refresh">↺ Actualiser</button>
+          <button class="ap-btn danger" id="ap-ach-clear-all">🗑 Tout effacer</button>
+        </div>
+        <div id="ap-ach-status" class="ap-status"></div>
+        <div id="ap-ach-list"></div>
       </div>
 
       <!-- TAB OUTILS -->
@@ -2711,6 +2762,9 @@ const TRANSLATIONS = {
     'misc.by': 'par ',
     'misc.reset_deaths': 'Réinitialiser le compteur de morts total ?',
     'misc.mirror_confirm': 'Activer le mode miroir annulera la campagne en cours.\nContinuer ?',
+    'lock.mirror': '🔒 Terminez les 3 campagnes normales d\'abord',
+    'lock.yb': '🔒 Terminez les 3 campagnes en miroir d\'abord',
+    'lock.survival': '🔒 Terminez les 3 campagnes normales d\'abord',
     'misc.mirror_confirm_surv': 'Activer le mode miroir annulera la survie en cours.\nContinuer ?',
     'misc.yb_confirm_surv': 'Activer les yeux bandés annulera la survie en cours.\nContinuer ?',
     'misc.free': 'Gratuit',
@@ -3092,6 +3146,9 @@ const TRANSLATIONS = {
     'misc.by': 'by ',
     'misc.reset_deaths': 'Reset total death counter?',
     'misc.mirror_confirm': 'Enabling mirror mode will cancel the current campaign.\nContinue?',
+    'lock.mirror': '🔒 Complete all 3 normal campaigns first',
+    'lock.yb': '🔒 Complete all 3 mirror campaigns first',
+    'lock.survival': '🔒 Complete all 3 normal campaigns first',
     'misc.mirror_confirm_surv': 'Enabling mirror mode will cancel the current survival run.\nContinue?',
     'misc.yb_confirm_surv': 'Enabling blindfold mode will cancel the current survival run.\nContinue?',
     'misc.free': 'Free',
@@ -3249,6 +3306,7 @@ function applyLang() {
   if (_mirrorName) _mirrorName.textContent = t('camp.mirror.name');
   const _ybName = document.getElementById('mode-yb-name');
   if (_ybName) _ybName.textContent = t('camp.yb.name');
+  _applyModeLocks();
   // Auth overlay
   const _authDesc = document.getElementById('auth-desc');
   if (_authDesc) _authDesc.innerHTML = t('auth.hof_desc');
@@ -3312,10 +3370,90 @@ document.querySelectorAll('.ap-tab').forEach(btn => {
     document.querySelectorAll('.ap-section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('ap-' + btn.dataset.ap).classList.add('active');
+    if (btn.dataset.ap === 'ach') _apRenderAch();
     // show/hide time vs score fields in HOF add form
     _apHofToggleFields();
   };
 });
+
+// ── HAUTS-FAITS TAB ────────────────────────────────────────
+// IDs internes qui ne sont pas dans ACHIEVEMENTS mais qui servent aux verrous de mode
+const _ACH_INTERNAL = [
+  { id: 'bebe_mirror',   emoji: '🔄', name: 'Bébés (miroir) — interne' },
+  { id: 'piquer_mirror', emoji: '🔄', name: 'Piquer (miroir) — interne' },
+];
+
+function _apRenderAch() {
+  const listEl  = document.getElementById('ap-ach-list');
+  const statusEl = document.getElementById('ap-ach-status');
+  if (!listEl) return;
+
+  const allAchs = [
+    ...ACHIEVEMENTS,
+    ..._ACH_INTERNAL.filter(a => !ACHIEVEMENTS.find(x => x.id === a.id))
+  ];
+
+  const unlocked = allAchs.filter(a =>  _achDone.has(a.id));
+  const locked   = allAchs.filter(a => !_achDone.has(a.id));
+
+  function makeRow(ach, has) {
+    const row = document.createElement('div');
+    row.className = 'ap-ach-row ' + (has ? 'unlocked' : 'locked-ach');
+    const btn = document.createElement('button');
+    btn.className = 'ap-ach-toggle ' + (has ? 'remove' : 'grant');
+    btn.textContent = has ? '✕ Retirer' : '+ Accorder';
+    btn.onclick = () => {
+      if (has) {
+        _achDone.delete(ach.id);
+        localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
+        statusEl.textContent = `✓ "${ach.id}" retiré`;
+      } else {
+        unlockAchievement(ach.id);
+        statusEl.textContent = `✓ "${ach.id}" accordé`;
+      }
+      _applyModeLocks();
+      setTimeout(() => { statusEl.textContent = ''; }, 2500);
+      _apRenderAch();
+    };
+    row.innerHTML = `
+      <span class="ap-ach-emoji">${ach.emoji || '🏅'}</span>
+      <span class="ap-ach-name">${ach.name || ach.id}</span>
+      <span class="ap-ach-id">${ach.id}</span>`;
+    row.appendChild(btn);
+    return row;
+  }
+
+  listEl.innerHTML = `<div style="font-size:9px;color:#886633;letter-spacing:1px;margin-bottom:6px">
+    DÉBLOQUÉS (${unlocked.length})</div>`;
+  if (unlocked.length === 0) {
+    listEl.innerHTML += `<div style="color:#443322;font-size:10px;padding:4px">Aucun</div>`;
+  } else {
+    unlocked.forEach(a => listEl.appendChild(makeRow(a, true)));
+  }
+  const sep = document.createElement('div');
+  sep.style.cssText = 'font-size:9px;color:#443322;letter-spacing:1px;margin:10px 0 6px';
+  sep.textContent = `VERROUILLÉS (${locked.length})`;
+  listEl.appendChild(sep);
+  if (locked.length === 0) {
+    const none = document.createElement('div');
+    none.style.cssText = 'color:#443322;font-size:10px;padding:4px';
+    none.textContent = 'Aucun';
+    listEl.appendChild(none);
+  } else {
+    locked.forEach(a => listEl.appendChild(makeRow(a, false)));
+  }
+}
+
+document.getElementById('ap-ach-refresh').onclick = _apRenderAch;
+document.getElementById('ap-ach-clear-all').onclick = () => {
+  if (!confirm('Effacer TOUS les hauts-faits ? (irréversible)')) return;
+  _achDone.clear();
+  localStorage.setItem(_ACH_LS, JSON.stringify([]));
+  _applyModeLocks();
+  document.getElementById('ap-ach-status').textContent = '✓ Tous les HF effacés';
+  setTimeout(() => { document.getElementById('ap-ach-status').textContent = ''; }, 2500);
+  _apRenderAch();
+};
 
 // ── VB TAB ──
 async function _apAdminToken() {
@@ -4407,6 +4545,7 @@ function openCampSelect() {
   };
   btnsEl.appendChild(libreBtn);
   _updateCampVbLabels();
+  _applyModeLocks();
   overlay.classList.add('open');
 }
 
@@ -4495,6 +4634,64 @@ function downloadReplay() {
   URL.revokeObjectURL(url);
 }
 
+// ── MODE LOCKS ─────────────────────────────────────────────
+function _isMirrorUnlocked() {
+  if (adminMode) return true;
+  return _achDone.has('bebe_won') && _achDone.has('piquer_won') && _achDone.has('cauchemar_won');
+}
+function _isYbUnlocked() {
+  if (adminMode) return true;
+  // Rétrocompat : si un score HOF miroir existe mais l'ach interne manque, on le débloque
+  if (!_achDone.has('bebe_mirror')   && getCampScore('bebe_inv'))   unlockAchievement('bebe_mirror');
+  if (!_achDone.has('piquer_mirror') && getCampScore('piquer_inv')) unlockAchievement('piquer_mirror');
+  return _achDone.has('bebe_mirror') && _achDone.has('piquer_mirror') && _achDone.has('cauchemar_mirror');
+}
+function _isSurvivalUnlocked() {
+  return _isMirrorUnlocked(); // mêmes prérequis : les 3 campagnes normales
+}
+
+function _applyModeLocks() {
+  const mirrorOk   = _isMirrorUnlocked();
+  const ybOk       = _isYbUnlocked();
+  const survivalOk = _isSurvivalUnlocked();
+
+  // Boutons mode-tile (écran campagne)
+  const invertCampBtn = document.getElementById('invert-btn-camp');
+  const ybCampBtn     = document.getElementById('yb-btn-camp');
+  if (invertCampBtn) {
+    invertCampBtn.classList.toggle('locked', !mirrorOk);
+    invertCampBtn.querySelector('.mode-tile-sub').textContent = mirrorOk
+      ? 'Q ↔ P'
+      : t('lock.mirror');
+  }
+  if (ybCampBtn) {
+    ybCampBtn.classList.toggle('locked', !ybOk);
+    ybCampBtn.querySelector('.mode-tile-sub').textContent = ybOk
+      ? 'HOF séparé'
+      : t('lock.yb');
+  }
+
+  // Boutons sidebar
+  const invertSbBtn = document.getElementById('invert-btn-sidebar');
+  const ybSbBtn     = document.getElementById('yb-btn-sidebar');
+  if (invertSbBtn) invertSbBtn.classList.toggle('locked', !mirrorOk);
+  if (ybSbBtn)     ybSbBtn.classList.toggle('locked', !ybOk);
+
+  // Bouton survie
+  const survBtn = document.getElementById('survival-start-btn');
+  if (survBtn) {
+    survBtn.classList.toggle('mode-locked', !survivalOk);
+    const descEl = document.getElementById('surv-btn-desc');
+    if (descEl) {
+      descEl.textContent = survivalOk
+        ? (currentLang === 'en'
+            ? '∞ Nightmare levels · 3 lives · Separate HOF · Mirror & Blindfold compatible'
+            : '∞ niveaux Cauchemar aléatoires · 3 vies · HOF séparé · Miroir & Yeux bandés compatibles')
+        : t('lock.survival');
+    }
+  }
+}
+
 // ── MODE MIROIR (invert Q↔P) ───────────────────────────────
 function _applyInvertUI() {
   document.getElementById('invert-btn-camp')?.classList.toggle('active', invertControls);
@@ -4503,6 +4700,7 @@ function _applyInvertUI() {
 }
 
 function toggleInvert() {
+  if (!_isMirrorUnlocked()) return;
   if (survivalRunning) {
     const ok = confirm(t('misc.mirror_confirm_surv'));
     if (!ok) return;
@@ -4966,6 +5164,10 @@ function unlockAchievement(id) {
     const baseAchs = ACHIEVEMENTS.filter(a => a.id !== 'platine');
     if (baseAchs.every(a => _achDone.has(a.id))) unlockAchievement('platine');
   }
+  // Mettre à jour les verrous de mode si un prérequis vient d'être débloqué
+  if (['bebe_won','piquer_won','cauchemar_won','bebe_mirror','piquer_mirror','cauchemar_mirror'].includes(id)) {
+    _applyModeLocks();
+  }
 }
 
 function checkAchievements(trigger) {
@@ -4988,6 +5190,8 @@ function checkAchievements(trigger) {
       if (campId === 'bebe'      && time < 180000) unlockAchievement('bebe_speed');
       if (campId === 'cauchemar' && time < 900000) unlockAchievement('cauchemar_speed');
       if (inv)                             unlockAchievement('mirror_won');
+      if (campId === 'bebe'    && inv)   unlockAchievement('bebe_mirror');
+      if (campId === 'piquer'  && inv)   unlockAchievement('piquer_mirror');
       if (campId === 'cauchemar' && inv)   unlockAchievement('cauchemar_mirror');
       if (campId === 'cauchemar' && inv && deaths === 0) unlockAchievement('cauchemar_mirror_deathless');
     } else if (!inv) {
@@ -5058,6 +5262,7 @@ function goSurvivalLevel(entry) {
 }
 
 function startSurvival() {
+  if (!_isSurvivalUnlocked()) return;
   if (campRunning) campStop();
   survivalRunning  = true;
   _runUsedConsumables = new Set();
@@ -5773,6 +5978,7 @@ function _applyYbUI() {
 }
 
 function toggleYb() {
+  if (!_isYbUnlocked()) return;
   if (survivalRunning) {
     const ok = confirm(t('misc.yb_confirm_surv'));
     if (!ok) return;
