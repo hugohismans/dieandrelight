@@ -5897,22 +5897,23 @@ let currentPseudo = null;  // chosen pseudo (from /users/{uid}/pseudo)
 const FB_USERS_URL   = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/users';
 const FB_PSEUDOS_URL = 'https://dieandretry-af391-default-rtdb.europe-west1.firebasedatabase.app/pseudos';
 
-// Sur mobile/tablette les popups sont bloquées — utiliser redirect à la place
-const _isMobileOrTablet = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
-  || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
-
 async function _signInWithGoogle() {
-  if (_isMobileOrTablet) {
-    await _fbAuth.signInWithRedirect(_googleProvider);
-  } else {
+  try {
+    // signInWithPopup fonctionne sur desktop ET mobile moderne
     await _fbAuth.signInWithPopup(_googleProvider);
+  } catch(e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      // Fallback redirect uniquement si le popup est explicitement bloqué
+      await _fbAuth.signInWithRedirect(_googleProvider);
+    } else if (e.code !== 'auth/cancelled-popup-request') {
+      console.error('[Auth popup]', e.code, e.message);
+    }
   }
 }
 
-// Gérer le retour après signInWithRedirect (mobile/tablette)
+// Gérer le retour après signInWithRedirect (fallback uniquement)
 _fbAuth.getRedirectResult().then(result => {
-  // onAuthStateChanged se déclenche automatiquement si result.user existe
-  if (result && result.user) console.log('[Auth redirect] OK:', result.user.email);
+  if (result && result.user) console.log('[Auth redirect fallback] OK:', result.user.email);
 }).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
 });

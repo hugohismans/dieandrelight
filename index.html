@@ -1390,20 +1390,22 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
   } catch(e) { statusEl.style.color = '#ff4444'; statusEl.textContent = t_idx('idx.pseudo_error') + e.message; }
 };
 
-const _idxIsMobile = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
-  || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
-
 _fbAuth.getRedirectResult().then(result => {
-  if (result && result.user) console.log('[Auth redirect] OK:', result.user.email);
+  if (result && result.user) console.log('[Auth redirect fallback] OK:', result.user.email);
 }).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
 });
 
 document.getElementById('idx-google-btn').onclick = async () => {
   try {
-    if (_idxIsMobile) { await _fbAuth.signInWithRedirect(_googleProvider); }
-    else { await _fbAuth.signInWithPopup(_googleProvider); }
-  } catch(e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
+    await _fbAuth.signInWithPopup(_googleProvider);
+  } catch(e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      await _fbAuth.signInWithRedirect(_googleProvider);
+    } else if (e.code !== 'auth/cancelled-popup-request') {
+      console.error('[Auth popup]', e.code, e.message);
+    }
+  }
 };
 document.getElementById('auth-logout-btn').onclick = () => _fbAuth.signOut();
 </script>
