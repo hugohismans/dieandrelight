@@ -2383,6 +2383,7 @@ const TRANSLATIONS = {
     'tuto3.hint': '[Q] ▶ relâche [Q] ▶ [P] ▶ relâche [P] — [R] pour recommencer',
     'tuto3.hint.ps': '[L2] ▶ relâche [L2] ▶ [R2] ▶ relâche [R2] — [○] pour recommencer',
     'tuto3.hint.xbox': '[LT] ▶ relâche [LT] ▶ [RT] ▶ relâche [RT] — [B] pour recommencer',
+    'tuto3.bg_hint': 'Alterne !',
     'hint.restart': '— [R] pour recommencer',
     'hint.restart.ps': '— [○] pour recommencer',
     'hint.restart.xbox': '— [B] pour recommencer',
@@ -2763,6 +2764,7 @@ const TRANSLATIONS = {
     'tuto3.hint': '[Q] ▶ release [Q] ▶ [P] ▶ release [P] — [R] to restart',
     'tuto3.hint.ps': '[L2] ▶ release [L2] ▶ [R2] ▶ release [R2] — [○] to restart',
     'tuto3.hint.xbox': '[LT] ▶ release [LT] ▶ [RT] ▶ release [RT] — [B] to restart',
+    'tuto3.bg_hint': 'Alternate!',
     'hint.restart': '— [R] to restart',
     'hint.restart.ps': '— [○] to restart',
     'hint.restart.xbox': '— [B] to restart',
@@ -3966,6 +3968,9 @@ function _buildTutoHint(idx) {
   } else if (idx === 1) {
     const verb = t('tuto2.bg_hint_verb');
     el.innerHTML = `<span style="color:#7799aa">${verb} </span><span style="${O}">${kQ}</span><span style="color:#334455"> + </span><span style="${P}">${kP}</span>`;
+    el.classList.add('visible');
+  } else if (idx === 2) {
+    el.innerHTML = `<span style="${O}">${kQ}</span><span style="color:#7799aa"> ↔ </span><span style="${P}">${kP}</span><span style="color:#7799aa">  ${t('tuto3.bg_hint')}</span>`;
     el.classList.add('visible');
   } else if (LEVELS[idx]?.bgHint === 'resistance') {
     el.innerHTML = `<span style="${Y}">${t('resistance.bg_hint')}</span>`;
