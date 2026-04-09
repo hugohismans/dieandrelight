@@ -1,5 +1,6 @@
 {
   "name": "PingPong",
+  "made_by": "KetaKoala",
   "ballSpeedMult": 2,
   "nodes": [
     {
