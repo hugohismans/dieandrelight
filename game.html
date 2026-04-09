@@ -3412,6 +3412,16 @@ async function _apAchWrite(uid, achId, value, token) {
   });
 }
 
+async function _apSyncAchCount(uid, token) {
+  // Recompter les HF depuis _apAchFbData et mettre à jour achievement_ranks
+  const count = Object.values(_apAchFbData).filter(v => v === true).length;
+  await fetch(`${_FB_BASE}/achievement_ranks/${uid}/achCount.json?auth=${token}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(count)
+  });
+}
+
 function _apRenderAch() {
   const listEl   = document.getElementById('ap-ach-list');
   const statusEl = document.getElementById('ap-ach-status');
@@ -3452,6 +3462,8 @@ function _apRenderAch() {
           localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
           _applyModeLocks();
         }
+        // Mettre à jour le compteur HOF
+        await _apSyncAchCount(_apAchUid, token);
         statusEl.style.color = '#00cc99';
         statusEl.textContent = `✓ "${ach.id}" ${has ? 'retiré' : 'accordé'}`;
         setTimeout(() => { statusEl.textContent = ''; }, 2500);
@@ -3561,6 +3573,7 @@ document.getElementById('ap-ach-clear-all').onclick = async () => {
       localStorage.setItem(_ACH_LS, JSON.stringify([]));
       _applyModeLocks();
     }
+    await _apSyncAchCount(_apAchUid, token);
     st.style.color = '#00cc99'; st.textContent = '✓ Tous les HF effacés';
     setTimeout(() => { st.textContent = ''; }, 2500);
     _apRenderAch();
