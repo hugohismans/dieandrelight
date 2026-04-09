@@ -5845,9 +5845,10 @@ function detectDevice() {
 }
 const DEVICE_ICON = { pc: '🖥️', mobile: '📱', tablet: '📟' };
 const CTRL_ICON   = { keyboard: '⌨️', gamepad: '🎮' };
-function _ctrlIcon(e) {
-  if (!e.ctrl || e.device === 'mobile' || e.device === 'tablet') return '';
-  return `<span style="font-size:12px;opacity:0.7;margin-left:2px" title="${e.ctrl}">${CTRL_ICON[e.ctrl] || ''}</span>`;
+function _ctrlCol(e) {
+  if (e.device === 'mobile' || e.device === 'tablet') return '<td></td>';
+  const icon = CTRL_ICON[e.ctrl] || '⌨️'; // ⌨️ par défaut pour anciens records PC
+  return `<td style="font-size:13px;opacity:0.55" title="${e.ctrl || 'keyboard'}">${icon}</td>`;
 }
 
 // ── HOF fetch & display ────────────────────────────────────
@@ -5892,14 +5893,15 @@ function hofRenderBody(entries, isSurvival = false) {
   if (isSurvival) {
     body.innerHTML = `<table class="hof-table">
       <thead><tr>
-        <th>#</th><th>Pseudo</th><th>⚡ ${currentLang === 'en' ? 'Levels' : 'Niveaux'}</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
+        <th>#</th><th>Pseudo</th><th>⚡ ${currentLang === 'en' ? 'Levels' : 'Niveaux'}</th><th>Date</th><th></th><th></th>${isAdmin ? '<th></th>' : ''}
       </tr></thead>
       <tbody>${entries.map((e, i) => `<tr>
         <td class="hof-rank">${medals[i] || (i+1)}</td>
         <td class="hof-pseudo pp-trigger" data-uid="${e.uid || ''}" data-pseudo="${escHtml(e.pseudo)}">${emote(e)}${escHtml(e.pseudo)}</td>
         <td class="hof-time" style="color:#ff8899">${e.score}</td>
         <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
-        <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}${_ctrlIcon(e)}</td>
+        <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
+        ${_ctrlCol(e)}
         ${delBtn(e)}
       </tr>`).join('')}</tbody>
     </table>`;
@@ -5907,7 +5909,7 @@ function hofRenderBody(entries, isSurvival = false) {
   }
   body.innerHTML = `<table class="hof-table">
     <thead><tr>
-      <th>#</th><th>Pseudo</th><th>${currentLang === 'en' ? 'Time' : 'Temps'}</th><th>💀 ${currentLang === 'en' ? 'Deaths' : 'Morts'}</th><th>Date</th><th></th>${isAdmin ? '<th></th>' : ''}
+      <th>#</th><th>Pseudo</th><th>${currentLang === 'en' ? 'Time' : 'Temps'}</th><th>💀 ${currentLang === 'en' ? 'Deaths' : 'Morts'}</th><th>Date</th><th></th><th></th>${isAdmin ? '<th></th>' : ''}
     </tr></thead>
     <tbody>${entries.map((e, i) => `<tr>
       <td class="hof-rank">${medals[i] || (i+1)}</td>
@@ -5916,6 +5918,7 @@ function hofRenderBody(entries, isSurvival = false) {
       <td class="hof-deaths">${e.deaths}</td>
       <td style="color:#224433;font-size:10px">${new Date(e.ts).toLocaleDateString()}</td>
       <td title="${e.device || 'pc'}" style="font-size:14px">${DEVICE_ICON[e.device] || DEVICE_ICON.pc}</td>
+      ${_ctrlCol(e)}
       ${delBtn(e)}
     </tr>`).join('')}</tbody>
   </table>`;
