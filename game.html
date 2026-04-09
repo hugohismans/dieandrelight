@@ -8328,9 +8328,7 @@ function drawSwitch(sw) {
     ctx.textAlign = 'center';
     ctx.fillStyle = c.main;
     ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
-    // Contre-flip le texte en mode miroir pour le garder lisible
-    if (invertControls) { ctx.translate(x, labelY); ctx.scale(-1, 1); ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', 0, 0); }
-    else ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
+    ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
     ctx.restore();
   }
   // Cadenas si switch verrouillé par fusible
@@ -9787,8 +9785,6 @@ function drawCustom() {
       // Label: perpendicular to wire, offset to the side
       ctx.save();
       ctx.rotate(-angle); // unrotate for readable text
-      // Contre-flip le texte en mode miroir pour le garder lisible
-      if (invertControls) ctx.scale(-1, 1);
       if (!_hideLabels) {
         ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
         ctx.fillStyle = c.main;
