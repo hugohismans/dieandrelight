@@ -1604,12 +1604,8 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .touch-device #btn-gp-ps,
   .touch-device #btn-gp-xbox { display: none; }
 
-  /* ── CTRL PICKER (camp screen) ───────────────────────────── */
-  #ctrl-picker {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    margin-top: 4px;
-  }
-  .touch-device #ctrl-picker { display: none; }
+  /* ── CTRL PICKER (sidebar) ───────────────────────────────── */
+  .touch-device #ctrl-picker { display: none !important; }
   .ctrl-pick-btn {
     font-family: 'Courier New', monospace;
     font-size: 10px; letter-spacing: 1px;
@@ -1812,14 +1808,6 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <div style="font-size:9px;letter-spacing:1px;opacity:0.7;margin-top:2px" id="camp-vb-survie"></div>
     </div>
   </button>
-  <div id="ctrl-picker">
-    <p id="ctrl-picker-label" data-i18n="ctrl.picker.label" style="width:100%;text-align:center;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#00ffcc55;text-transform:uppercase;margin:0 0 6px">Choisissez votre contrôleur</p>
-    <div style="display:flex;gap:8px;justify-content:center">
-      <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ <span data-i18n="ctrl.modal.kb">Clavier</span></button>
-      <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
-      <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
-    </div>
-  </div>
   <div id="mode-camp-wrap">
     <div id="mode-camp-tiles">
       <button class="mode-tile" id="invert-btn-camp">
@@ -2187,6 +2175,14 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div style="margin-top:auto;padding-top:12px;border-top:1px solid #1a5a3a;display:flex;flex-direction:column;gap:4px">
       <button class="invert-toggle" id="invert-btn-sidebar"><span class="toggle-pip"></span>Mode miroir Q↔P</button>
       <button class="invert-toggle" id="yb-btn-sidebar"><span class="toggle-pip"></span>🙈 Yeux bandés</button>
+      <div id="ctrl-picker" style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:2px">
+        <p data-i18n="ctrl.picker.label" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#00ffcc55;text-transform:uppercase;margin:0">Choisissez votre contrôleur</p>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ <span data-i18n="ctrl.modal.kb">Clavier</span></button>
+          <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
+          <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+        </div>
+      </div>
       <button class="replay-btn" id="launch-camp-btn" style="border-color:#00cc99;color:#00cc99">⚡ Choisir une campagne</button>
       <button class="replay-btn" id="profile-open-btn" style="border-color:#00ddaa;color:#00ddaa">👤 Profil</button>
       <button class="replay-btn" id="ach-open-btn" style="border-color:#aa66ff;color:#aa66ff">🏅 Hauts-Faits</button>
@@ -5862,7 +5858,7 @@ async function hofFetch(version, diff) {
     if (!res.ok) return [];
     const data = await res.json();
     if (!data) return [];
-    const isSurvival = diff.startsWith('survie');
+    const isSurvival = diff ? diff.startsWith('survie') : false;
     // Flatten: handle both flat {key: entry} and nested {diff: {key: entry}} structures
     // Preserve Firebase keys for admin deletion
     const raw = Object.entries(data);
@@ -6149,7 +6145,7 @@ async function _ppShowDiff(diff) {
       _ppHofCache[diff] = (res.ok ? await res.json() : null) || {};
     }
     const data = _ppHofCache[diff];
-    const isSurvival = diff.startsWith('survie');
+    const isSurvival = diff ? diff.startsWith('survie') : false;
     const sorted = Object.values(data)
       .filter(e => e && typeof e.pseudo === 'string' && (isSurvival ? typeof e.score === 'number' : typeof e.time === 'number'))
       .sort(isSurvival ? (a, b) => b.score - a.score || a.ts - b.ts : (a, b) => a.time - b.time);
