@@ -1604,8 +1604,9 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
   .touch-device #btn-gp-ps,
   .touch-device #btn-gp-xbox { display: none; }
 
-  /* ── CTRL PICKER (sidebar) ───────────────────────────────── */
-  .touch-device #ctrl-picker { display: none !important; }
+  /* ── CTRL PICKER ────────────────────────────────────────── */
+  .touch-device .ctrl-picker,
+  .touch-device .touch-hidden { display: none !important; }
   .ctrl-pick-btn {
     font-family: 'Courier New', monospace;
     font-size: 10px; letter-spacing: 1px;
@@ -1808,6 +1809,14 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
       <div style="font-size:9px;letter-spacing:1px;opacity:0.7;margin-top:2px" id="camp-vb-survie"></div>
     </div>
   </button>
+  <div class="ctrl-picker touch-hidden" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <p data-i18n="ctrl.picker.label" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#00ffcc55;text-transform:uppercase;margin:0">Choisissez votre contrôleur</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="ctrl-pick-btn" data-cp="null"  onclick="_setGamepadMode(null)">⌨️ <span data-i18n="ctrl.modal.kb">Clavier</span></button>
+      <button class="ctrl-pick-btn" data-cp="ps"    onclick="_setGamepadMode('ps')">🕹️ PS</button>
+      <button class="ctrl-pick-btn" data-cp="xbox"  onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+    </div>
+  </div>
   <div id="mode-camp-wrap">
     <div id="mode-camp-tiles">
       <button class="mode-tile" id="invert-btn-camp">
@@ -2175,12 +2184,12 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     <div style="margin-top:auto;padding-top:12px;border-top:1px solid #1a5a3a;display:flex;flex-direction:column;gap:4px">
       <button class="invert-toggle" id="invert-btn-sidebar"><span class="toggle-pip"></span>Mode miroir Q↔P</button>
       <button class="invert-toggle" id="yb-btn-sidebar"><span class="toggle-pip"></span>🙈 Yeux bandés</button>
-      <div id="ctrl-picker" style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:2px">
+      <div class="ctrl-picker" style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:2px">
         <p data-i18n="ctrl.picker.label" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#00ffcc55;text-transform:uppercase;margin:0">Choisissez votre contrôleur</p>
         <div style="display:flex;gap:8px;justify-content:center">
-          <button class="ctrl-pick-btn" id="cp-btn-pc"   onclick="_setGamepadMode(null)">⌨️ <span data-i18n="ctrl.modal.kb">Clavier</span></button>
-          <button class="ctrl-pick-btn" id="cp-btn-ps"   onclick="_setGamepadMode('ps')">🕹️ PS</button>
-          <button class="ctrl-pick-btn" id="cp-btn-xbox" onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
+          <button class="ctrl-pick-btn" data-cp="null"   onclick="_setGamepadMode(null)">⌨️ <span data-i18n="ctrl.modal.kb">Clavier</span></button>
+          <button class="ctrl-pick-btn" data-cp="ps"     onclick="_setGamepadMode('ps')">🕹️ PS</button>
+          <button class="ctrl-pick-btn" data-cp="xbox"   onclick="_setGamepadMode('xbox')">🎮 XBOX</button>
         </div>
       </div>
       <button class="replay-btn" id="launch-camp-btn" style="border-color:#00cc99;color:#00cc99">⚡ Choisir une campagne</button>
@@ -3740,13 +3749,11 @@ function _applyGamepadMode() {
   if (btnPc)   btnPc.style.opacity   = _gamepadMode === null    ? '1' : '0.35';
   if (btnPs)   btnPs.style.opacity   = _gamepadMode === 'ps'    ? '1' : '0.35';
   if (btnXbox) btnXbox.style.opacity = _gamepadMode === 'xbox'  ? '1' : '0.35';
-  // Camp-screen picker buttons
-  const cpPc   = document.getElementById('cp-btn-pc');
-  const cpPs   = document.getElementById('cp-btn-ps');
-  const cpXbox = document.getElementById('cp-btn-xbox');
-  if (cpPc)   cpPc.classList.toggle('active',   _gamepadMode === null);
-  if (cpPs)   cpPs.classList.toggle('active',   _gamepadMode === 'ps');
-  if (cpXbox) cpXbox.classList.toggle('active', _gamepadMode === 'xbox');
+  // Tous les pickers (sidebar + camp-select) via data-cp
+  document.querySelectorAll('.ctrl-pick-btn[data-cp]').forEach(btn => {
+    const val = btn.dataset.cp === 'null' ? null : btn.dataset.cp;
+    btn.classList.toggle('active', val === _gamepadMode);
+  });
   // Touch control labels
   const btnQ  = document.getElementById('btn-q');
   const btnP  = document.getElementById('btn-p');
