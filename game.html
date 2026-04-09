@@ -8328,7 +8328,9 @@ function drawSwitch(sw) {
     ctx.textAlign = 'center';
     ctx.fillStyle = c.main;
     ctx.shadowBlur = open ? 0 : 6; ctx.shadowColor = c.glow;
-    ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
+    // Contre-flip le texte en mode miroir pour le garder lisible
+    if (invertControls) { ctx.translate(x, labelY); ctx.scale(-1, 1); ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', 0, 0); }
+    else ctx.fillText('[' + _gpKey(_ikey(sw.key)) + ']', x, labelY);
     ctx.restore();
   }
   // Cadenas si switch verrouillé par fusible
@@ -8809,6 +8811,12 @@ function draw() {
   const shakeAmt = shakeTimer > 0 ? (Math.random() - 0.5) * 10 * (shakeTimer / 0.22) : 0;
   ctx.save();
   if (shakeAmt) ctx.translate(shakeAmt, (Math.random() - 0.5) * 10 * (shakeTimer / 0.22));
+
+  // Miroir : flip horizontal du canvas pour les niveaux single/split
+  if (invertControls && state.type !== 'custom') {
+    ctx.translate(W, 0);
+    ctx.scale(-1, 1);
+  }
 
   // fond semi-transparent : laisse le bg (grille + électrons) traverser
   ctx.fillStyle = 'rgba(8,8,15,0.18)'; ctx.fillRect(-20, -20, W + 40, H + 40);
@@ -9651,7 +9659,12 @@ function drawCustom() {
 
   // Apply fit transform so entire level is visible
   ctx.save();
-  ctx.setTransform(camScale, 0, 0, camScale, camTX, camTY);
+  if (invertControls) {
+    // Miroir horizontal : flip autour du centre du canvas
+    ctx.setTransform(-camScale, 0, 0, camScale, W - camTX, camTY);
+  } else {
+    ctx.setTransform(camScale, 0, 0, camScale, camTX, camTY);
+  }
 
   const edgesWithBall = new Set(balls.map(b => b.edgeId));
 
@@ -9774,6 +9787,8 @@ function drawCustom() {
       // Label: perpendicular to wire, offset to the side
       ctx.save();
       ctx.rotate(-angle); // unrotate for readable text
+      // Contre-flip le texte en mode miroir pour le garder lisible
+      if (invertControls) ctx.scale(-1, 1);
       if (!_hideLabels) {
         ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
         ctx.fillStyle = c.main;
