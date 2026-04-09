@@ -113,9 +113,14 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     white-space: nowrap;
   }
   #tuto-q-hint.visible { opacity: 0.4; }
+  #tuto-q-hint.mirrored { animation-name: tuto-float-mirror; }
   @keyframes tuto-float {
     0%, 100% { transform: translateX(-50%) translateY(0px); }
     50%       { transform: translateX(-50%) translateY(-14px); }
+  }
+  @keyframes tuto-float-mirror {
+    0%, 100% { transform: translateX(-50%) translateY(0px) scaleX(-1); }
+    50%       { transform: translateX(-50%) translateY(-14px) scaleX(-1); }
   }
 
   #bg-scanlines {
@@ -4845,6 +4850,7 @@ function _applyModeLocks() {
 function _applyInvertUI() {
   document.getElementById('invert-btn-camp')?.classList.toggle('active', invertControls);
   document.getElementById('invert-btn-sidebar')?.classList.toggle('active', invertControls);
+  document.getElementById('tuto-q-hint')?.classList.toggle('mirrored', invertControls);
   _updateCampVbLabels();
 }
 
