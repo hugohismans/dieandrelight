@@ -5910,7 +5910,10 @@ async function _signInWithGoogle() {
 }
 
 // Gérer le retour après signInWithRedirect (mobile/tablette)
-_fbAuth.getRedirectResult().catch(e => {
+_fbAuth.getRedirectResult().then(result => {
+  // onAuthStateChanged se déclenche automatiquement si result.user existe
+  if (result && result.user) console.log('[Auth redirect] OK:', result.user.email);
+}).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
 });
 

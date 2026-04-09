@@ -1393,7 +1393,9 @@ document.getElementById('idx-pseudo-save').onclick = async () => {
 const _idxIsMobile = /mobile|android|iphone|ipad|ipod|tablet/i.test(navigator.userAgent)
   || (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
 
-_fbAuth.getRedirectResult().catch(e => {
+_fbAuth.getRedirectResult().then(result => {
+  if (result && result.user) console.log('[Auth redirect] OK:', result.user.email);
+}).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') console.error('[Auth redirect]', e.code, e.message);
 });
 
