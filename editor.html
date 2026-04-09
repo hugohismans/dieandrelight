@@ -408,146 +408,6 @@ body {
     </div>
     <div id="doc-body">
 
-      <!-- OUTILS -->
-      <div class="doc-section">
-        <h3>Outils de la barre</h3>
-        <div class="doc-grid">
-          <div class="doc-key"><span class="kbd">S</span></div>
-          <div class="doc-desc"><strong>Select</strong> — sélectionner, déplacer un nœud ou un fil</div>
-
-          <div class="doc-key"><span class="kbd">N</span></div>
-          <div class="doc-desc"><strong>Node</strong> — double-clic sur le canvas pour ajouter un nœud (choisir le type : ⚡ source, ● nœud, 💡 ampoule, 🌀 téléporteur)</div>
-
-          <div class="doc-key"><span class="kbd">W</span></div>
-          <div class="doc-desc"><strong>Wire</strong> — cliquer sur un nœud source puis un nœud destination pour créer un fil. Clic sur un fil existant = insérer un nœud intermédiaire</div>
-
-          <div class="doc-key"><span class="kbd">D</span></div>
-          <div class="doc-desc"><strong>Delete</strong> — clic sur un nœud ou fil pour le supprimer</div>
-
-          <div class="doc-key"><span class="kbd">F</span></div>
-          <div class="doc-desc"><strong>Fit</strong> — recentrer la vue sur tous les éléments</div>
-        </div>
-      </div>
-
-      <!-- NAVIGATION -->
-      <div class="doc-section">
-        <h3>Navigation dans la vue</h3>
-        <div class="doc-grid">
-          <div class="doc-key"><span class="kbd">Molette</span></div>
-          <div class="doc-desc">Zoom avant/arrière</div>
-
-          <div class="doc-key"><span class="kbd">Espace</span> <span style="color:#446655">+</span> <span class="kbd">Drag</span></div>
-          <div class="doc-desc">Déplacer la vue (pan)</div>
-
-          <div class="doc-key"><span class="kbd">Drag</span> <span style="color:#446655">sur vide</span></div>
-          <div class="doc-desc">Pan rapide (en mode Select, sur zone vide)</div>
-
-          <div class="doc-key"><span class="kbd">F</span></div>
-          <div class="doc-desc">Recadrer automatiquement tous les éléments</div>
-        </div>
-      </div>
-
-      <!-- SÉLECTION MULTIPLE -->
-      <div class="doc-section">
-        <h3>Sélection multiple</h3>
-        <div class="doc-grid">
-          <div class="doc-key"><span class="kbd">Ctrl</span> <span style="color:#446655">+</span> <span class="kbd">Drag</span></div>
-          <div class="doc-desc">Dessiner un rectangle de sélection — tous les nœuds à l'intérieur sont sélectionnés</div>
-
-          <div class="doc-key"><span class="kbd">Drag</span> <span style="color:#446655">sur sélection</span></div>
-          <div class="doc-desc">Déplacer le groupe sélectionné (les fils internes suivent)</div>
-
-          <div class="doc-key"><span class="kbd">X</span></div>
-          <div class="doc-desc">Symétrie ↔ — miroir gauche/droite autour du centre de la sélection</div>
-
-          <div class="doc-key"><span class="kbd">Y</span></div>
-          <div class="doc-desc">Symétrie ↕ — miroir haut/bas autour du centre de la sélection</div>
-
-          <div class="doc-key"><span class="kbd">Ctrl+C</span></div>
-          <div class="doc-desc">Copier la sélection (nœuds + fils internes)</div>
-
-          <div class="doc-key"><span class="kbd">Ctrl+V</span></div>
-          <div class="doc-desc">Coller avec décalage de +40px</div>
-
-          <div class="doc-key"><span class="kbd">Suppr</span></div>
-          <div class="doc-desc">Supprimer tous les nœuds sélectionnés (et leurs fils)</div>
-
-          <div class="doc-key"><span class="kbd">Échap</span> <span style="color:#446655">/ clic droit</span></div>
-          <div class="doc-desc">Désélectionner tout / annuler le fil en cours</div>
-        </div>
-      </div>
-
-      <!-- HISTORIQUE -->
-      <div class="doc-section">
-        <h3>Historique</h3>
-        <div class="doc-grid">
-          <div class="doc-key"><span class="kbd">Ctrl+Z</span></div>
-          <div class="doc-desc">Annuler la dernière action (60 niveaux d'historique)</div>
-
-          <div class="doc-key"><span class="kbd">Ctrl+Shift+Z</span></div>
-          <div class="doc-desc">Rétablir</div>
-        </div>
-      </div>
-
-      <!-- PROPRIÉTÉS D'UN FIL -->
-      <div class="doc-section">
-        <h3>Propriétés d'un fil (panneau en bas après sélection)</h3>
-        <div class="doc-grid">
-          <div class="doc-key"><span class="kbd">Switch</span></div>
-          <div class="doc-desc">Assigner la touche <strong>Q</strong> ou <strong>P</strong> au fil — le joueur appuiera dessus pour ouvrir/fermer</div>
-
-          <div class="doc-key"><span class="kbd">État initial</span></div>
-          <div class="doc-desc"><strong>Ouvert 🔓</strong> = interrupteur ouvert au départ (balle meurt si elle entre) / <strong>Fermé 🔒</strong> = passant par défaut</div>
-
-          <div class="doc-key"><span class="kbd">Résistance</span></div>
-          <div class="doc-desc">La balle ralentit — le joueur doit spammer Espace pour maintenir la jauge et passer. Configurer la durée en secondes</div>
-
-          <div class="doc-key"><span class="kbd">Microprocesseur</span></div>
-          <div class="doc-desc">La balle se bloque — le joueur doit saisir un code à 3 chiffres en temps limité. Configurer le délai en secondes</div>
-
-          <div class="doc-key"><span class="kbd">Inductance</span></div>
-          <div class="doc-desc">Pause chronométrée automatique — la balle attend un certain temps sans interaction. Configurer la durée</div>
-
-          <div class="doc-key"><span class="kbd">Inverser ⇄</span></div>
-          <div class="doc-desc">Inverse le sens du fil (échange source et destination)</div>
-
-          <div class="doc-key"><span class="kbd">Coude wayY</span></div>
-          <div class="doc-desc">Ajouter un coude au fil en spécifiant une coordonnée Y intermédiaire (laisser vide = fil direct)</div>
-        </div>
-      </div>
-
-      <!-- ÉLÉMENTS -->
-      <div class="doc-section">
-        <h3>Types de nœuds</h3>
-        <div class="doc-elem-grid">
-          <div class="doc-icon">⚡</div>
-          <div class="doc-elem-desc"><strong>Source</strong> — point de départ d'une balle. Un niveau peut avoir plusieurs sources (plusieurs balles partent en même temps)</div>
-
-          <div class="doc-icon">●</div>
-          <div class="doc-elem-desc"><strong>Nœud</strong> — jonction. Si plusieurs fils en sortent, la balle se divise en autant de copies</div>
-
-          <div class="doc-icon">💡</div>
-          <div class="doc-elem-desc"><strong>Ampoule</strong> — objectif. Toutes les balles doivent arriver ici pour gagner. Un niveau peut avoir plusieurs ampoules</div>
-
-          <div class="doc-icon">🌀</div>
-          <div class="doc-elem-desc"><strong>Téléporteur quantique</strong> — la balle qui entre ressort instantanément à l'autre téléporteur du même groupe (A/B/C…). Deux téléporteurs du même groupe forment une paire. Utilisable dans les deux sens. Un arc électrique animate la téléportation.</div>
-        </div>
-      </div>
-
-      <!-- WORKFLOW -->
-      <div class="doc-section">
-        <h3>Workflow — créer et soumettre un niveau</h3>
-        <div class="doc-note">
-          1. Construis ton circuit avec les outils <strong>Node + Wire</strong><br>
-          2. Configure les fils (switches, résistances, microprocesseurs…) via le <strong>panneau bas</strong><br>
-          3. Vérifie que le validateur affiche <span style="color:#00cc99">✓ Circuit valide</span><br>
-          4. Clique sur <strong>▶ Test</strong> — le niveau s'ouvre dans le jeu en mode test<br>
-          5. Joue et trouve la solution. Une fois gagné, le bouton <strong>📤 Soumettre à l'admin</strong> apparaît<br>
-          6. Saisis ton pseudo, un message optionnel, et envoie — le JSON + replay partent automatiquement sur Discord avec un lien de test cliquable<br>
-          7. L'admin peut tester le niveau en un clic depuis Discord avant de l'intégrer à la campagne
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -601,7 +461,7 @@ const TRANSLATIONS = {
     'btn.fit': '⊡ Fit',
     'speed.label': '⚡ Vitesse',
     'validator.title': 'Validation du circuit',
-    'props.hint': 'Sélectionne un nœud ou un fil — Clic droit = suppr/désélect — Dbl-clic = nœud — Molette = zoom — Espace+drag = pan — [F] = fit — [S/N/W/D] outils — [Ctrl+Z] undo — [Ctrl+Shift+Z] redo — [Suppr] supprimer — [X] symétrie ↔ — [Y] symétrie ↕ (multi-sélection)',
+    'props.hint': 'Sélectionne un nœud ou un fil — Clic droit = suppr/désélect — Dbl-clic = nœud — Ctrl+Dbl-clic = sélect. composant — Molette = zoom — Espace+drag = pan — [F] = fit — [S/N/W/D] outils — [Ctrl+Z] undo — [Ctrl+Shift+Z] redo — [Suppr] supprimer — [X] symétrie ↔ — [Y] symétrie ↕ (multi-sélection)',
     'props.hint.short': 'Sélectionne un nœud ou un fil — Clic droit = suppr/désélect — Dbl-clic = nœud — Molette = zoom — Espace+drag = pan',
     'props.node': 'Nœud #',
     'props.type': 'Type :',
@@ -669,7 +529,7 @@ const TRANSLATIONS = {
     'btn.fit': '⊡ Fit',
     'speed.label': '⚡ Speed',
     'validator.title': 'Circuit validation',
-    'props.hint': 'Select a node or wire — Right-click = delete/deselect — Dbl-click = node — Scroll = zoom — Space+drag = pan — [F] = fit — [S/N/W/D] tools — [Ctrl+Z] undo — [Ctrl+Shift+Z] redo — [Del] delete — [X] flip ↔ — [Y] flip ↕ (multi-select)',
+    'props.hint': 'Select a node or wire — Right-click = delete/deselect — Dbl-click = node — Ctrl+Dbl-click = select component — Scroll = zoom — Space+drag = pan — [F] = fit — [S/N/W/D] tools — [Ctrl+Z] undo — [Ctrl+Shift+Z] redo — [Del] delete — [X] flip ↔ — [Y] flip ↕ (multi-select)',
     'props.hint.short': 'Select a node or wire — Right-click = delete/deselect — Dbl-click = node — Scroll = zoom — Space+drag = pan',
     'props.node': 'Node #',
     'props.type': 'Type:',
@@ -1273,14 +1133,45 @@ canvas.addEventListener('contextmenu', e => {
   }
 });
 
+// Ctrl+double-click: select entire connected component from node or wire
+function selectConnectedComponent(startNodeId) {
+  const visitedNodes = new Set([startNodeId]);
+  const queue = [startNodeId];
+  while (queue.length > 0) {
+    const nid = queue.shift();
+    for (const ed of edges) {
+      if (ed.from === nid && !visitedNodes.has(ed.to)) {
+        visitedNodes.add(ed.to); queue.push(ed.to);
+      } else if (ed.to === nid && !visitedNodes.has(ed.from)) {
+        visitedNodes.add(ed.from); queue.push(ed.from);
+      }
+    }
+  }
+  selectedNodes = nodes.filter(n => visitedNodes.has(n.id));
+  selectedNode = null; selectedEdge = null;
+  buildProps();
+  const lang = document.documentElement.lang || 'fr';
+  flash(lang === 'en'
+    ? `${selectedNodes.length} nodes selected`
+    : `${selectedNodes.length} nœuds sélectionnés`);
+}
+
 // Double-click add node (or split edge)
 canvas.addEventListener('dblclick', e => {
-  if (tool !== 'select' && tool !== 'node') return;
   const rect = canvas.getBoundingClientRect();
   const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   const hit = nodeAt(w.x, w.y);
+  const hitEdge = hit ? null : edgeNear(w.x, w.y);
+
+  // Ctrl+dblclick → select connected component
+  if (e.ctrlKey || e.metaKey) {
+    if (hit) { selectConnectedComponent(hit.id); }
+    else if (hitEdge) { selectConnectedComponent(hitEdge.from); }
+    return;
+  }
+
+  if (tool !== 'select' && tool !== 'node') return;
   if (hit) return;
-  const hitEdge = edgeNear(w.x, w.y);
   const sx2 = snap(w.x), sy2 = snap(w.y);
   saveUndo();
   const id = nextNodeId++;
@@ -1305,7 +1196,102 @@ canvas.addEventListener('dblclick', e => {
 });
 
 // ── DOC MODAL ──────────────────────────────────────────────
+function buildDocHTML() {
+  const fr = currentLang !== 'en';
+  const k = (f, e) => fr ? f : e;
+  const kk = s => `<span class="kbd">${s}</span>`;
+  const sep = s => `<span style="color:#446655">${s}</span>`;
+  const row = (key, desc) => `<div class="doc-key">${key}</div><div class="doc-desc">${desc}</div>`;
+  return `
+  <div class="doc-section">
+    <h3>${k('Outils de la barre', 'Toolbar tools')}</h3>
+    <div class="doc-grid">
+      ${row(kk('S'), `<strong>Select</strong> — ${k('sélectionner, déplacer un nœud ou un fil', 'select and move a node or wire')}`)}
+      ${row(kk('N'), `<strong>Node</strong> — ${k('double-clic sur le canvas pour ajouter un nœud (choisir le type : ⚡ source, ● nœud, 💡 ampoule, 🌀 téléporteur)', 'double-click on the canvas to add a node (choose type: ⚡ source, ● node, 💡 bulb, 🌀 teleporter)')}`)}
+      ${row(kk('W'), `<strong>Wire</strong> — ${k('cliquer sur un nœud source puis un nœud destination pour créer un fil. Clic sur un fil existant = insérer un nœud intermédiaire', 'click a source node then a destination node to draw a wire. Click on an existing wire = insert an intermediate node')}`)}
+      ${row(kk('D'), `<strong>Delete</strong> — ${k('clic sur un nœud ou fil pour le supprimer', 'click a node or wire to delete it')}`)}
+      ${row(kk('F'), `<strong>Fit</strong> — ${k('recentrer la vue sur tous les éléments', 'recenter the view on all elements')}`)}
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Navigation dans la vue', 'View navigation')}</h3>
+    <div class="doc-grid">
+      ${row(kk(k('Molette', 'Scroll')), k('Zoom avant/arrière', 'Zoom in/out'))}
+      ${row(`${kk(k('Espace', 'Space'))} ${sep('+')} ${kk('Drag')}`, k('Déplacer la vue (pan)', 'Pan the view'))}
+      ${row(`${kk('Drag')} ${sep(k('sur vide', 'on empty'))}`, k('Pan rapide (en mode Select, sur zone vide)', 'Quick pan (in Select mode, on empty area)'))}
+      ${row(kk('F'), k('Recadrer automatiquement tous les éléments', 'Auto-fit all elements'))}
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Sélection multiple', 'Multi-select')}</h3>
+    <div class="doc-grid">
+      ${row(`${kk('Ctrl')} ${sep('+')} ${kk('Drag')}`, k('Dessiner un rectangle de sélection — tous les nœuds à l\'intérieur sont sélectionnés', 'Draw a selection rectangle — all nodes inside are selected'))}
+      ${row(`${kk('Ctrl')} ${sep('+')} ${kk(k('Dbl-clic', 'Dbl-click'))}`, k('Sélectionner tout le composant connexe depuis un nœud ou un fil (parcours en arbre)', 'Select the entire connected component from a node or wire (tree traversal)'))}
+      ${row(`${kk('Drag')} ${sep(k('sur sélection', 'on selection'))}`, k('Déplacer le groupe sélectionné (les fils internes suivent)', 'Move the selected group (internal wires follow)'))}
+      ${row(kk('X'), k('Symétrie ↔ — miroir gauche/droite autour du centre de la sélection', 'Flip ↔ — mirror left/right around the selection center'))}
+      ${row(kk('Y'), k('Symétrie ↕ — miroir haut/bas autour du centre de la sélection', 'Flip ↕ — mirror top/bottom around the selection center'))}
+      ${row(kk('Ctrl+C'), k('Copier la sélection (nœuds + fils internes)', 'Copy selection (nodes + internal wires)'))}
+      ${row(kk('Ctrl+V'), k('Coller avec décalage de +40px', 'Paste with +40px offset'))}
+      ${row(kk(k('Suppr', 'Del')), k('Supprimer tous les nœuds sélectionnés (et leurs fils)', 'Delete all selected nodes (and their wires)'))}
+      ${row(`${kk(k('Échap', 'Esc'))} ${sep(k('/ clic droit', '/ right-click'))}`, k('Désélectionner tout / annuler le fil en cours', 'Deselect all / cancel current wire'))}
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Historique', 'History')}</h3>
+    <div class="doc-grid">
+      ${row(kk('Ctrl+Z'), k('Annuler la dernière action (60 niveaux d\'historique)', 'Undo last action (60 levels of history)'))}
+      ${row(kk('Ctrl+Shift+Z'), k('Rétablir', 'Redo'))}
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Propriétés d\'un fil (panneau en bas après sélection)', 'Wire properties (bottom panel after selection)')}</h3>
+    <div class="doc-grid">
+      ${row(kk('Switch'), k('Assigner la touche <strong>Q</strong> ou <strong>P</strong> au fil — le joueur appuiera dessus pour ouvrir/fermer', 'Assign key <strong>Q</strong> or <strong>P</strong> to the wire — the player presses it to open/close'))}
+      ${row(kk(k('État initial', 'Initial state')), k('<strong>Ouvert 🔓</strong> = interrupteur ouvert au départ (balle meurt si elle entre) / <strong>Fermé 🔒</strong> = passant par défaut', '<strong>Open 🔓</strong> = switch open at start (ball dies if it enters) / <strong>Closed 🔒</strong> = conducting by default'))}
+      ${row(kk(k('Résistance', 'Resistance')), k('La balle ralentit — le joueur doit spammer Espace pour maintenir la jauge et passer. Configurer la durée en secondes', 'Ball slows down — player must spam Space to keep the gauge up and pass. Configure duration in seconds'))}
+      ${row(kk(k('Microprocesseur', 'Microprocessor')), k('La balle se bloque — le joueur doit saisir un code à 3 chiffres en temps limité. Configurer le délai en secondes', 'Ball is blocked — player must enter a 3-digit code within a time limit. Configure the delay in seconds'))}
+      ${row(kk(k('Inductance', 'Inductance')), k('Pause chronométrée automatique — la balle attend un certain temps sans interaction. Configurer la durée', 'Automatic timed pause — the ball waits for a set duration without interaction. Configure the duration'))}
+      ${row(kk(k('Inverser ⇄', 'Reverse ⇄')), k('Inverse le sens du fil (échange source et destination)', 'Reverse the wire direction (swap source and destination)'))}
+      ${row(kk(k('Coude wayY', 'Bend wayY')), k('Ajouter un coude au fil en spécifiant une coordonnée Y intermédiaire (laisser vide = fil direct)', 'Add a bend to the wire by specifying an intermediate Y coordinate (leave empty = straight wire)'))}
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Types de nœuds', 'Node types')}</h3>
+    <div class="doc-elem-grid">
+      <div class="doc-icon">⚡</div>
+      <div class="doc-elem-desc"><strong>Source</strong> — ${k('point de départ d\'une balle. Un niveau peut avoir plusieurs sources (plusieurs balles partent en même temps)', 'starting point of a ball. A level can have multiple sources (multiple balls launch simultaneously)')}</div>
+
+      <div class="doc-icon">●</div>
+      <div class="doc-elem-desc"><strong>${k('Nœud', 'Node')}</strong> — ${k('jonction. Si plusieurs fils en sortent, la balle se divise en autant de copies', 'junction. If multiple wires leave it, the ball splits into that many copies')}</div>
+
+      <div class="doc-icon">💡</div>
+      <div class="doc-elem-desc"><strong>${k('Ampoule', 'Bulb')}</strong> — ${k('objectif. Toutes les balles doivent arriver ici pour gagner. Un niveau peut avoir plusieurs ampoules', 'goal. All balls must reach here to win. A level can have multiple bulbs')}</div>
+
+      <div class="doc-icon">🌀</div>
+      <div class="doc-elem-desc"><strong>${k('Téléporteur quantique', 'Quantum teleporter')}</strong> — ${k('la balle qui entre ressort instantanément à l\'autre téléporteur du même groupe (A/B/C…). Deux téléporteurs du même groupe forment une paire. Utilisable dans les deux sens. Un arc électrique anime la téléportation.', 'a ball entering it instantly exits at the other teleporter in the same group (A/B/C…). Two teleporters in the same group form a pair. Works in both directions. An electric arc animates the teleportation.')}</div>
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h3>${k('Workflow — créer et soumettre un niveau', 'Workflow — create and submit a level')}</h3>
+    <div class="doc-note">
+      ${k(
+        '1. Construis ton circuit avec les outils <strong>Node + Wire</strong><br>2. Configure les fils (switches, résistances, microprocesseurs…) via le <strong>panneau bas</strong><br>3. Vérifie que le validateur affiche <span style="color:#00cc99">✓ Circuit valide</span><br>4. Clique sur <strong>▶ Test</strong> — le niveau s\'ouvre dans le jeu en mode test<br>5. Joue et trouve la solution. Une fois gagné, le bouton <strong>📤 Soumettre à l\'admin</strong> apparaît<br>6. Saisis ton pseudo, un message optionnel, et envoie — le JSON + replay partent automatiquement sur Discord avec un lien de test cliquable<br>7. L\'admin peut tester le niveau en un clic depuis Discord avant de l\'intégrer à la campagne',
+        '1. Build your circuit using the <strong>Node + Wire</strong> tools<br>2. Configure wires (switches, resistances, microprocessors…) via the <strong>bottom panel</strong><br>3. Make sure the validator shows <span style="color:#00cc99">✓ Valid circuit</span><br>4. Click <strong>▶ Test</strong> — the level opens in the game in test mode<br>5. Play and find the solution. Once won, the <strong>📤 Submit to admin</strong> button appears<br>6. Enter your username, an optional message, and send — the JSON + replay are automatically posted to Discord with a clickable test link<br>7. The admin can test the level in one click from Discord before adding it to the campaign'
+      )}
+    </div>
+  </div>`;
+}
+
 function openDoc() {
+  document.getElementById('doc-header').querySelector('h2').textContent =
+    currentLang === 'en' ? '📖 Help — Level Editor' : '📖 Aide — Éditeur de niveaux';
+  document.getElementById('doc-body').innerHTML = buildDocHTML();
   document.getElementById('doc-overlay').classList.add('visible');
 }
 function closeDoc() {
