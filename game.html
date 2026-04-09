@@ -1059,6 +1059,7 @@ _googleProvider.setCustomParameters({ prompt: 'select_account' });
     background: transparent;
   }
   #gg-overlay.active { display: flex; }
+  #gg-overlay.mirrored { transform: scaleX(-1); }
   #gg-canvas {
     position: fixed; inset: 0; z-index: 749; pointer-events: none;
   }
@@ -4851,6 +4852,7 @@ function _applyInvertUI() {
   document.getElementById('invert-btn-camp')?.classList.toggle('active', invertControls);
   document.getElementById('invert-btn-sidebar')?.classList.toggle('active', invertControls);
   document.getElementById('tuto-q-hint')?.classList.toggle('mirrored', invertControls);
+  document.getElementById('gg-overlay')?.classList.toggle('mirrored', invertControls);
   _updateCampVbLabels();
 }
 
@@ -4977,6 +4979,7 @@ function startGGCelebration(finalTime, finalDeaths, camp) {
   document.getElementById('gg-sub').textContent =
     (camp ? camp.emoji + ' ' + camp.name.toUpperCase() : '') +
     '  —  ' + campFmtTime(finalTime) + ' / ' + finalDeaths + ' mort' + (finalDeaths > 1 ? 's' : '');
+  overlay.classList.toggle('mirrored', invertControls);
   overlay.classList.add('active');
 
   // Fireworks canvas
