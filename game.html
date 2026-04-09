@@ -3716,6 +3716,16 @@ applyAudioMuteUI();
 
 // ── GAMEPAD MODE (3-way exclusive: null=pc, 'ps', 'xbox') ───
 function _setGamepadMode(mode) {
+  if (mode === _gamepadMode) return; // déjà actif
+  if (campRunning || survivalRunning) {
+    const msg = currentLang === 'en'
+      ? 'Changing controller will cancel the current campaign.\nContinue?'
+      : 'Changer de contrôleur annulera la campagne en cours.\nContinuer ?';
+    if (!confirm(msg)) return;
+    campStop();
+    campRunning = false;
+    if (survivalRunning) { survivalRunning = false; updateSurvivalHUD(); }
+  }
   _gamepadMode = mode;
   localStorage.setItem('elecgame_gp_mode', mode || '');
   localStorage.setItem('elecgame_ctrl_modal_seen', '1');
