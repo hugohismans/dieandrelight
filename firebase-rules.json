@@ -3,7 +3,7 @@
     "hof": {
       "$version": {
         ".read": true,
-        ".validate": "$version.matches(/^v0_(0_(1|2|3|4|5)|1_0)$/)",
+        ".validate": "$version.matches(/^v0_(0_(1|2|3|4|5)|1_(0|1))$/)",
         "$diff": {
           ".validate": "$diff.matches(/^(bebe|piquer|cauchemar|survie|bebe_inv|piquer_inv|cauchemar_inv|survie_inv|bebe_yb|piquer_yb|cauchemar_yb|survie_yb|bebe_yb_inv|piquer_yb_inv|cauchemar_yb_inv|survie_yb_inv)$/)",
           "$key": {

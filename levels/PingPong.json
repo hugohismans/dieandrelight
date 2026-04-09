@@ -1,6 +1,5 @@
 {
   "name": "PingPong",
-  "made_by": "KetaKoala",
   "ballSpeedMult": 2,
   "nodes": [
     {
@@ -103,13 +102,15 @@
       "id": 22,
       "type": "teleporter",
       "x": -60,
-      "y": 0
+      "y": 0,
+      "group": "A"
     },
     {
       "id": 26,
       "type": "teleporter",
       "x": 1220,
-      "y": -20
+      "y": -20,
+      "group": "A"
     },
     {
       "id": 27,
