@@ -3440,10 +3440,18 @@ function _apRenderAch() {
       try {
         const token = await _apAdminToken();
         await _apAchWrite(_apAchUid, ach.id, has ? null : true, token);
-        // Mettre à jour le cache local
+        // Mettre à jour le cache Firebase en mémoire
         const key = btoa(ach.id);
         if (has) delete _apAchFbData[key];
         else _apAchFbData[key] = true;
+        // Si c'est le propre compte de l'admin, sync aussi le localStorage
+        // pour éviter que _apAchLoad ne re-push l'ach supprimé au prochain actualiser
+        if (_apAchUid === currentUser?.uid) {
+          if (has) { _achDone.delete(ach.id); }
+          else     { _achDone.add(ach.id); }
+          localStorage.setItem(_ACH_LS, JSON.stringify([..._achDone]));
+          _applyModeLocks();
+        }
         statusEl.style.color = '#00cc99';
         statusEl.textContent = `✓ "${ach.id}" ${has ? 'retiré' : 'accordé'}`;
         setTimeout(() => { statusEl.textContent = ''; }, 2500);
@@ -3548,6 +3556,11 @@ document.getElementById('ap-ach-clear-all').onclick = async () => {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'null'
     });
     _apAchFbData = {};
+    if (_apAchUid === currentUser?.uid) {
+      _achDone.clear();
+      localStorage.setItem(_ACH_LS, JSON.stringify([]));
+      _applyModeLocks();
+    }
     st.style.color = '#00cc99'; st.textContent = '✓ Tous les HF effacés';
     setTimeout(() => { st.textContent = ''; }, 2500);
     _apRenderAch();
