@@ -2384,6 +2384,7 @@ const TRANSLATIONS = {
     'tuto3.hint.ps': '[L2] ▶ relâche [L2] ▶ [R2] ▶ relâche [R2] — [○] pour recommencer',
     'tuto3.hint.xbox': '[LT] ▶ relâche [LT] ▶ [RT] ▶ relâche [RT] — [B] pour recommencer',
     'tuto3.bg_hint': 'Alterne !',
+    'micro.bg_hint': 'Suis les instructions !',
     'hint.restart': '— [R] pour recommencer',
     'hint.restart.ps': '— [○] pour recommencer',
     'hint.restart.xbox': '— [B] pour recommencer',
@@ -2765,6 +2766,7 @@ const TRANSLATIONS = {
     'tuto3.hint.ps': '[L2] ▶ release [L2] ▶ [R2] ▶ release [R2] — [○] to restart',
     'tuto3.hint.xbox': '[LT] ▶ release [LT] ▶ [RT] ▶ release [RT] — [B] to restart',
     'tuto3.bg_hint': 'Alternate!',
+    'micro.bg_hint': 'Follow the instructions!',
     'hint.restart': '— [R] to restart',
     'hint.restart.ps': '— [○] to restart',
     'hint.restart.xbox': '— [B] to restart',
@@ -3856,7 +3858,7 @@ const CAMPAIGNS = {
     levels: [
       { idx: 0 }, { idx: 1 }, { idx: 2 },
       { file: 'levels/TUTO4_resistance_eclair.json', name: 'Résistance Éclair', bgHint: 'resistance' },
-      { file: 'levels/tuto5_microprocesseur.json',   name: 'Microprocesseur' },
+      { file: 'levels/tuto5_microprocesseur.json',   name: 'Microprocesseur', bgHint: 'micro' },
       { file: 'levels/67.json',                      name: '67' },
       { file: "levels/Le Pistolet.json",             name: 'Le Pistolet' },
       { file: 'levels/Merry Christmas.json',         name: 'Merry Christmas' },
@@ -3974,6 +3976,10 @@ function _buildTutoHint(idx) {
     el.classList.add('visible');
   } else if (LEVELS[idx]?.bgHint === 'resistance') {
     el.innerHTML = `<span style="${Y}">${t('resistance.bg_hint')}</span>`;
+    el.classList.add('visible');
+  } else if (LEVELS[idx]?.bgHint === 'micro') {
+    const B = 'color:#44aaff;text-shadow:0 0 18px #44aaff,0 0 40px #0066ff';
+    el.innerHTML = `<span style="${B}">${t('micro.bg_hint')}</span>`;
     el.classList.add('visible');
   } else {
     el.classList.remove('visible');
