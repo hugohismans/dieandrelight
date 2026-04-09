@@ -3475,6 +3475,35 @@ function _apRenderAch() {
   else locked.forEach(a => listEl.appendChild(makeRow(a, false)));
 }
 
+async function _apAchLoad(uid, token) {
+  let fbData = await _apAchFetch(uid, token);
+  // Si c'est le compte de l'admin connecté, merger avec le localStorage
+  // (les HF gagnés hors-connexion ne sont que dans le localStorage)
+  if (uid === currentUser?.uid) {
+    const missing = [];
+    for (const id of _achDone) {
+      const key = btoa(id);
+      if (!fbData[key]) {
+        fbData[key] = true;
+        missing.push(id);
+      }
+    }
+    if (missing.length > 0) {
+      // Remonter les HF manquants vers Firebase silencieusement
+      await Promise.all(missing.map(id =>
+        fetch(`${_FB_BASE}/users/${uid}/achievements/${btoa(id)}.json?auth=${token}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'true'
+        }).catch(() => {})
+      ));
+      const noteEl = document.getElementById('ap-ach-status');
+      noteEl.style.color = '#886622';
+      noteEl.textContent = `ℹ ${missing.length} HF locaux synchronisés vers Firebase.`;
+      setTimeout(() => { noteEl.textContent = ''; }, 4000);
+    }
+  }
+  return fbData;
+}
+
 document.getElementById('ap-ach-search').onclick = async () => {
   const pseudo = document.getElementById('ap-ach-pseudo').value.trim().toLowerCase();
   const st = document.getElementById('ap-ach-status');
@@ -3488,7 +3517,7 @@ document.getElementById('ap-ach-search').onclick = async () => {
     _apAchUid = uid;
     document.getElementById('ap-ach-uid').textContent = uid;
     st.style.color = '#886622'; st.textContent = 'Chargement des HF…';
-    _apAchFbData = await _apAchFetch(uid, token);
+    _apAchFbData = await _apAchLoad(uid, token);
     st.textContent = '';
     res.style.display = 'block';
     _apRenderAch();
@@ -3503,7 +3532,7 @@ document.getElementById('ap-ach-refresh').onclick = async () => {
   try {
     const token = await _apAdminToken();
     st.style.color = '#886622'; st.textContent = 'Actualisation…';
-    _apAchFbData = await _apAchFetch(_apAchUid, token);
+    _apAchFbData = await _apAchLoad(_apAchUid, token);
     st.textContent = '';
     _apRenderAch();
   } catch(e) { st.style.color = '#ff4444'; st.textContent = 'Erreur : ' + e.message; }
